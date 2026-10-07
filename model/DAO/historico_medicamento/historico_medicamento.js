@@ -118,7 +118,7 @@ async function deleteHistoricoMedicamentoByID(id) {
     try {
         let sql =
             `
-        delete from tbl_contato_de_emergencia where id = ${id}
+        delete from tbl_historico_medicamento where id = ${id}
     `
 
         let result = await knexConection.raw(sql)

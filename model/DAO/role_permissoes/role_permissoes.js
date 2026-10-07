@@ -86,15 +86,7 @@ const selectByIdRolePermissoes = async function (id) {
 
 const selectPermissoesByIdRole = async function (idRole) {
     try {
-        let sql = ` select tbl_permissoes.*
-                    from tbl_role
-                    
-                        inner join tbl_role_permissoes
-                            on tbl_role.id = tbl_role_permissoes.id_role
-                        inner join tbl_permissoes
-                            on tbl_permissoes.id = tbl_role_permissoes.id_permissoes
-                            
-                    where tbl_role.id = ${idRole};`
+        let sql = ` select * from vw_permissoes_id_role where id_role = ${idRole};`
 
         let result = await knexConection.raw(sql)
 
@@ -109,15 +101,7 @@ const selectPermissoesByIdRole = async function (idRole) {
 
 const selectRolesByIdPermissoes = async function (idPermissoes) {
     try {
-        let sql = ` select tbl_role.*
-                    from tbl_role
-                    
-                        inner join tbl_role_permissoes
-                            on tbl_role.id = tbl_role_permissoes.id_role
-                        inner join tbl_permissoes
-                            on tbl_permissoes.id = tbl_role_permissoes.id_permissoes
-                            
-                    where tbl_permissoes.id = ${idPermissoes};`
+        let sql = ` select * from vw_role_id_permissoes where id_permissoes = ${idPermissoes};`
 
         let result = await knexConection.raw(sql)
 
@@ -150,5 +134,7 @@ module.exports = {
     updateRolePermissoes,
     selectAllRolePermissoes,
     selectByIdRolePermissoes,
+    selectPermissoesByIdRole,
+    selectRolesByIdPermissoes,
     deleteRolePermissoes
 }
