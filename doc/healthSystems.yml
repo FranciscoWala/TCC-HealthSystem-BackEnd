@@ -1,0 +1,2657 @@
+openapi: 3.0.3
+info:
+  title: Projeto MedTime - Health Systems
+  description: |-
+    Projeto de desenvolvimento de controle de medicamentos a partir de alarmes automátizados.
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: franschesco64@gmail.com
+    x-other-emails:
+      - email: samuel.s.m.santos009@gmail.com
+      - email: kayquebrennoferreira@gmail.com
+      - email: pyetroferreirasouzza9@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.4.26
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+  - url: http://
+paths:
+  /v1/healthSystem/medtime/usuario:
+    post:
+      tags:
+        - Usuário
+      security:
+        - bearerAuth: []
+
+      summary: Adiciona um novo Usuario
+      description: Adiciona um novo Usuario
+      requestBody:
+        description: JSON contendo os dados do novo USUARIO a ser inserido no sistema
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Usuario"
+        required: true
+      responses:
+        "201":
+          description: Success Created Item
+        "400":
+          description: Error Bad Request
+        "409":
+          description: Error Conflict
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error Internal Server (Controller | Model)
+    get:
+      tags:
+        - Usuário
+      security:
+        - bearerAuth: []
+      summary: Lista todos os Usuarios
+      description: Listagem de todos os USUARIOS registrados no sistema
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UsuarioGetPaciente"
+        "404":
+          description: Error Not Found
+        "500":
+          description: Error Internal Server (Controller | Model)
+  /v1/healthSystem/medtime/usuario/:{id}:
+    get:
+      tags:
+        - Usuário
+      security:
+        - bearerAuth: []
+      summary: Busca um Usuário pelo ID
+      description: Retorna um Usuário pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca do Usuário
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioGetPaciente"
+        "400":
+          description: Error Bad Request (id)
+        "404":
+          description: Error Not found
+        "500":
+          description: Error Internal Server (Controller | Model)
+    put:
+      tags:
+        - Usuário
+      security:
+        - bearerAuth: []
+      summary: Atualiza um usuario pelo ID
+      description: Atualiza um usuário pelo ID colocando as informações da mesma forma que o POST
+      parameters:
+        - name: id
+          in: path
+          description: ID para atualizar o Usuário
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Dados para atualizar um usuário existente
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Usuario"
+        required: true
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Error Bad Request (id | dados)
+        "404":
+          description: Error Not Found
+        "409":
+          description: Error Conflict
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error internal server (Controller | Model)
+    delete:
+      tags:
+        - Usuário
+      security:
+        - bearerAuth: []
+      summary: Exclui um Usuário pelo ID
+      description: Excluir um Usuário existente buscando pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca do usuário
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Success Delete
+        "400":
+          description: Error Bad Request (ID)
+        "500":
+          description: Error Internal Server (Controller | Model)
+  /v1/healthSystem/medtime/usuario/login:
+    post:
+      tags:
+        - Usuário
+      summary: Fazer login com informações registradas no sistema
+      description: Fazer login
+      requestBody:
+        description: JSON contendo os dados do login do usuário
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UsuarioLogin"
+        required: true
+      responses:
+        "201":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioLoginJWT"
+        "400":
+          description: Error Bad Request
+        "401":
+          description: Error Unauthorized
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error Internal Server (Controller | Model)
+
+  /v1/healthSystem/medtime/medicamento:
+    post:
+      tags:
+        - Medicamento
+      security:
+        - bearerAuth: []
+      summary: Adiciona um novo medicamento
+      description: Adiciona um novo medicamento
+      requestBody:
+        description: JSON contendo os dados do novo medicamento a ser adicionad
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Medicamento"
+        required: true
+      responses:
+        "201":
+          description: Success Created Item ou Success Created Item Warning
+        "400":
+          description: Error Bad Request
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error Internal Server (Controller | Model)
+        "401":
+          description: Error Unauthorized
+        "403":
+          description: Error Forbidden
+    get:
+      tags:
+        - Medicamento
+      summary: Lista todos os medicamentos relacionados a um paciente
+      description: Listagem todos os medicamento relacionados a um paciente
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MedicamentoGet"
+        "404":
+          description: Error Not Found
+        "500":
+          description: Error Internal Server (Controller | Model)
+        "401":
+          description: Error Unauthorized
+        "403":
+          description: Error Forbidden
+  /v1/healthSystem/medTime/medicamento/:{id}:
+    get:
+      tags:
+        - Medicamento
+      summary: Busca um medicamento pelo seu ID
+      description: Retorna um medicamento pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca de medicamento
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MedicamentoGet"
+        "400":
+          description: Error Bad Request (id)
+        "404":
+          description: Error Not found
+        "500":
+          description: Error Internal Server (Controller | Model)
+        "401":
+          description: Error Unauthroized
+        "403":
+          description: Error Forbidden
+    put:
+      tags:
+        - Medicamento
+      security:
+        - bearerAuth: []
+      summary: Atualiza um medicamento pelo ID
+      description: Atualiza um medicamento pelo ID colocando as novas informações no body
+      parameters:
+        - name: id
+          in: path
+          description: ID para atualizar o medicamento
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Dados para atualizar um medicamento existente
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Medicamento"
+        required: true
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Error Bad Request (id | dados)
+        "404":
+          description: Error Not Found
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error internal server (Controller | Model)
+        "401":
+          description: Error Unauthroized
+        "403":
+          description: Error Forbidden
+    delete:
+      tags:
+        - Medicamento
+      security:
+        - bearerAuth: []
+      summary: Exclui um medicamento pelo ID
+      description: Excluir um medicamento existente buscando pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca do medicamento
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Success Delete
+        "400":
+          description: Error Bad Request (ID)
+        "500":
+          description: Error Internal Server (Controller | Model)
+        "401":
+          description: Error Unauthroized
+        "403":
+          description: Error Forbidden
+
+  /v1/healthSystem/medtime/doenca_cronica:
+    post:
+      tags:
+        - Doenças Crônicas
+      security:
+        - bearerAuth: []
+      summary: Adiciona uma nova Doença Crônica
+      description: Adiciona uma nova Doença Crônica
+      requestBody:
+        description: JSON contendo os dados da nova Doença Crônica a ser inserida no sistema
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DoencaCronica"
+        required: true
+      responses:
+        "201":
+          description: Success Created Item
+        "400":
+          description: Error Bad Request
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error Internal Server (Controller | Model)
+    get:
+      tags:
+        - Doenças Crônicas
+      summary: Lista todas as Doenças Crônicas
+      description: Listagem de todas as Doenças Crônicas registrados no sistema
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DoencaCronicaGet"
+        "404":
+          description: Error Not Found
+        "500":
+          description: Error Internal Server (Controller | Model)
+  /v1/healthSystem/medtime/doenca_cronica/:{id}:
+    get:
+      tags:
+        - Doenças Crônicas
+      summary: Busca uma Doença Crônica pelo ID
+      description: Retorna uma Doença Crônica pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca da Doença Crônica
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DoencaCronicaGet"
+        "400":
+          description: Error Bad Request (id)
+        "404":
+          description: Error Not found
+        "500":
+          description: Error Internal Server (Controller | Model)
+    put:
+      tags:
+        - Doenças Crônicas
+      security:
+        - bearerAuth: []
+      summary: Atualiza uma Doença Crônica pelo ID
+      description: Atualiza uma Doença Crônica pelo ID colocando as informações da mesma forma que o POST
+      parameters:
+        - name: id
+          in: path
+          description: ID para atualizar a Doença Crônica
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Dados para atualizar uma Doença Crônica existente
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DoencaCronica"
+        required: true
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Error Bad Request (id | dados)
+        "404":
+          description: Error Not Found
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error internal server (Controller | Model)
+    delete:
+      tags:
+        - Doenças Crônicas
+      security:
+        - bearerAuth: []
+      summary: Exclui uma Doença Crônica pelo ID
+      description: Excluir uma Doença Crônica existente buscando pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca da categoria
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Success Delete
+        "400":
+          description: Error Bad Request (ID)
+        "500":
+          description: Error Internal Server (Controller | Model)
+
+  /v1/healthSystem/medtime/tipo_intervalo/:
+    post:
+      tags:
+        - Tipo de Intervalo
+      security:
+        - bearerAuth: []
+      summary: Adiciona um novo Tipo de Intervalo
+      description: Adiciona um novo Tipo de Intervalo
+      requestBody:
+        description: JSON contendo os dados do novo TIPO DE INTERVALO a ser inserido no sistema
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TipoIntervalo"
+        required: true
+      responses:
+        "201":
+          description: Success Created Item
+        "400":
+          description: Error Bad Request
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error Internal Server (Controller | Model)
+    get:
+      tags:
+        - Tipo de Intervalo
+      summary: Lista todos os Tipos de Intervalo
+      description: Listagem de todos os TIPOS DE INTERVALO registrados no sistema
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TipoIntervaloGet"
+        "404":
+          description: Error Not Found
+        "500":
+          description: Error Internal Server (Controller | Model)
+  /v1/healthSystem/medtime/tipo_intervalo/:{id}:
+    get:
+      tags:
+        - Tipo de Intervalo
+      summary: Busca um Tipo de Intervalo pelo ID
+      description: Retorna um Tipo de Intervalo pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca do Tipo de Intervalo
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TipoIntervaloGet"
+        "400":
+          description: Error Bad Request (id)
+        "404":
+          description: Error Not found
+        "500":
+          description: Error Internal Server (Controller | Model)
+    put:
+      tags:
+        - Tipo de Intervalo
+      security:
+        - bearerAuth: []
+      summary: Atualiza um Tipo de Intervalo pelo ID
+      description: Atualiza um Tipo de Intervalo pelo ID colocando as informações da mesma forma que o POST
+      parameters:
+        - name: id
+          in: path
+          description: ID para atualizar o Tipo de Intervalo
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Dados para atualizar um Tipo de Intervalo existente
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TipoIntervalo"
+        required: true
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Error Bad Request (ID | Dados)
+        "404":
+          description: Error Not Found
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error internal server (Controller | Model)
+    delete:
+      tags:
+        - Tipo de Intervalo
+      security:
+        - bearerAuth: []
+      summary: Exclui um Tipo de Intervalo pelo ID
+      description: Excluir um Tipo de Intervalo existente buscando pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca do Tipo de Intervalo
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Success Delete
+        "400":
+          description: Error Bad Request (ID)
+        "500":
+          description: Error Internal Server (Controller | Model)
+
+  /v1/healthSystem/medtime/horarios/:
+    post:
+      tags:
+        - Horários
+      security:
+        - bearerAuth: []
+      summary: Adiciona um novo Horário
+      description: Adiciona um novo Horário
+      requestBody:
+        description: JSON contendo os dados do novo HORÁRIO a ser inserido no sistema
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Horarios"
+        required: true
+      responses:
+        "201":
+          description: Success Created Item
+        "400":
+          description: Error Bad Request
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error Internal Server (Controller | Model)
+    get:
+      tags:
+        - Horários
+      summary: Lista todos os Horários
+      description: Listagem de todos os HORÁRIOS registrados no sistema
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/HorariosGet"
+        "404":
+          description: Error Not Found
+        "500":
+          description: Error Internal Server (Controller | Model)
+  /v1/healthSystem/medtime/horarios/:{id}:
+    get:
+      tags:
+        - Horários
+      summary: Busca um Horário pelo ID
+      description: Retorna um Horário pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca do Horário
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HorariosGet"
+        "400":
+          description: Error Bad Request (id)
+        "404":
+          description: Error Not found
+        "500":
+          description: Error Internal Server (Controller | Model)
+    put:
+      tags:
+        - Horários
+      security:
+        - bearerAuth: []
+      summary: Atualiza um Horário pelo ID
+      description: Atualiza um Horário pelo ID colocando as informações da mesma forma que o POST
+      parameters:
+        - name: id
+          in: path
+          description: ID para atualizar o Horário
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Dados para atualizar um Horário existente
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Horarios"
+        required: true
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Error Bad Request (ID | Dados)
+        "404":
+          description: Error Not Found
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error internal server (Controller | Model)
+    delete:
+      tags:
+        - Horários
+      security:
+        - bearerAuth: []
+      summary: Exclui um Horário pelo ID
+      description: Excluir um Horário existente buscando pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca do Horário
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Success Delete
+        "400":
+          description: Error Bad Request (ID)
+        "500":
+          description: Error Internal Server (Controller | Model)
+
+  /v1/healthSystem/medtime/tipo_dosagem/:
+    post:
+      tags:
+        - Tipo de Dosagem
+      security:
+        - bearerAuth: []
+      summary: Adiciona um novo Tipo de Dosagem
+      description: Adiciona um novo Tipo de Dosagem
+      requestBody:
+        description: JSON contendo os dados do novo TIPO DE DOSAGEM a ser inserido no sistema
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TipoDosagem"
+        required: true
+      responses:
+        "201":
+          description: Success Created Item
+        "400":
+          description: Error Bad Request
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error Internal Server (Controller | Model)
+    get:
+      tags:
+        - Tipo de Dosagem
+      summary: Lista todos os Tipos de Dosagem
+      description: Listagem de todos os TIPOS DE DOSAGEM registrados no sistema
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TipoDosagemGet"
+        "404":
+          description: Error Not Found
+        "500":
+          description: Error Internal Server (Controller | Model)
+  /v1/healthSystem/medtime/tipo_dosagem/:{id}:
+    get:
+      tags:
+        - Tipo de Dosagem
+      summary: Busca um Tipo de Dosagem pelo ID
+      description: Retorna um Tipo de Dosagem pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca do Tipo de Dosagem
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TipoDosagemGet"
+        "400":
+          description: Error Bad Request (id)
+        "404":
+          description: Error Not found
+        "500":
+          description: Error Internal Server (Controller | Model)
+    put:
+      tags:
+        - Tipo de Dosagem
+      security:
+        - bearerAuth: []
+      summary: Atualiza um Tipo de Dosagem pelo ID
+      description: Atualiza um Tipo de Dosagem pelo ID colocando as informações da mesma forma que o POST
+      parameters:
+        - name: id
+          in: path
+          description: ID para atualizar o Tipo de Dosagem
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Dados para atualizar um Tipo de Dosagem existente
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TipoDosagem"
+        required: true
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Error Bad Request (ID | Dados)
+        "404":
+          description: Error Not Found
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error internal server (Controller | Model)
+    delete:
+      tags:
+        - Tipo de Dosagem
+      security:
+        - bearerAuth: []
+      summary: Exclui um Tipo de Dosagem pelo ID
+      description: Excluir um Tipo de Dosagem existente buscando pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca do Tipo de Dosagem
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Success Delete
+        "400":
+          description: Error Bad Request (ID)
+        "500":
+          description: Error Internal Server (Controller | Model)
+
+  /v1/healthSystem/medtime/unidade_medida/:
+    post:
+      tags:
+        - Unidade de Medida
+      security:
+        - bearerAuth: []
+      summary: Adiciona uma nova Unidade de Medida
+      description: Adiciona uma nova Unidade de Medida
+      requestBody:
+        description: JSON contendo os dados da nova UNIDADE DE MEDIDA a ser inserida no sistema
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnidadeMedida"
+        required: true
+      responses:
+        "201":
+          description: Success Created Item
+        "400":
+          description: Error Bad Request
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error Internal Server (Controller | Model)
+    get:
+      tags:
+        - Unidade de Medida
+      summary: Lista todas as Unidades de Medida
+      description: Listagem de todas as UNIDADES DE MEDIDA registradas no sistema
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UnidadeMedidaGet"
+        "404":
+          description: Error Not Found
+        "500":
+          description: Error Internal Server (Controller | Model)
+  /v1/healthSystem/medtime/unidade_medida/:{id}:
+    get:
+      tags:
+        - Unidade de Medida
+      summary: Busca uma Unidade de Medida pelo ID
+      description: Retorna uma Unidade de Medida pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca da Unidade de Medida
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnidadeMedidaGet"
+        "400":
+          description: Error Bad Request (id)
+        "404":
+          description: Error Not found
+        "500":
+          description: Error Internal Server (Controller | Model)
+    put:
+      tags:
+        - Unidade de Medida
+      security:
+        - bearerAuth: []
+      summary: Atualiza uma Unidade de Medida pelo ID
+      description: Atualiza uma Unidade de Medida pelo ID colocando as informações da mesma forma que o POST
+      parameters:
+        - name: id
+          in: path
+          description: ID para atualizar a Unidade de Medida
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Dados para atualizar uma Unidade de Medida existente
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnidadeMedida"
+        required: true
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Error Bad Request (ID | Dados)
+        "404":
+          description: Error Not Found
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error internal server (Controller | Model)
+    delete:
+      tags:
+        - Unidade de Medida
+      security:
+        - bearerAuth: []
+      summary: Exclui uma Unidade de Medida pelo ID
+      description: Excluir uma Unidade de Medida existente buscando pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca da Unidade de Medida
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Success Delete
+        "400":
+          description: Error Bad Request (ID)
+        "500":
+          description: Error Internal Server (Controller | Model)
+
+  /v1/healthSystem/medtime/estoque/:
+    post:
+      tags:
+        - Estoque
+      security:
+        - bearerAuth: []
+      summary: Adiciona um novo Estoque
+      description: Adiciona um novo Estoque
+      requestBody:
+        description: JSON contendo os dados do novo ESTOQUE a ser inserido no sistema
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Estoque"
+        required: true
+      responses:
+        "201":
+          description: Success Created Item
+        "400":
+          description: Error Bad Request
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error Internal Server (Controller | Model)
+    get:
+      tags:
+        - Estoque
+      summary: Lista todos os Estoques
+      description: Listagem de todos os ESTOQUES registrados no sistema
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EstoqueGet"
+        "404":
+          description: Error Not Found
+        "500":
+          description: Error Internal Server (Controller | Model)
+  /v1/healthSystem/medtime/estoque/:{id}:
+    get:
+      tags:
+        - Estoque
+      summary: Busca um Estoque pelo ID
+      description: Retorna um Estoque pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca do Estoque
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EstoqueGet"
+        "400":
+          description: Error Bad Request (id)
+        "404":
+          description: Error Not found
+        "500":
+          description: Error Internal Server (Controller | Model)
+    put:
+      tags:
+        - Estoque
+      security:
+        - bearerAuth: []
+      summary: Atualiza umEstoque pelo ID
+      description: Atualiza umEstoque pelo ID colocando as informações da mesma forma que o POST
+      parameters:
+        - name: id
+          in: path
+          description: ID para atualizar o Estoque
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Dados para atualizar um Estoque existente
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Estoque"
+        required: true
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Error Bad Request (ID | Dados)
+        "404":
+          description: Error Not Found
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error internal server (Controller | Model)
+    delete:
+      tags:
+        - Estoque
+      security:
+        - bearerAuth: []
+      summary: Exclui um Estoque pelo ID
+      description: Excluir um Estoque existente buscando pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca do Estoque
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Success Delete
+        "400":
+          description: Error Bad Request (ID)
+        "500":
+          description: Error Internal Server (Controller | Model)
+
+  /v1/healthSystem/medtime/permissoes:
+    post:
+      tags:
+        - Permissões
+      security:
+        - bearerAuth: []
+      summary: Adiciona uma nova Permissão
+      description: Adiciona uma nova Permissão
+      requestBody:
+        description: JSON contendo os dados da nova PERMISSÃO a ser inserida no sistema
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Permissao"
+        required: true
+      responses:
+        "201":
+          description: Success Created Item
+        "400":
+          description: Error Bad Request
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error Internal Server (Controller | Model)
+    get:
+      tags:
+        - Permissões
+      summary: Lista todas as Permissões
+      description: Listagem de todas as Permissões registradas no sistema
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PermissaoGet"
+        "404":
+          description: Error Not Found
+        "500":
+          description: Error Internal Server (Controller | Model)
+  /v1/healthSystem/medtime/permissoes/:{id}:
+    get:
+      tags:
+        - Permissões
+      summary: Busca uma Permissão pelo ID
+      description: Retorna uma Permissão pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca da Permissão
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PermissaoGet"
+        "400":
+          description: Error Bad Request (id)
+        "404":
+          description: Error Not found
+        "500":
+          description: Error Internal Server (Controller | Model)
+    put:
+      tags:
+        - Permissões
+      security:
+        - bearerAuth: []
+      summary: Atualiza uma Permissão pelo ID
+      description: Atualiza uma permissão pelo ID colocando as informações da mesma forma que o POST
+      parameters:
+        - name: id
+          in: path
+          description: ID para atualizar a PERMISSÃO
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Dados para atualizar uma Permissão existente
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Permissao"
+        required: true
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Error Bad Request (ID | Dados)
+        "404":
+          description: Error Not Found
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error internal server (Controller | Model)
+    delete:
+      tags:
+        - Permissões
+      security:
+        - bearerAuth: []
+      summary: Exclui uma Permissão pelo ID
+      description: Excluir uma permissão existente buscando pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca da Permissão
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Success Delete
+        "400":
+          description: Error Bad Request (ID)
+        "500":
+          description: Error Internal Server (Controller | Model)
+
+  /v1/healthSystem/medtime/role:
+    post:
+      tags:
+        - Role
+      security:
+        - bearerAuth: []
+      summary: Adiciona um novo role
+      description: Adiciona um novo role
+      requestBody:
+        description: JSON contendo os dados do novo ROLE a ser inserido no sistema
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Role"
+        required: true
+      responses:
+        "201":
+          description: Success Created Item
+        "400":
+          description: Error Bad Request
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error Internal Server (Controller | Model)
+    get:
+      tags:
+        - Role
+      summary: Lista todos os roles
+      description: Listagem de todas as Roles registradas no sistema
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RoleGet"
+        "404":
+          description: Error Not Found
+        "500":
+          description: Error Internal Server (Controller | Model)
+  /v1/healthSystem/medtime/role/:{id}:
+    get:
+      tags:
+        - Role
+      summary: Busca uma Role pelo ID
+      description: Retorna um Role pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca do role
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoleGet"
+        "400":
+          description: Error Bad Request (id)
+        "404":
+          description: Error Not found
+        "500":
+          description: Error Internal Server (Controller | Model)
+    put:
+      tags:
+        - Role
+      security:
+        - bearerAuth: []
+      summary: Atualiza um Role pelo ID
+      description: Atualiza um Role pelo ID colocando as informações da mesma forma que o POST
+      parameters:
+        - name: id
+          in: path
+          description: ID para atualizar o Role
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Dados para atualizar um Role existente
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Role"
+        required: true
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Error Bad Request (ID | Dados)
+        "404":
+          description: Error Not Found
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error internal server (Controller | Model)
+    delete:
+      tags:
+        - Role
+      security:
+        - bearerAuth: []
+      summary: Exclui um Role pelo ID
+      description: Excluir um Role existente buscando pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca da Característica
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Success Delete
+        "400":
+          description: Error Bad Request (ID)
+        "500":
+          description: Error Internal Server (Controller | Model)
+
+  /v1/healthSystem/medtime/vinculo_paciente:
+    post:
+      tags:
+        - Vinculo Paciente
+      security:
+        - bearerAuth: []
+      summary: Adiciona um novo Vinculo com Paciente
+      description: Adiciona um novo Vinculo com Paciente
+      requestBody:
+        description: JSON contendo os dados do novo Vinculo Paciente a ser inserido no sistema
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VinculoPaciente"
+        required: true
+      responses:
+        "201":
+          description: Success Created Item
+        "400":
+          description: Error Bad Request
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error Internal Server (Controller | Model)
+    get:
+      tags:
+        - Vinculo Paciente
+      summary: Lista todos os Vinculo Paciente
+      description: Listagem de todos os Vinculo Paciente registradas no sistema
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VinculoPacienteGet"
+        "404":
+          description: Error Not Found
+        "500":
+          description: Error Internal Server (Controller | Model)
+  /v1/healthSystem/medtime/vinculo_paciente/:{id}:
+    get:
+      tags:
+        - Vinculo Paciente
+      summary: Busca um Vinculo Paciente pelo ID
+      description: Retorna um Vinculo Paciente pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca do Vinculo Paciente
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VinculoPacienteGet"
+        "400":
+          description: Error Bad Request (id)
+        "404":
+          description: Error Not found
+        "500":
+          description: Error Internal Server (Controller | Model)
+    put:
+      tags:
+        - Vinculo Paciente
+      security:
+        - bearerAuth: []
+      summary: Atualiza um Vinculo Paciente pelo ID
+      description: Atualiza um vinculo com paciente pelo ID colocando as informações da mesma forma que o POST
+      parameters:
+        - name: id
+          in: path
+          description: ID para atualizar o Vinculo Paciente
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Dados para atualizar um Vinculo Paciente existente
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VinculoPaciente"
+        required: true
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Error Bad Request (ID | Dados)
+        "404":
+          description: Error Not Found
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error internal server (Controller | Model)
+    delete:
+      tags:
+        - Vinculo Paciente
+      security:
+        - bearerAuth: []
+      summary: Exclui um Vinculo Paciente pelo ID
+      description: Excluir um vinculo com paciente existente buscando pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca do Vinculo Paciente
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Success Delete
+        "400":
+          description: Error Bad Request (ID)
+        "500":
+          description: Error Internal Server (Controller | Model)
+
+  /v1/healthSystem/medtime/contato_emergencia:
+    post:
+      tags:
+        - Contato de Emergencia
+      security:
+        - bearerAuth: []
+      summary: Adiciona um novo Contato de Emergencia
+      description: Adiciona um novo Contato de Emergencia
+      requestBody:
+        description: JSON contendo os dados do novo Contato de Emergencia a ser inserida no sistema
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContatoEmergencia"
+        required: true
+      responses:
+        "201":
+          description: Success Created Item
+        "400":
+          description: Error Bad Request
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error Internal Server (Controller | Model)
+    get:
+      tags:
+        - Contato de Emergencia
+      summary: Lista todos os Contato de Emergencia
+      description: Listagem de todos os contatos de emergencia registrados no sistema
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ContatoEmergenciaGet"
+        "404":
+          description: Error Not Found
+        "500":
+          description: Error Internal Server (Controller | Model)
+  /v1/healthSystem/medtime/contato_emergencia/:{id}:
+    get:
+      tags:
+        - Contato de Emergencia
+      summary: Busca um Contato de Emergencia pelo ID
+      description: Retorna um Contato de Emergencia pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca do Contato de Emergencia
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContatoEmergenciaGet"
+        "400":
+          description: Error Bad Request (id)
+        "404":
+          description: Error Not found
+        "500":
+          description: Error Internal Server (Controller | Model)
+    put:
+      tags:
+        - Contato de Emergencia
+      security:
+        - bearerAuth: []
+      summary: Atualiza um Contato de Emergencia pelo ID
+      description: Atualiza um contato de emergencia pelo ID colocando as informações da mesma forma que o POST
+      parameters:
+        - name: id
+          in: path
+          description: ID para atualizar o Contato de Emergencia
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Dados para atualizar um Contato de Emergencia existente
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContatoEmergencia"
+        required: true
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Error Bad Request (ID | Dados)
+        "404":
+          description: Error Not Found
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error internal server (Controller | Model)
+    delete:
+      tags:
+        - Contato de Emergencia
+      security:
+        - bearerAuth: []
+      summary: Exclui um Contato de Emergencia pelo ID
+      description: Excluir um contato de emergencia existente buscando pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca do Contato de Emergencia
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Success Delete
+        "400":
+          description: Error Bad Request (ID)
+        "500":
+          description: Error Internal Server (Controller | Model)
+
+  /v1/healthSystem/medtime/historico_medicamento:
+    post:
+      tags:
+        - Histórico de Medicamento
+      security:
+        - bearerAuth: []
+      summary: Adiciona um novo Histórico de Medicamento
+      description: Adiciona um novo Histórico de Medicamento
+      requestBody:
+        description: JSON contendo os dados do novo Histórico de Medicamento a ser inserido no sistema
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HistoricoMedicamento"
+        required: true
+      responses:
+        "201":
+          description: Success Created Item
+        "400":
+          description: Error Bad Request
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error Internal Server (Controller | Model)
+    get:
+      tags:
+        - Histórico de Medicamento
+      summary: Lista todos os Histórico de Medicamento
+      description: Listagem de todos os histórico de medicamentos registrados no sistema
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/HistoricoMedicamentoGet"
+        "404":
+          description: Error Not Found
+        "500":
+          description: Error Internal Server (Controller | Model)
+  /v1/healthSystem/medtime/historico_medicamento/:{id}:
+    get:
+      tags:
+        - Histórico de Medicamento
+      summary: Busca um Histórico de Medicamento pelo ID
+      description: Retorna um Histórico de Medicamento pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca do Histórico de Medicamento
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HistoricoMedicamentoGet"
+        "400":
+          description: Error Bad Request (id)
+        "404":
+          description: Error Not found
+        "500":
+          description: Error Internal Server (Controller | Model)
+    put:
+      tags:
+        - Histórico de Medicamento
+      security:
+        - bearerAuth: []
+      summary: Atualiza um Histórico de Medicamento pelo ID
+      description: Atualiza um histórico de medicamento pelo ID colocando as informações da mesma forma que o POST
+      parameters:
+        - name: id
+          in: path
+          description: ID para atualizar o Histórico de Medicamento
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Dados para atualizar um Histórico de Medicamento existente
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HistoricoMedicamento"
+        required: true
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Error Bad Request (ID | Dados)
+        "404":
+          description: Error Not Found
+        "415":
+          description: Error Content Type
+        "500":
+          description: Error internal server (Controller | Model)
+    delete:
+      tags:
+        - Histórico de Medicamento
+      security:
+        - bearerAuth: []
+      summary: Exclui um Histórico de Medicamento pelo ID
+      description: Excluir um histórico de medicamento existente buscando pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID para realizar a busca do Histórico de Medicamento
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Success Delete
+        "400":
+          description: Error Bad Request (ID)
+        "500":
+          description: Error Internal Server (Controller | Model)
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Usuario:
+      required:
+        - nome
+        - email
+        - senha
+        - data_nascimento
+      type: object
+      properties:
+        nome:
+          type: string
+          example: João Cleber
+          description: O número máximo de caracteres é de 45
+          minLength: 4
+          maxLength: 45
+        email:
+          type: string
+          example: joao.cleber@gmail.com
+          description: O número máximo de caracteres é de 255
+          minLength: 15
+          maxLength: 255
+        senha:
+          type: string
+          example: jc@123
+          description: O número máximo de caracteres é de 70
+          minLength: 6
+          maxLength: 70
+        data_nascimento:
+          type: string
+          example: 2000-01-15
+          description: O número máximo de caracteres é de 10
+          minLength: 10
+          maxLength: 10
+        usuario_role:
+          type: array
+          items:
+            type: object
+            properties:
+              id_role:
+                type: integer
+            example:
+              id_role: 1
+        doencas_cronicas:
+          type: array
+          items:
+            type: object
+            properties:
+              id_doencas_cronicas:
+                type: integer
+            example:
+              - nome_doenca: hipertensão
+              - nome_doenca: diabete
+        contatos_emergencias:
+          type: array
+          items:
+            type: object
+            properties:
+              nome:
+                type: string
+              telefone:
+                type: string
+            example:
+              - nome: ana beatriz almeida
+                telefone: "11987654321"
+              - nome: lucas henrique santos
+                telefone: "11976543210"
+
+    Medicamento:
+      required:
+        - nome
+        - imagem
+        - concentracao
+        - frequencia
+        - dosagem
+        - data_hora_inicio
+        - descricao
+        - id_tipo_intervalo
+        - id_unidade_medida_embalagem
+        - id_unidade_medida_dosagem
+        - id_tipo_dosagem
+        - id_usuario
+      type: object
+      properties:
+        id_usuario:
+          type: integer
+          example: 1
+          description: aqui coloca o id do usuário que será atribuido o medicamento
+        medicamento:
+          type: object
+          properties:
+            nome:
+              type: string
+              description: O número máximo de caracteres é de 45
+              minLength: 1
+              maxLength: 45
+            imagem:
+              type: string
+              description: O número máximo de caracteres é de 255
+              minLength: 1
+              maxLength: 25
+            concentracao:
+              type: number
+              format: float
+              description: O número máximo de digítos é 5
+              minimum: 1
+              maximum: 99999
+            id_tipo_dosagem:
+              type: integer
+              example: 1
+              description: aqui coloca o id do tipo de dosagem (comprimido, xarope, injetável)
+            id_unidade_medida_embalagem:
+              type: integer
+              example: 1
+              description: aqui coloca o id do tipo de unidade de medida (ml, g, mg, l, etc)
+        receita_medica:
+          type: object
+          properties:
+            frequencia:
+              type: string
+              format: time
+              example: 00:01:30:00
+              description: para 1 hora e 30 minutos
+            dosagem:
+              type: number
+              format: float
+              example: 2.0
+              description: É válido colocar este tipo de valor para casos em que a unidade de medida suporte números floats (ml, l, g)
+            data_hora_inicio:
+              type: string
+              format: date-time
+              example: 2026-09-29T14:30:00Z
+              description: para a data 29/09/2026 e horário 14:30:00
+            descricao:
+              type: string
+              description: O número de caracteres permitido é ilimitado
+            id_tipo_inervalo:
+              type: integer
+              example: 1
+              description: aqui coloca o id do tipo de intervalo (dias ou horas)
+            id_unidade_medida:
+              type: integer
+              example: 1
+              description: aqui coloca o id do tipo de unidade de medida (ml, g, mg, l, etc)
+        estoque:
+          type: object
+          properties:
+            quantidade_em_estoque:
+              type: number
+              format: float
+    DoencaCronica:
+      required:
+        - nome_doenca
+      type: object
+      properties:
+        nome_doenca:
+          type: string
+          example: Hipertensão
+          description: O número máximo de caracteres é de 45
+          minLength: 1
+          maxLength: 45
+
+    TipoIntervalo:
+      required:
+        - tipo_intervalo
+      type: object
+      properties:
+        tipo_intervalo:
+          type: string
+          example: Hora
+          description: O número máximo de caracteres é de 5
+          minLength: 1
+          maxLength: 5
+
+    Horarios:
+      required:
+        - horario
+        - status
+      type: object
+      properties:
+        horario:
+          type: string
+          example: 2026-09-24 08:00:00
+          description: Registra data e hora
+        status:
+          type: string
+          example: Pendente
+          description: O número máximo de caracteres é de 10
+          minLength: 1
+          maxLength: 10
+
+    TipoDosagem:
+      required:
+        - tipo_dosagem
+      type: object
+      properties:
+        tipo_dosagem:
+          type: string
+          example: Comprimido
+          description: O número máximo de caracteres é de 12
+          minLength: 1
+          maxLength: 12
+
+    UnidadeMedida:
+      required:
+        - unidade_medida
+        - sigla
+      type: object
+      properties:
+        unidade_medida:
+          type: string
+          example: Miligrama
+          description: O número máximo de caracteres é de 30
+          minLength: 1
+          maxLength: 30
+        sigla:
+          type: string
+          example: mg
+          description: O número máximo de caracteres é de 6
+          minLength: 1
+          maxLength: 6
+
+    Estoque:
+      required:
+        - quantidade_em_estoque
+        - id_usuarios
+        - id_medicamentos
+      type: object
+      properties:
+        quantidade_em_estoque:
+          type: integer
+          example: 30
+        id_usuarios:
+          type: integer
+          example: 1
+        id_medicamentos:
+          type: integer
+          example: 1
+
+    Permissao:
+      required:
+        - permissao
+      type: object
+      properties:
+        permissao:
+          type: string
+          example: Adicionar Medicamento
+          description: O número máximo de caracteres é de 45
+          minLength: 1
+          maxLength: 45
+
+    Role:
+      required:
+        - role
+      type: object
+      properties:
+        role:
+          type: string
+          example: Cuidador
+          description: O número máximo de caracteres é de 45
+          minLength: 1
+          maxLength: 45
+        permissoes:
+          type: array
+          items:
+            type: object
+            properties:
+              id_permissoes:
+                type: integer
+            example:
+              - id_permissoes: 1
+              - id_permissoes: 2
+              - id_permissoes: 4
+              - id_permissoes: 7
+
+    VinculoPaciente:
+      required:
+        - data_vinculo
+        - id_paciente
+        - id_cuidador
+      type: object
+      properties:
+        data_vinculo:
+          type: string
+          example: 2026-09-01 09:15:00
+          description: Registra data e hora
+        id_paciente:
+          type: integer
+          example: 1
+        id_cuidador:
+          type: integer
+          example: 2
+
+    ContatoEmergencia:
+      required:
+        - nome
+        - telefone
+      type: object
+      properties:
+        nome:
+          type: string
+          example: Ana Beatriz Almeida
+          description: O número máximo de caracteres é de 45
+          minLength: 1
+          maxLength: 45
+        telefone:
+          type: string
+          example: 11987654321
+          description: O número máximo de caracteres é de 15
+          minLength: 1
+          maxLength: 15
+
+    HistoricoMedicamento:
+      required:
+        - hora_ingestao
+        - id_paciente
+        - dosagem_ingerida
+        - id_horario
+        - status_ingestao
+      type: object
+      properties:
+        hora_ingestao:
+          type: string
+          example: 2026-09-24 08:03:00
+          description: Registra data e hora
+        id_paciente:
+          type: integer
+          example: 1
+        dosagem_ingerida:
+          type: string
+          example: 50mg
+          description: O número máximo de caracteres é de 45
+          minLength: 1
+          maxLength: 45
+        id_horario:
+          type: integer
+          example: 1
+        status_ingestao:
+          type: string
+          example: tomado
+          description: O número máximo de caracteres é de 15
+          minLength: 1
+          maxLength: 15
+
+    # SCHEMAS PARA OS GETS (RELAÇÕES)
+    UsuarioGetPaciente:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nome:
+          type: string
+          example: João Cleber
+          description: O número máximo de caracteres é de 45
+          minLength: 4
+          maxLength: 45
+        email:
+          type: string
+          example: joao.cleber@gmail.com
+          description: O número máximo de caracteres é de 255
+          minLength: 15
+          maxLength: 255
+        data_nascimento:
+          type: string
+          example: 2000-01-15
+          description: O número máximo de caracteres é de 256
+          minLength: 10
+          maxLength: 10
+        usuario_role:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              ativo:
+                type: integer
+                format: int32
+                description: "Representa um campo TINYINT do banco de dados"
+              data_ativacao:
+                type: string
+                format: date-time
+                example: "2026-09-25T19:03:00Z"
+                description: "Data e hora em que o usuário foi criado."
+              data_desativacao:
+                type: string
+                format: date-time
+                example: "2026-09-25T19:03:00Z"
+                description: "Data e hora em que o usuário foi desativado."
+              role:
+                type: string
+            example:
+              - id: 1
+                ativo: true
+                data_ativacao: "2026-09-01 08:00:00"
+                data_desativacao: null
+                role: pessoa acompanhada
+        doencas_cronicas:
+          type: array
+          items:
+            $ref: "#/components/schemas/DoencaCronicaGet"
+        contatos_emergencias:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContatoEmergenciaGet"
+
+    UsuarioGetCuidador:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nome:
+          type: string
+          example: Sidney Oliveira
+          description: O número máximo de caracteres é de 45
+          minLength: 4
+          maxLength: 45
+        email:
+          type: string
+          example: sidney.oliveira@gmail.com
+          description: O número máximo de caracteres é de 255
+          minLength: 15
+          maxLength: 255
+        data_nascimento:
+          type: string
+          example: 1990-03-30
+          description: O número máximo de caracteres é de 256
+          minLength: 10
+          maxLength: 10
+        usuario_role:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              ativo:
+                type: integer
+                format: int32
+                description: "Representa um campo TINYINT do banco de dados"
+              data_ativacao:
+                type: string
+                format: date-time
+                example: "2026-09-25T19:03:00Z"
+                description: "Data e hora em que o usuário foi criado."
+              data_desativacao:
+                type: string
+                format: date-time
+                example: "2026-09-25T19:03:00Z"
+                description: "Data e hora em que o usuário foi desativado."
+              role:
+                type: string
+            example:
+              - id: 2
+                ativo: true
+                data_ativacao: "2026-09-01 08:00:00"
+                data_desativacao: null
+                role: cuidador
+
+    MedicamentoGet:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nome:
+          type: string
+          description: O número máximo de caracteres é de 45
+          minLength: 1
+          maxLength: 45
+        imagem:
+          type: string
+          description: O número máximo de caracteres é de 255
+          minLength: 1
+          maxLength: 25
+        concentracao:
+          type: number
+          format: float
+          description: O número máximo de digítos é 5
+          minimum: 1
+          maximum: 99999
+        receita_medica:
+          type: object
+          properties:
+            frequencia:
+              type: string
+              format: time
+              example: 00:01:30:00
+              description: para 1 hora e 30 minutos
+            dosagem:
+              type: number
+              format: float
+              example: 2.0
+              description: É válido colocar este tipo de valor para casos em que a unidade de medida suporte números floats (ml, l, g)
+            data_hora_inicio:
+              type: string
+              format: date-time
+              example: 2026-09-29T14:30:00Z
+              description: para a data 29/09/2026 e horário 14:30:00
+            descricao:
+              type: string
+              description: O número de caracteres permitido é ilimitado
+            tipo_inervalo:
+              type: string
+              example: horas
+            unidade_medida:
+              type: string
+              example: ml
+            tipo_dosagem:
+              type: string
+              example: xarope
+        estoque:
+          type: object
+          properties:
+            quantidade_em_estoque:
+              type: number
+              format: float
+              example: 1,5
+            unidade_medida:
+              type: string
+              example: l
+        usuario:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            nome:
+              type: string
+              example: José da Silva
+            data_nascimento:
+              type: string
+              format: date
+              example: 1958-10-09
+
+    DoencaCronicaGet:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nome_doenca:
+          type: string
+          example: Hipertensão
+          description: O número máximo de caracteres é de 45
+
+    TipoIntervaloGet:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        tipo_intervalo:
+          type: string
+          example: Hora
+          description: O número máximo de caracteres é de 5
+
+    HorariosGet:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        horario:
+          type: string
+          example: 2026-09-24 08:00:00
+          description: Registra data e hora
+        status:
+          type: string
+          example: Pendente
+          description: O número máximo de caracteres é de 10
+          minLength: 1
+          maxLength: 10
+
+    TipoDosagemGet:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        tipo_dosagem:
+          type: string
+          example: Comprimido
+          description: O número máximo de caracteres é de 12
+
+    UnidadeMedidaGet:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        unidade_medida:
+          type: string
+          example: miligrama
+          description: O número máximo de caracteres é de 30
+        sigla:
+          type: string
+          example: mg
+          description: O número máximo de caracteres é de 6
+
+    EstoqueGet:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        quantidade_em_estoque:
+          type: integer
+          example: 30
+        paciente:
+          type: array
+          items:
+            $ref: "#/components/schemas/UsuarioGetPaciente"
+
+    PermissaoGet:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        permissao:
+          type: string
+          example: Adicionar Medicamento
+          description: O número máximo de caracteres é de 45
+
+    RoleGet:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        role:
+          type: string
+          example: Cuidador
+          description: O número máximo de caracteres é de 45
+        permissoes:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              permissao:
+                type: string
+          example:
+            - id: 1
+              permissao: Adicionar Medicamento
+            - id: 2
+              permissao: Editar Medicamento
+            - id: 4
+              permissao: Excluir Medicamento
+            - id: 7
+              permissao: Visualizar Medicamento
+
+    VinculoPacienteGet:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        data_vinculo:
+          type: string
+          example: 2026-09-01 09:15:00
+        paciente:
+          type: array
+          items:
+            $ref: "#/components/schemas/UsuarioGetPaciente"
+        cuidador:
+          type: array
+          items:
+            $ref: "#/components/schemas/UsuarioGetCuidador"
+
+    ContatoEmergenciaGet:
+      required:
+        - nome
+        - telefone
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nome:
+          type: string
+          example: Ana Beatriz Almeida
+        telefone:
+          type: string
+          example: 11987654321
+          description: O número máximo de caracteres é de 15
+
+    HistoricoMedicamentoGet:
+      required:
+        - hora_ingestao
+        - id_paciente
+        - dosagem_ingerida
+        - id_horario
+        - status_ingestao
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        hora_ingestao:
+          type: string
+          example: 2026-09-24 08:03:00
+          description: Registra data e hora
+        paciente:
+          type: array
+          items:
+            $ref: "#/components/schemas/UsuarioGetPaciente"
+        dosagem_ingerida:
+          type: string
+          example: 50mg
+          description: O número máximo de caracteres é de 45
+          minLength: 1
+          maxLength: 45
+        horarios:
+          type: array
+          items:
+            $ref: "#/components/schemas/HorariosGet"
+        status_ingestao:
+          type: string
+          example: tomado
+          description: O número máximo de caracteres é de 15
+          minLength: 1
+          maxLength: 15
+
+    # Login Usuário
+    UsuarioLogin:
+      required:
+        - email
+        - senha
+      type: object
+      properties:
+        email:
+          type: string
+          example: joao.cleber@gmail.com
+          description: O número máximo de caracteres é de 255
+          minLength: 15
+          maxLength: 255
+        senha:
+          type: string
+          example: jc@123
+          description: O número máximo de caracteres é de 70
+          minLength: 6
+          maxLength: 70
+
+    UsuarioLoginJWT:
+      required:
+        - email
+        - jwt
+      type: object
+      properties:
+        email:
+          type: string
+          example: joao.cleber@gmail.com
+          description: O número máximo de caracteres é de 255
+          minLength: 15
+          maxLength: 255
+        jwt:
+          type: string
+          example: jwt_token
+          description: O número máximo de caracteres é de 255
+          minLength: 10
+          maxLength: 255
+
+  requestBodies:
+    Usuario:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Usuario"
+    Medicamento:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Medicamento"
+
+    DoencaCronica:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DoencaCronica"
+
+    TipoIntervalo:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TipoIntervalo"
+
+    Horarios:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Horarios"
+
+    TipoDosagem:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TipoDosagem"
+
+    UnidadeMedida:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UnidadeMedida"
+
+    Permissao:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Permissao"
+
+    Caracteristica:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Role"
+
+    VinculoPaciente:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/VinculoPaciente"
+
+    ContatoEmergencia:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ContatoEmergencia"
+
+    HistoricoMedicamento:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/HistoricoMedicamento"
+
+    # GETS
+    UsuarioGet:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UsuarioGetPaciente"
+
+    MedicamentoGet:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/MedicamentoGet"
+
+    DoencaCronicaGet:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DoencaCronicaGet"
+
+    TipoIntervaloGet:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TipoIntervaloGet"
+
+    HorariosGet:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/HorariosGet"
+
+    TipoDosagemGet:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TipoDosagemGet"
+
+    UnidadeMedidaGet:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UnidadeMedidaGet"
+
+    PermissaoGet:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/PermissaoGet"
+
+    RoleGet:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/RoleGet"
+
+    VinculoPacienteGet:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/VinculoPacienteGet"
+
+    ContatoEmergenciaGet:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ContatoEmergenciaGet"
+
+    HistoricoMedicamentoGet:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/HistoricoMedicamentoGet"
+
+    #Login Usuário
+    UsuarioLogin:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UsuarioLogin"
+
+    UsuarioLoginJWT:
+      description: Objeto que deve ser enviado no Body das requisicoes
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UsuarioLoginJWT"
