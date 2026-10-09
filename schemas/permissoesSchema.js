@@ -8,7 +8,7 @@
 const Joi = require('joi')
 
 const permissoesSchema = Joi.object({
-    permissoes: Joi.string()
+    permissao: Joi.string()
                 .max(45)
                 .required()
 })

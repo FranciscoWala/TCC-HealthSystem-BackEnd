@@ -91,7 +91,7 @@ const deleteEstoque = async function (id) {
     try {
         let sql = `delete from tbl_estoque where id = ${id};`
 
-        let result = knexConection.raw(sql)
+        let result = await knexConection.raw(sql)
 
         if (result)
             return true

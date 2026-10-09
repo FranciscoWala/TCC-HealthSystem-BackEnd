@@ -126,7 +126,7 @@ const deleteUsuario = async function (id) {
     try {
         let sql = `delete from tbl_usuarios where id = ${id};`
 
-        let result = knexConection.raw(sql)
+        let result = await knexConection.raw(sql)
 
         if (result)
             return true
