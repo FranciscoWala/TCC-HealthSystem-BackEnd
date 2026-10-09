@@ -92,7 +92,7 @@ const selectByIdUsuario = async function (id) {
 
 const selectUsuarioByEmail = async function(email){
     try {
-        let sql = `select * from tbl_usuarios where email = ${email}`
+        let sql = `select * from tbl_usuarios where email ='${email}'`
 
         let result = await knexConection.raw(sql)
 
