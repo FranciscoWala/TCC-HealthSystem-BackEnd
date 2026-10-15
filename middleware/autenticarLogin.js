@@ -2,38 +2,64 @@ const authenticate = require("./authenticate.js")
 const usuarioDAO = require("../model/DAO/usuarios/usuario.js")
 const bcrypt = require("bcrypt")
 
-async function autenticarLogin(request, response, next) {
+async function autenticarLogin(request, response) {
 
-   const {email, senha} = request.body
+    try {
+        const { email, senha } = request.body
+        
 
-    const usuario = await usuarioDAO.selectUsuarioByEmail(email)
+        if (!email || !senha) {
+            return response.status(400).json({ message: "É necessário fornecer e-mail e senha" })
+        }
 
-    //A linha 13 está presente apenas a caráter de testes.
-    // A senha do usuário já virá criptografada do banco, antes criptografada no front e depois armazenada no banco
-    const senhaCriptografada = await bcrypt.hash(usuario[0].senha, 10) 
-    
 
-    const validarSenha = await bcrypt.compare(senha, senhaCriptografada)
-    
+        const usuario = await usuarioDAO.selectUsuarioByEmail(email)
 
-    if(!usuario || usuario.lenght === 0)
-        return response
-        .status(401)
-            .json(
-                {message: "EMAIL OU SENHA INVÁLIDOS"}
-            )
 
-    if(!validarSenha)
-       return response
-        .status(401)
-            .json(
-                {message: "EMAIL OU SENHA INVÁLIDOS"}
-            ) 
+        if (!usuario || usuario.length === 0)
+            return response
+                .status(401)
+                .json(
+                    { message: "EMAIL OU SENHA INVÁLIDOS" }
+                )
 
-    let jwt = await authenticate.createJWT(usuario[0].id)
-    usuario[0].jwt = jwt
+        //A linha 29 está presente apenas a caráter de testes.
+        // A senha do usuário já virá criptografada do banco, antes criptografada no front e depois armazenada no banco
+        const senhaCriptografada = await bcrypt.hash(usuario[0].senha, 10)
+        const validarSenha = await bcrypt.compare(senha, senhaCriptografada)
 
-    return usuario
+        if (!validarSenha)
+            return response
+                .status(401)
+                .json(
+                    { message: "EMAIL OU SENHA INVÁLIDOS" }
+                )
+
+
+        // Converte o retorno de permissões de string para um array        
+        if (
+            usuario[0] && usuario[0].permissoes
+            && typeof usuario[0].permissoes === "string"
+        ) {
+            usuario[0].permissoes = usuario[0].permissoes
+                .split(',')
+                .map(permissao => permissao.trim());
+        }
+
+        let payload = {
+            id: usuario[0].id,
+            role: usuario[0].role,
+            permissoes: usuario[0].permissoes
+        }
+
+        let jwt = await authenticate.createJWT(payload)
+        usuario[0].jwt = jwt
+
+        return usuario
+    } catch (error) {
+        console.log(error)
+        return response.status(500).json({ message: "INTERNAL SERVER ERROR" })
+    }
 }
 
-module.exports = {autenticarLogin}
+module.exports = { autenticarLogin }
