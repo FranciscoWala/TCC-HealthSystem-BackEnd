@@ -14,6 +14,7 @@ const usuarioSchema = Joi.object({
 
     email: Joi.string()
             .max(255)
+            .email()
             .required(),
 
     senha: Joi.string()
