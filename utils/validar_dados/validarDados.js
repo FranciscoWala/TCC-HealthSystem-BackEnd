@@ -5,7 +5,7 @@
     Versão: 1.0
 ***************************************************************************/
 
-const idSchema = require('../schemas/idSchema.js')
+const idSchema = require('../../schemas/idSchema.js')
 
 const validarDados = function (schema, dados, customMessages) {
     const { error } = schema.validate(dados, { abortEarly: false })

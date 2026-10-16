@@ -67,6 +67,12 @@ const ERROR_INTERNAL_SERVER_CONTROLLER = {
     message: 'Não foi possível processar a requisição devido a um erro interno no servidor [CONTROLLER]'
 }
 
+const ERROR_INTERNAL_SERVER_SERVICE = {
+    status: false,
+    status_code: 500,
+    message: 'Não foi possível processar a requisição devido a um erro interno no servidor [SERVICE]'
+}
+
 //MENSAGENS DE SUCESSO
 const SUCCESS_RESPONSE = {
     status: true,
@@ -106,6 +112,7 @@ module.exports = {
     ERROR_CONTENT_TYPE,
     ERROR_INTERNAL_SERVER_MODEL,
     ERROR_INTERNAL_SERVER_CONTROLLER,
+    ERROR_INTERNAL_SERVER_SERVICE,
     SUCCESS_RESPONSE,
     SUCCESS_UPDATE_ITEM,
     SUCCESS_CREATED_ITEM,

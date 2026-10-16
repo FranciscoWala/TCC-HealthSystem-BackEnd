@@ -6,14 +6,9 @@
 **************************************************************************************************************************/
 
 // IMPORT DO ARQUIVO DE CONFIGURAÇÕES DE MENSAGENS DO PROJETO
-const configMessages = require('../modulo/configMessages.js')
+const configMessages = require('../../utils/messages/configMessages.js')
 
-// IMPORT DA DAO
-const unidadeMedidaDAO = require('../../models/DAO/unidade_medida/unidade_medida.js')
-
-// IMPORT DO SCHEMAS DE VALIDAÇÃO
-const validarDados = require('../../utils/validarDados.js')
-const unidadeMedidaSchema = require('../../schemas/unidadeMedidaSchema.js')
+const unidadeMedidaService = require('../../services/unidade_medida/service_unidade_medida.js')
 
 const validarDadosUnidadeMedida = function (unidadeMedida) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
@@ -26,28 +21,23 @@ const inserirNovaUnidadeMedida = async function (unidadeMedida, contentType) {
 
     try {
         if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
-            let validar = validarDadosUnidadeMedida(unidadeMedida)
+            let resultService = await unidadeMedidaService.inserirUnidadeMedidaService(unidadeMedida)
 
-            if (validar)
-                return validar
-            else {
-                let result = await unidadeMedidaDAO.insertUnidadeMedida(unidadeMedida)
+            if (resultService && resultService.status) {
+                customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
+                customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_CREATED_ITEM.status_code
+                customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_CREATED_ITEM.message
+                customMessages.DEFAULT_MESSAGE.response = unidadeMedida
 
-                if (result) {
-                    unidadeMedida.id = result
-
-                    customMessages.DEFAULT_MESSAGE.status       = customMessages.SUCCESS_CREATED_ITEM.status
-                    customMessages.DEFAULT_MESSAGE.status_code  = customMessages.SUCCESS_CREATED_ITEM.status_code
-                    customMessages.DEFAULT_MESSAGE.message      = customMessages.SUCCESS_CREATED_ITEM.message
-                    customMessages.DEFAULT_MESSAGE.response     = unidadeMedida
-
-                    return customMessages.DEFAULT_MESSAGE
-                } else
-                    return customMessages.ERROR_INTERNAL_SERVER_MODEL
-            }
+                return customMessages.DEFAULT_MESSAGE
+            } else if (resultService && resultService.message) {
+                customMessages.ERROR_BAD_REQUEST.field = resultService.message
+                return customMessages.ERROR_BAD_REQUEST
+            } else
+                return customMessages.ERROR_INTERNAL_SERVER_MODEL
         } else
             return customMessages.ERROR_CONTENT_TYPE
-    } catch (error) {   
+    } catch (error) {
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
     }
 }
@@ -70,10 +60,10 @@ const atualizarUnidadeMedida = async function (unidadeMedida, id, contentType) {
                     let result = await unidadeMedidaDAO.updateUnidadeMedida(unidadeMedida)
 
                     if (result) {
-                        customMessages.DEFAULT_MESSAGE.status       = customMessages.SUCCESS_UPDATE_ITEM.status
-                        customMessages.DEFAULT_MESSAGE.status_code  = customMessages.SUCCESS_UPDATE_ITEM.status_code
-                        customMessages.DEFAULT_MESSAGE.message      = customMessages.SUCCESS_UPDATE_ITEM.message
-                        customMessages.DEFAULT_MESSAGE.response     = unidadeMedida
+                        customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
+                        customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
+                        customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_UPDATE_ITEM.message
+                        customMessages.DEFAULT_MESSAGE.response = unidadeMedida
 
                         return customMessages.DEFAULT_MESSAGE
                     } else
@@ -96,10 +86,10 @@ const listarUnidadeMedida = async function () {
 
         if (result) {
             if (result.length > 0) {
-                customMessages.DEFAULT_MESSAGE.status                   = customMessages.SUCCESS_RESPONSE.status
-                customMessages.DEFAULT_MESSAGE.status_code              = customMessages.SUCCESS_RESPONSE.status_code
-                customMessages.DEFAULT_MESSAGE.response.count           = result.length
-                customMessages.DEFAULT_MESSAGE.response.unidade_medida  = result
+                customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
+                customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
+                customMessages.DEFAULT_MESSAGE.response.count = result.length
+                customMessages.DEFAULT_MESSAGE.response.unidade_medida = result
 
                 return customMessages.DEFAULT_MESSAGE
             } else
@@ -124,9 +114,9 @@ const buscarUnidadeMedida = async function (id) {
 
             if (result) {
                 if (result.length > 0) {
-                    customMessages.DEFAULT_MESSAGE.status                   = customMessages.SUCCESS_RESPONSE.status
-                    customMessages.DEFAULT_MESSAGE.status_code              = customMessages.SUCCESS_RESPONSE.status_code
-                    customMessages.DEFAULT_MESSAGE.response.unidade_medida  = result
+                    customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
+                    customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
+                    customMessages.DEFAULT_MESSAGE.response.unidade_medida = result
 
                     return customMessages.DEFAULT_MESSAGE
                 } else

@@ -6,7 +6,7 @@
 **************************************************************************************************************************/
 
 // IMPORT DO ARQUIVO DE CONFIGURAÇÕES DE MENSAGENS DO PROJETO
-const configMessages = require('../modulo/configMessages.js')
+const configMessages = require('../../utils/messages/configMessages.js')
 
 // IMPORT DA DAO
 const medicamentoDAO = require('../../models/DAO/medicamentos/medicamentos.js')
@@ -16,7 +16,7 @@ const controllerUnidadeMedida = require('../unidade_medida/controller_unidade_me
 const controllerTipoDosagem = require('../tipo_dosagem/controller_tipo_dosagem.js')
 
 // IMPORT DO SCHEMAS DE VALIDAÇÃO
-const validarDados = require('../../utils/validarDados.js')
+const validarDados = require('../../utils/validar_dados/validarDados.js')
 const medicamentoSchema = require('../../schemas/medicamentoSchema.js')
 
 const validarDadosMedicamento = function (medicamento) {

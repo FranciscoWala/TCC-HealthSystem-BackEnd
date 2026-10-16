@@ -6,13 +6,13 @@
 **************************************************************************************************************************/
 
 // IMPORT DO ARQUIVO DE CONFIGURAÇÕES DE MENSAGENS DO PROJETO
-const configMessages = require('../modulo/configMessages.js')
+const configMessages = require('../../utils/messages/configMessages.js')
 
 // IMPORT DA DAO
 const tipoIntervaloDAO = require('../../models/DAO/tipo_intervalo/tipo_intervalo.js')
 
 // IMPORT DO SCHEMAS DE VALIDAÇÃO
-const validarDados = require('../../utils/validarDados.js')
+const validarDados = require('../../utils/validar_dados/validarDados.js')
 const tipoIntervaloSchema = require('../../schemas/tipoIntervaloSchema.js')
 
 const validarDadosTipoIntervalo = function (tipoIntervalo) {

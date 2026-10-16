@@ -7,13 +7,13 @@
 ***********************************************************************************************************************************/
 
 // IMPORT DO ARQUIVO DE CONFIGURAÇÕES DE MENSAGENS DO PROJETO
-const configMessages = require('../modulo/configMessages.js')
+const configMessages = require('../../utils/messages/configMessages.js')
 
 // IMPORT DA DAO
 const contatoEmergenciaDAO = require('../../models/DAO/contato_de_emergencia/contato_de_emergencia.js')
 
 // IMPORT DO SCHEMAS DE VALIDAÇÃO
-const validarDados = require('../../utils/validarDados.js')
+const validarDados = require('../../utils/validar_dados/validarDados.js')
 const contatoEmergenciaSchema = require('../../schemas/contatoEmergenciaSchema.js')
 
 const validarDadosContatosEmergencia = function (contatoEmergencia) {
