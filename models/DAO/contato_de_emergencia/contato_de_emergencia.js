@@ -19,7 +19,7 @@ async function insertContatoEmergencia(contatoEmergencia){
         `insert into tbl_contato_de_emergencia(
            nome, 
            telefone 
-        ).values(
+        )values(
             '${contatoEmergencia.nome}',
             '${contatoEmergencia.telefone}'
         );`
@@ -32,14 +32,14 @@ async function insertContatoEmergencia(contatoEmergencia){
         return false
 }
 
-async function updateContatoEmergencia(contatoEmergencia, id) {
+async function updateContatoEmergencia(contatoEmergencia) {
     let sql = 
     `
         update tbl_contato_de_emergencia
             set 
                 nome = '${contatoEmergencia.nome}',
                 telefone = '${contatoEmergencia.telefone}'
-            where id = ${id};
+            where id = ${contatoEmergencia.id};
     `
 
     let result = await knexConection.raw(sql)
@@ -53,12 +53,12 @@ async function updateContatoEmergencia(contatoEmergencia, id) {
 async function getContatosEmergencia() {
     let sql = 
     `
-        select * from tbl_contatos_emergencia;    
+        select * from tbl_contato_de_emergencia;    
     `
 
     let result = await knexConection.raw(sql)
 
-    if(result)
+    if(Array.isArray(result))
         return result[0]
     else
         return false
@@ -72,7 +72,7 @@ async function getContatosEmergenciaByID(id) {
 
     let result = await knexConection.raw(sql)
 
-    if(result)
+    if(Array.isArray(result))
         return result[0]
     else 
         return false
@@ -90,4 +90,12 @@ async function deleteContatoEmergenciaByID(id) {
         return true
     else
         return false
+}
+
+module.exports = {
+    insertContatoEmergencia,
+    updateContatoEmergencia,
+    getContatosEmergencia,
+    getContatosEmergenciaByID,
+    deleteContatoEmergenciaByID
 }

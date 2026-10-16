@@ -27,6 +27,12 @@ app.use('/v1/healthSystem/medtime/permissoes', cors(), permissoesRouter)
 const doencaCronicaRouter = require('./routes/doenca_cronica.router.js')
 app.use('/v1/healthSystem/medtime/doenca_cronica', cors(), doencaCronicaRouter)
 
+const contatoEmergenciaRouter = require('./routes/contato_emergencia.router.js')
+app.use('/v1/healthSystem/medtime/contato_emergencia', cors(), contatoEmergenciaRouter)
+
+const tipoIntervaloRouter = require('./routes/tipo_intervalo.router.js')
+app.use('/v1/healthSystem/medtime/tipo_intervalo', cors(), tipoIntervaloRouter)
+
 // FAZER O START DA API
 app.listen(8080, function() {
     console.log('API aguardando novas requisições...')

@@ -13,9 +13,9 @@ const bodyParserJSON = bodyParser.json()
 
 const router = express.Router()
 
-const controllerPermissoes = require('../controller/permissoes/controller_permissoes.js')
+const controllerPermissoes = require('../controllers/permissoes/controller_permissoes.js')
 
-//                          ENDPOINTS ROLE
+//                          ENDPOINTS PERMISSÕES
 router.post('/', bodyParserJSON, async function (request, response) {
     let dados = request.body
     let contentType = request.headers['content-type']

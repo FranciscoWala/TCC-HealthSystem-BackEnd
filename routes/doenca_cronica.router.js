@@ -13,9 +13,9 @@ const bodyParserJSON = bodyParser.json()
 
 const router = express.Router()
 
-const controllerDoencaCronica = require('../controller/doencas_cronicas/controller_doencas_cronicas.js')
+const controllerDoencaCronica = require('../controllers/doencas_cronicas/controller_doencas_cronicas.js')
 
-//                          ENDPOINTS ROLE
+//                          ENDPOINTS DOENÇAS CRÔNICAS
 router.post('/', bodyParserJSON, async function (request, response) {
     let dados = request.body
     let contentType = request.headers['content-type']

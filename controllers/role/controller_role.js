@@ -1,5 +1,5 @@
 /*************************************************************************************************************************
- * Objetivo: Arquivo responsável pela validação, tratamento, manipulação de dados para realizar o CRUD de PERMISSOES
+ * Objetivo: Arquivo responsável pela validação, tratamento, manipulação de dados para realizar o CRUD da ROLE
  * Autor: Kayque Brenno Ferreira Almeida
  * Data: 09/10/2026
  * Versão: 1.0
@@ -9,44 +9,38 @@
 const configMessages = require('../modulo/configMessages.js')
 
 // IMPORT DA DAO
-const permissoesDAO = require('../../model/DAO/permissoes/permissoes.js')
+const roleDAO = require('../../models/DAO/role/role.js')
 
 // IMPORT DO SCHEMAS DE VALIDAÇÃO
-const permissoesSchema = require('../../schemas/permissoesSchema.js')
+const validarDados = require('../../utils/validarDados.js')
+const roleSchema = require('../../schemas/roleSchemas.js')
 const idSchema = require('../../schemas/idSchema.js')
 
-const validarDados = async function (permissoes) {
+const validarDadosRole = async function (role) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
-    const { error } = permissoesSchema.validate(permissoes)
-
-    if (error) {
-        customMessages.ERROR_BAD_REQUEST.field = error.details[0].message
-        return customMessages.ERROR_BAD_REQUEST
-    }
-
-    return false
+    return validarDados(roleSchema, role, customMessages)
 }
 
-const inserirNovaPermissao = async function (permissoes, contentType) {
+const inserirNovaRole = async function (role, contentType) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
         if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
-            let validar = await validarDados(permissoes)
+            let validar = await validarDadosRole(role)
 
             if (validar)
                 return validar
             else {
-                let result = await permissoesDAO.insertPermissoes(permissoes)
+                let result = await roleDAO.insertRole(role)
 
                 if (result) {
-                    permissoes.id = result
+                    role.id = result
 
                     customMessages.DEFAULT_MESSAGE.status       = customMessages.SUCCESS_CREATED_ITEM.status
                     customMessages.DEFAULT_MESSAGE.status_code  = customMessages.SUCCESS_CREATED_ITEM.status_code
                     customMessages.DEFAULT_MESSAGE.message      = customMessages.SUCCESS_CREATED_ITEM.message
-                    customMessages.DEFAULT_MESSAGE.response     = permissoes
+                    customMessages.DEFAULT_MESSAGE.response     = role
 
                     return customMessages.DEFAULT_MESSAGE
                 } else
@@ -59,28 +53,28 @@ const inserirNovaPermissao = async function (permissoes, contentType) {
     }
 }
 
-const atualizarPermissao = async function (permissoes, id, contentType) {
+const atualizarRole = async function (role, id, contentType) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
         if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
-            let resultBuscarID = await buscarPermissao(id)
+            let resultBuscarID = await buscarRole(id)
 
             if (resultBuscarID.status) {
-                let validar = await validarDados(permissoes)
+                let validar = await validarDadosRole(role)
 
                 if (validar)
                     return validar
                 else {
-                    permissoes.id = Number(id)
+                    role.id = Number(id)
 
-                    let result = await permissoesDAO.updatePermissoes(permissoes)
+                    let result = await roleDAO.updateRole(role)
 
                     if (result) {
                         customMessages.DEFAULT_MESSAGE.status       = customMessages.SUCCESS_UPDATE_ITEM.status
                         customMessages.DEFAULT_MESSAGE.status_code  = customMessages.SUCCESS_UPDATE_ITEM.status_code
                         customMessages.DEFAULT_MESSAGE.message      = customMessages.SUCCESS_UPDATE_ITEM.message
-                        customMessages.DEFAULT_MESSAGE.response     = permissoes
+                        customMessages.DEFAULT_MESSAGE.response     = role
 
                         return customMessages.DEFAULT_MESSAGE
                     } else
@@ -95,18 +89,18 @@ const atualizarPermissao = async function (permissoes, id, contentType) {
     }
 }
 
-const listarPermissao = async function () {
+const listarRole = async function () {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
-        let result = await permissoesDAO.selectAllPermissoes()
+        let result = await roleDAO.selectAllRoles()
 
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status               = customMessages.SUCCESS_RESPONSE.status
                 customMessages.DEFAULT_MESSAGE.status_code          = customMessages.SUCCESS_RESPONSE.status_code
                 customMessages.DEFAULT_MESSAGE.response.count       = result.length
-                customMessages.DEFAULT_MESSAGE.response.permissoes  = result
+                customMessages.DEFAULT_MESSAGE.response.role        = result
 
                 return customMessages.DEFAULT_MESSAGE
             } else
@@ -118,7 +112,7 @@ const listarPermissao = async function () {
     }
 }
 
-const buscarPermissao = async function (id) {
+const buscarRole = async function (id) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
@@ -128,13 +122,13 @@ const buscarPermissao = async function (id) {
             customMessages.ERROR_BAD_REQUEST.field = error.details[0].message
             return customMessages.ERROR_BAD_REQUEST
         } else {
-            let result = await permissoesDAO.selectByIdPermissoes(id)
+            let result = await roleDAO.selectByIdRole(id)
 
             if (result) {
                 if (result.length > 0) {
                     customMessages.DEFAULT_MESSAGE.status               = customMessages.SUCCESS_RESPONSE.status
                     customMessages.DEFAULT_MESSAGE.status_code          = customMessages.SUCCESS_RESPONSE.status_code
-                    customMessages.DEFAULT_MESSAGE.response.permissoes  = result
+                    customMessages.DEFAULT_MESSAGE.response.role        = result
 
                     return customMessages.DEFAULT_MESSAGE
                 } else
@@ -147,14 +141,14 @@ const buscarPermissao = async function (id) {
     }
 }
 
-const excluirPermissao = async function (id) {
+const excluirRole = async function (id) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
-        let resultBuscarID = await buscarPermissao(id)
+        let resultBuscarID = await buscarRole(id)
 
         if (resultBuscarID.status) {
-            let result = await permissoesDAO.deletePermissoes(id)
+            let result = await roleDAO.deleteRole(id)
 
             if (result)
                 return customMessages.SUCCESS_DELETE_ITEM
@@ -168,9 +162,9 @@ const excluirPermissao = async function (id) {
 }
 
 module.exports = {
-    inserirNovaPermissao,
-    atualizarPermissao,
-    listarPermissao,
-    buscarPermissao,
-    excluirPermissao
+    inserirNovaRole,
+    atualizarRole,
+    listarRole,
+    buscarRole,
+    excluirRole
 }

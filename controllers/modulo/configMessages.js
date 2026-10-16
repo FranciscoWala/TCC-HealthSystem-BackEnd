@@ -8,7 +8,10 @@
 //Padronização dos retornos da API (Cabeçalho)
 const DEFAULT_MESSAGE = {
     api_description: 'API para controlar o projeto MedTime',
-    development: 'Kayque Brenno Ferreira Almeida',
+    developments: [
+        'Kayque Brenno Ferreira Almeida',
+        'Samuel Silva Moreira Dos Santos'
+    ],
     version: '1.0.10.26',
     status: Boolean,
     status_code: Number,

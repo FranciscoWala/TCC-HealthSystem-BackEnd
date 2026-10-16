@@ -13,7 +13,7 @@ const bodyParserJSON = bodyParser.json()
 
 const router = express.Router()
 
-const controllerRole = require('../controller/role/controller_role.js')
+const controllerRole = require('../controllers/role/controller_role.js')
 
 //                          ENDPOINTS ROLE
 router.post('/', bodyParserJSON, async function (request, response) {

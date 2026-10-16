@@ -9,23 +9,17 @@
 const configMessages = require('../modulo/configMessages.js')
 
 // IMPORT DA DAO
-const doencaCronicaDAO = require('../../model/DAO/doencas_cronicas/doenca_cronica.js')
+const doencaCronicaDAO = require('../../models/DAO/doencas_cronicas/doenca_cronica.js')
 
 // IMPORT DO SCHEMAS DE VALIDAÇÃO
+const validarDados = require('../../utils/validarDados.js')
 const doencaCronicasSchema = require('../../schemas/doencaCronicaSchema.js')
 const idSchema = require('../../schemas/idSchema.js')
 
-const validarDados = async function (doencaCronica) {
+const validarDadosDoencasCronicas = async function (doencaCronica) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
-    const { error } = doencaCronicasSchema.validate(doencaCronica)
-
-    if (error) {
-        customMessages.ERROR_BAD_REQUEST.field = error.details[0].message
-        return customMessages.ERROR_BAD_REQUEST
-    }
-
-    return false
+    return validarDados(doencaCronicasSchema, doencaCronica, customMessages)
 }
 
 const inserirNovaDoencaCronica = async function (doencaCronica, contentType) {
@@ -33,7 +27,7 @@ const inserirNovaDoencaCronica = async function (doencaCronica, contentType) {
 
     try {
         if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
-            let validar = await validarDados(doencaCronica)
+            let validar = await validarDadosDoencasCronicas(doencaCronica)
 
             if (validar)
                 return validar
@@ -67,7 +61,7 @@ const atualizarDoencaCronica = async function (doencaCronica, id, contentType) {
             let resultBuscarID = await buscarDoencaCronica(id)
 
             if (resultBuscarID.status) {
-                let validar = await validarDados(doencaCronica)
+                let validar = await validarDadosDoencasCronicas(doencaCronica)
 
                 if (validar)
                     return validar
