@@ -33,6 +33,15 @@ app.use('/v1/healthSystem/medtime/contato_emergencia', cors(), contatoEmergencia
 const tipoIntervaloRouter = require('./routes/tipo_intervalo.router.js')
 app.use('/v1/healthSystem/medtime/tipo_intervalo', cors(), tipoIntervaloRouter)
 
+const tipoDosagemRouter = require('./routes/tipo_dosagem.router.js')
+app.use('/v1/healthSystem/medtime/tipo_dosagem', cors(), tipoDosagemRouter)
+
+const unidadeMedidaRouter = require('./routes/unidade_medida.router.js')
+app.use('/v1/healthSystem/medtime/unidade_medida', cors(), unidadeMedidaRouter)
+
+const medicamentoRouter = require('./routes/medicamento.router.js')
+app.use('/v1/healthSystem/medtime/medicamento', cors(), medicamentoRouter)
+
 // FAZER O START DA API
 app.listen(8080, function() {
     console.log('API aguardando novas requisições...')

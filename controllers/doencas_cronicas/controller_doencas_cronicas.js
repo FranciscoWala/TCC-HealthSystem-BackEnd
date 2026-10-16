@@ -14,12 +14,11 @@ const doencaCronicaDAO = require('../../models/DAO/doencas_cronicas/doenca_croni
 // IMPORT DO SCHEMAS DE VALIDAÇÃO
 const validarDados = require('../../utils/validarDados.js')
 const doencaCronicasSchema = require('../../schemas/doencaCronicaSchema.js')
-const idSchema = require('../../schemas/idSchema.js')
 
-const validarDadosDoencasCronicas = async function (doencaCronica) {
+const validarDadosDoencasCronicas = function (doencaCronica) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
-    return validarDados(doencaCronicasSchema, doencaCronica, customMessages)
+    return validarDados.validarDados(doencaCronicasSchema, doencaCronica, customMessages)
 }
 
 const inserirNovaDoencaCronica = async function (doencaCronica, contentType) {
@@ -27,7 +26,7 @@ const inserirNovaDoencaCronica = async function (doencaCronica, contentType) {
 
     try {
         if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
-            let validar = await validarDadosDoencasCronicas(doencaCronica)
+            let validar = validarDadosDoencasCronicas(doencaCronica)
 
             if (validar)
                 return validar
@@ -116,11 +115,10 @@ const buscarDoencaCronica = async function (id) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
-        const { error } = idSchema.validate(id)
+        let validarID = validarDados.validarIDs(id, customMessages)
 
-        if (error) {
-            customMessages.ERROR_BAD_REQUEST.field = error.details[0].message
-            return customMessages.ERROR_BAD_REQUEST
+        if (validarID) {
+            return validarID
         } else {
             let result = await doencaCronicaDAO.selectByIdDoencasCronicas(id)
 

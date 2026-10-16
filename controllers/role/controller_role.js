@@ -14,12 +14,11 @@ const roleDAO = require('../../models/DAO/role/role.js')
 // IMPORT DO SCHEMAS DE VALIDAÇÃO
 const validarDados = require('../../utils/validarDados.js')
 const roleSchema = require('../../schemas/roleSchemas.js')
-const idSchema = require('../../schemas/idSchema.js')
 
-const validarDadosRole = async function (role) {
+const validarDadosRole = function (role) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
-    return validarDados(roleSchema, role, customMessages)
+    return validarDados.validarDados(roleSchema, role, customMessages)
 }
 
 const inserirNovaRole = async function (role, contentType) {
@@ -27,7 +26,7 @@ const inserirNovaRole = async function (role, contentType) {
 
     try {
         if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
-            let validar = await validarDadosRole(role)
+            let validar = validarDadosRole(role)
 
             if (validar)
                 return validar
@@ -116,11 +115,10 @@ const buscarRole = async function (id) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
-        const { error } = idSchema.validate(id)
+        let validarID = validarDados.validarIDs(id, customMessages)
 
-        if (error) {
-            customMessages.ERROR_BAD_REQUEST.field = error.details[0].message
-            return customMessages.ERROR_BAD_REQUEST
+        if (validarID) {
+            return validarID
         } else {
             let result = await roleDAO.selectByIdRole(id)
 

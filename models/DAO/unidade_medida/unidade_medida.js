@@ -18,9 +18,11 @@ const knexConection = knex(knexDataBaseConfig.development)
 const insertUnidadeMedida = async function (unidadeMedida) {
     try {
         let sql = `insert into tbl_unidade_medida (
-            unidade_medida
+            unidade_medida,
+            sigla
         ) values (
-            '${unidadeMedida.unidade_medida}' 
+            '${unidadeMedida.unidade_medida}',
+            '${unidadeMedida.sigla}'
         );`
 
         let result = await knexConection.raw(sql)
@@ -37,7 +39,8 @@ const insertUnidadeMedida = async function (unidadeMedida) {
 const updateUnidadeMedida = async function (unidadeMedida) {
     try {
         let sql = `update tbl_unidade_medida set
-                        unidade_medida = '${unidadeMedida.unidade_medida}'
+                        unidade_medida = '${unidadeMedida.unidade_medida}',
+                        sigla = '${unidadeMedida.sigla}'
                     where id = ${unidadeMedida.id};`
 
         let result = await knexConection.raw(sql)

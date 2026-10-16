@@ -14,7 +14,7 @@ const medicamentoSchema = Joi.object({
     
     imagem: Joi.string()
             .max(255)
-            .required,
+            .required(),
 
     concentracao: Joi.number()
                     .min(0)

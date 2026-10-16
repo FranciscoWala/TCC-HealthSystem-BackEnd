@@ -14,12 +14,11 @@ const permissoesDAO = require('../../models/DAO/permissoes/permissoes.js')
 // IMPORT DO SCHEMAS DE VALIDAÇÃO
 const validarDados = require('../../utils/validarDados.js')
 const permissoesSchema = require('../../schemas/permissoesSchema.js')
-const idSchema = require('../../schemas/idSchema.js')
 
-const validarDadosPermissoes = async function (permissoes) {
+const validarDadosPermissoes = function (permissoes) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
-    return validarDados(permissoesSchema, permissoes, customMessages)
+    return validarDados.validarDados(permissoesSchema, permissoes, customMessages)
 }
 
 const inserirNovaPermissao = async function (permissoes, contentType) {
@@ -27,7 +26,7 @@ const inserirNovaPermissao = async function (permissoes, contentType) {
 
     try {
         if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
-            let validar = await validarDadosPermissoes(permissoes)
+            let validar = validarDadosPermissoes(permissoes)
 
             if (validar)
                 return validar
@@ -116,11 +115,10 @@ const buscarPermissao = async function (id) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
-        const { error } = idSchema.validate(id)
+        let validarID = validarDados.validarIDs(id, customMessages)
 
-        if (error) {
-            customMessages.ERROR_BAD_REQUEST.field = error.details[0].message
-            return customMessages.ERROR_BAD_REQUEST
+        if (validarID) {
+            return validarID
         } else {
             let result = await permissoesDAO.selectByIdPermissoes(id)
 

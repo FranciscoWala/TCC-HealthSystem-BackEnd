@@ -1,7 +1,7 @@
 /*************************************************************************************************************************
- * Objetivo: Arquivo responsável pela validação, tratamento, manipulação de dados para realizar o CRUD da ROLE
+ * Objetivo: Arquivo responsável pela validação, tratamento, manipulação de dados para realizar o CRUD do TIPO DE INTERVALO
  * Autor: Kayque Brenno Ferreira Almeida
- * Data: 09/10/2026
+ * Data: 15/10/2026
  * Versão: 1.0
 **************************************************************************************************************************/
 
@@ -14,12 +14,11 @@ const tipoIntervaloDAO = require('../../models/DAO/tipo_intervalo/tipo_intervalo
 // IMPORT DO SCHEMAS DE VALIDAÇÃO
 const validarDados = require('../../utils/validarDados.js')
 const tipoIntervaloSchema = require('../../schemas/tipoIntervaloSchema.js')
-const idSchema = require('../../schemas/idSchema.js')
 
-const validarDadosTipoIntervalo = async function (tipoIntervalo) {
+const validarDadosTipoIntervalo = function (tipoIntervalo) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
-    return validarDados(tipoIntervaloSchema, tipoIntervalo, customMessages)
+    return validarDados.validarDados(tipoIntervaloSchema, tipoIntervalo, customMessages)
 }
 
 const inserirNovoTipoIntervalo = async function (tipoIntervalo, contentType) {
@@ -27,7 +26,7 @@ const inserirNovoTipoIntervalo = async function (tipoIntervalo, contentType) {
 
     try {
         if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
-            let validar = await validarDadosTipoIntervalo(tipoIntervalo)
+            let validar = validarDadosTipoIntervalo(tipoIntervalo)
 
             if (validar)
                 return validar
@@ -116,11 +115,10 @@ const buscarTipoIntervalo = async function (id) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
-        const { error } = idSchema.validate(id)
+        let validarID = validarDados.validarIDs(id, customMessages)
 
-        if (error) {
-            customMessages.ERROR_BAD_REQUEST.field = error.details[0].message
-            return customMessages.ERROR_BAD_REQUEST
+        if (validarID) {
+            return validarID
         } else {
             let result = await tipoIntervaloDAO.selectByIdTipoIntervalo(id)
 

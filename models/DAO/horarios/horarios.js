@@ -84,6 +84,39 @@ const selectByIdHorario = async function (id) {
     }
 }
 
+const selectByIdHorarioCompleto = async function (id) {
+    try {
+        let sql = `
+            select
+                horario.id,
+                horario.horario,
+                medicamentos.nome as nome_medicamento,
+                medicamentos.concentracao,
+                unidade_medida.sigla as unidade_concentracao,
+                tipo_dosagem.tipo_dosagem
+            from tbl_horarios as horario
+            inner join tbl_receita_medica as receita_medica
+                on horario.id_receita_medica = receita_medica.id
+            inner join tbl_medicamentos as medicamentos
+                on receita_medica.id_medicamento = medicamentos.id
+            inner join tbl_unidade_medida as unidade_medida
+                on medicamentos.id_unidade_medida_embalagem = unidade_medida.id
+            inner join tbl_tipo_dosagem as tipo_dosagem
+                on medicamentos.id_tipo_dosagem = tipo_dosagem.id
+            where horario.id = ${id};
+        `
+
+        let result = await knexConection.raw(sql)
+
+        if (Array.isArray(result))
+            return result[0]
+        else
+            return false
+    } catch (error) {
+        return false
+    }
+}
+
 const deleteHorario = async function (id) {
     try {
         let sql = `delete from tbl_horarios where id = ${id};`
@@ -104,5 +137,6 @@ module.exports = {
     updateHorario,
     selectAllHorarios,
     selectByIdHorario,
+    selectByIdHorarioCompleto,
     deleteHorario
 }

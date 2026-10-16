@@ -1,5 +1,5 @@
 /**********************************************************************************************************************************
- * Objetivo: Arquivo responsável pela validação, tratamento, manipulação de dados para realizar o CRUD de CONTAOS DE EMERGÊNCIA,
+ * Objetivo: Arquivo responsável pela validação, tratamento, manipulação de dados para realizar o CRUD de CONTATOS DE EMERGÊNCIA,
  *  e também fazer a integração entre a API e a model
  * Autor: Kayque Brenno Ferreira Almeida
  * Data: 15/10/2026
@@ -16,7 +16,7 @@ const contatoEmergenciaDAO = require('../../models/DAO/contato_de_emergencia/con
 const validarDados = require('../../utils/validarDados.js')
 const contatoEmergenciaSchema = require('../../schemas/contatoEmergenciaSchema.js')
 
-const validarDadosContatosEmergencia = async function (contatoEmergencia) {
+const validarDadosContatosEmergencia = function (contatoEmergencia) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     return validarDados.validarDados(contatoEmergenciaSchema, contatoEmergencia, customMessages)
@@ -27,7 +27,7 @@ const inserirNovoContatoEmergencia = async function (contatoEmergencia, contentT
 
     try {
         if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
-            let validar = await validarDadosContatosEmergencia(contatoEmergencia)
+            let validar = validarDadosContatosEmergencia(contatoEmergencia)
 
             if (validar)
                 return validar
