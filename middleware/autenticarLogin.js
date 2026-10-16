@@ -36,20 +36,10 @@ async function autenticarLogin(request, response) {
                 )
 
 
-        // Converte o retorno de permissões de string para um array        
-        if (
-            usuario[0] && usuario[0].permissoes
-            && typeof usuario[0].permissoes === "string"
-        ) {
-            usuario[0].permissoes = usuario[0].permissoes
-                .split(',')
-                .map(permissao => permissao.trim());
-        }
 
         let payload = {
             id: usuario[0].id,
-            role: usuario[0].role,
-            permissoes: usuario[0].permissoes
+            role: usuario[0].role
         }
 
         let jwt = await authenticate.createJWT(payload)
