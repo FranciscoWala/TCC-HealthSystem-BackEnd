@@ -5,19 +5,19 @@ function verficarPermissao(permissao) {
     return async function (request, response, next) {
 
         try {
-            const roleUsuario = request.body.usuario.role
+            const roleUsuario = request.user.role
 
             const possuiPermissao = await temPermissao(roleUsuario, permissao)
 
             if (!possuiPermissao) {
-                response.status(401).json(
+                return response.status(403).json(
                     {
                         message: "USUÁRIO NÃO POSSUI PERMISSÃO"
                     }
                 )
             }
 
-            next()
+            return next()
         } catch (error) {
             console.log(error)
             response.status(500).json({ message: "Erro interno no servidor" })

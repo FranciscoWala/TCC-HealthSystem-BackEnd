@@ -34,6 +34,7 @@ app.post("/v1/teste/usuario/login", async (request, response) => {
 
 app.post(
     "/v1/teste/medicamento", 
+    auth.verificarToken,
     authorization.verficarPermissao("gerenciar pessoas"), 
     async (request, response) => {
         console.log(request.body);
