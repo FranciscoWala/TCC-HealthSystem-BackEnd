@@ -53,6 +53,18 @@ router.put('/:id', bodyParserJSON, async function (request, response) {
     response.json(result)
 })
 
+// Confirmar ingestão de um medicamento
+router.patch('/confirmar_ingestao/:id', bodyParserJSON, async function (request, response) {
+    let idHorario = request.params.id
+//    let idUsuario = request.user.id
+    let idUsuario = request.body.id_usuario
+
+    let result = await controllerHistoricoMedicamento.confirmarIngestaoMedicamento(idHorario, idUsuario)
+
+    response.status(result.status_code)
+    response.json(result)
+})
+
 router.delete('/:id', async function (request, response) {
     let id = request.params.id
 

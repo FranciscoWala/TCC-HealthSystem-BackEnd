@@ -1,4 +1,3 @@
-
 /*******************************************************************************************
  * Objetivo: Regras de negócio e chamada ao DAO
  * Data: 22/10/2026
@@ -118,6 +117,31 @@ const buscarHistoricoMedicamentoService = async function (id) {
     }
 }
 
+const buscarHistoricoPorIdHorarioService = async function (idHorario) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+
+    try {
+        let validarID = validarDados.validarIDs(idHorario, customMessages)
+        if (validarID)
+            return validarID
+
+        let result = await historicoMedicamentoDAO.selectByIdHorarioHistoricoMedicamento(idHorario)
+
+        if (result) {
+            customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
+            customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
+            customMessages.DEFAULT_MESSAGE.response.historico = result
+
+            return customMessages.DEFAULT_MESSAGE
+        } else {
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
+        }
+    } catch (error) {
+        console.log(error)
+        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
+    }
+}
+
 const excluirHistoricoMedicamentoService = async function (id) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
@@ -140,5 +164,6 @@ module.exports = {
     atualizarHistoricoMedicamentoService,
     listarHistoricoMedicamentoService,
     buscarHistoricoMedicamentoService,
+    buscarHistoricoPorIdHorarioService,
     excluirHistoricoMedicamentoService
 }

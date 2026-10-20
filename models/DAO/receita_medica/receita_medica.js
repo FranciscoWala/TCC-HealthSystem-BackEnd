@@ -140,7 +140,7 @@ async function deleteReceitaMedicaByID(id) {
     }
 }
 
-exports.modules = {
+module.exports = {
     insertReceitamedica,
     updateReceitaMedica,
     getReceitaMedicaByID,

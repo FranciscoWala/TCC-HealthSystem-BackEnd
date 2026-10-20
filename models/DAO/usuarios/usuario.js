@@ -90,23 +90,6 @@ const selectByIdUsuario = async function (id) {
     }
 }
 
-const selectUsuarioByEmail = async function(email){
-    try {
-        let sql = `select * from tbl_usuarios where email = ${email}`
-
-        let result = await knexConection.raw(sql)
-
-        if(Array.isArray(result))
-            return result[0]
-        else
-            return false
-
-    } catch (error) {
-        console.log(error)
-        return false
-    }
-}
-
 const selectDadosUsuarios = async function () {
     try {
         let sql = `select * from vw_dados_usuarios;`
@@ -142,7 +125,6 @@ module.exports = {
     updateUsuario,
     selectAllUsuarios,
     selectByIdUsuario,
-    selectUsuarioByEmail,
     selectDadosUsuarios,
     deleteUsuario
 }

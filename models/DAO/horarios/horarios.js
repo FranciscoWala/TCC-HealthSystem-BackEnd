@@ -91,26 +91,7 @@ const selectByIdHorario = async function (id) {
         else
             return false
     } catch (error) {
-        return false
-    }
-}
-
-const selectByIdHorarioCompleto = async function (id) {
-    try {
-        let sql = `call procHorario(?, ?, ?, ?)`
-
-        let result = await knexConection.raw(sql, [
-            'SELECT_DADOS_HISTORICO',
-            null,
-            null,
-            id
-        ])
-
-        if (Array.isArray(result[0][0]))
-            return result[0][0]
-        else
-            return false
-    } catch (error) {
+        console.log('ERRO SELECT_BY_ID HORARIO:', error)
         return false
     }
 }
@@ -162,7 +143,6 @@ module.exports = {
     updateHorario,
     selectAllHorarios,
     selectByIdHorario,
-    selectByIdHorarioCompleto,
     selectHorariosNaoTomados,
     deleteHorario
 }

@@ -124,7 +124,7 @@ async function deleteDoencaCronicaUsuarioByID(id) {
     }
 }
 
-exports.modules = {
+module.exports = {
     insertDoencaCronicaUsuario,
     updateDoencaCronicaUsuario,
     selectDoencaCronicaUsuario,

@@ -72,19 +72,6 @@ const buscarHorario = async function (id) {
     }
 }
 
-// Buscar dados completos do horário
-const buscarHorarioCompleto = async function (id) {
-    let customMessages = JSON.parse(JSON.stringify(configMessages))
-
-    try {
-        let result = await horarioService.buscarHorarioCompletoService(id)
-
-        return result
-    } catch (error) {
-        return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
-    }
-}
-
 // Listar horários de medicamentos não tomados
 const listarHorariosNaoTomados = async function () {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
@@ -116,7 +103,6 @@ module.exports = {
     atualizarHorario,
     listarHorario,
     buscarHorario,
-    buscarHorarioCompleto,
     listarHorariosNaoTomados,
     excluirHorario
 }

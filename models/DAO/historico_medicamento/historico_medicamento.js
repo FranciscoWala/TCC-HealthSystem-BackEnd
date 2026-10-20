@@ -130,6 +130,35 @@ async function getHistoricoMedicamentoByID(id) {
     }
 }
 
+const selectByIdHorarioHistoricoMedicamento = async function (idHorario) {
+    try {
+        let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
+
+        let result = await knexConection.raw(sql, [
+            'SELECT_BY_ID_HORARIO',
+            null,
+            null,
+            null,
+            idHorario,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        ])
+
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
+        else
+            return false
+
+    } catch (error) {
+        return false
+    }
+}
+
 async function deleteHistoricoMedicamentoByID(id) {
     try {
         let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
@@ -165,5 +194,6 @@ module.exports = {
     updateHistoricoMedicamento,
     getHistoricoMedicamento,
     getHistoricoMedicamentoByID,
+    selectByIdHorarioHistoricoMedicamento,
     deleteHistoricoMedicamentoByID
 }

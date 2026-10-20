@@ -133,7 +133,7 @@ async function deleteUsuarioRoleByID(id) {
     }
 }
 
-exports.modules = {
+module.exports = {
     insertUsuarioRole,
     updateUsuarioRole,
     selectUsuarioRole,

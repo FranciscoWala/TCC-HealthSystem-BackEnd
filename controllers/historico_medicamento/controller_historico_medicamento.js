@@ -111,6 +111,72 @@ const registrarMedicamentosNaoTomados = async function () {
     }
 }
 
+const confirmarIngestaoMedicamento = async function (idHorario, idUsuario) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+
+    try {
+        let horario = await horarioService.buscarHorarioService(idHorario)
+
+        if (!horario.status)
+            return horario
+
+        let dadosHorario = horario.response.horarios[0]
+
+        if (!dadosHorario)
+            return customMessages.ERROR_NOT_FOUND
+
+        // O usuário só pode confirmar o próprio medicamento
+        if (Number(dadosHorario.id_usuario) != Number(idUsuario))
+            return customMessages.ERROR_BAD_REQUEST
+
+        let historico = await historicoMedicamentoService.buscarHistoricoPorIdHorarioService(idHorario)
+
+        if (!historico.status)
+            return historico
+
+        let registros = historico.response.historico
+
+        // Impede confirmação duplicada
+        if (registros.length > 0 && registros[0].status_ingestao != 'NAO_TOMADO')
+            return customMessages.ERROR_BAD_REQUEST
+
+        let horaAtual = new Date()
+        let horarioProgramado = new Date(dadosHorario.horario)
+
+        if (horaAtual < horarioProgramado)
+            return customMessages.ERROR_BAD_REQUEST
+
+        let diferencaMinutos = (horaAtual.getTime() - horarioProgramado.getTime()) / 60000
+
+        let statusIngestao = diferencaMinutos > 30 ? 'TOMADO_ATRASADO' : 'TOMADO'
+
+        let dados = {
+            hora_ingestao: horaAtual,
+            id_paciente: dadosHorario.id_usuario,
+            dosagem_ingerida: dadosHorario.dosagem,
+            id_horario: idHorario,
+            status_ingestao: statusIngestao,
+            horario_programado: dadosHorario.horario,
+            nome_medicamento: dadosHorario.nome_medicamento,
+            concentracao: dadosHorario.concentracao,
+            unidade_concentracao: dadosHorario.unidade_concentracao,
+            tipo_dosagem: dadosHorario.tipo_dosagem
+        }
+
+        let result
+
+        if (registros.length > 0)
+            result = await historicoMedicamentoService.atualizarHistoricoMedicamentoService(dados, registros[0].id)
+        else
+            result = await historicoMedicamentoService.inserirHistoricoMedicamentoService(dados)
+
+        return result
+    } catch (error) {
+        console.log(error)
+        return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
+    }
+}
+
 const excluirHistoricoMedicamento = async function (id) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
@@ -126,5 +192,6 @@ module.exports = {
     listarHistoricoMedicamento,
     buscarHistoricoMedicamento,
     registrarMedicamentosNaoTomados,
+    confirmarIngestaoMedicamento,
     excluirHistoricoMedicamento
 }

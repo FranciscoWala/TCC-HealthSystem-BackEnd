@@ -92,7 +92,7 @@ async function deleteContatoEmergenciaUsuarioByID(id) {
         return false
 }
 
-exports.modules = {
+module.exports = {
     insertContatoEmergenciaUsuario,
     updateContatoEmergenciaUsuario,
     selectContatoEmergenciaUsuario,
