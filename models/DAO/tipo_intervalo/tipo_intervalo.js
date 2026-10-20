@@ -17,32 +17,27 @@ const knexConection = knex(knexDataBaseConfig.development)
 
 const insertTipoIntervalo = async function (tipoIntervalo) {
     try {
-        let sql = `insert into tbl_tipo_intervalo (
-            tipo_intervalo
-        ) values (
-            '${tipoIntervalo.tipo_intervalo}' 
-        );`
+        let sql = `call procTipoIntervalo(?, ?, ?);`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, ['INSERT', tipoIntervalo.tipo_intervalo, null])
 
-        if (result)
-            return result[0].insertId
+        if (result && result[0][0][0].id)
+            return result[0][0][0].id
         else
             return false
     } catch (error) {
+        console.log(error)
         return false
     }
 }
 
 const updateTipoIntervalo = async function (tipoIntervalo) {
     try {
-        let sql = `update tbl_tipo_intervalo set
-                        tipo_intervalo = '${tipoIntervalo.tipo_intervalo}'
-                    where id = ${tipoIntervalo.id};`
+        let sql = `call procTipoIntervalo(?, ?, ?);`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, ['UPDATE', tipoIntervalo.tipo_intervalo, tipoIntervalo.id])
 
-        if (result)
+        if (result && result[0][0][0].affectedRows > 0)
             return true
         else
             return false
@@ -53,12 +48,12 @@ const updateTipoIntervalo = async function (tipoIntervalo) {
 
 const selectAllTipoIntervalo = async function () {
     try {
-        let sql = `select * from tbl_tipo_intervalo order by id desc;`
+        let sql = `call procTipoIntervalo(?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, ['SELECT_ALL', null, null])
 
-        if (Array.isArray(result))
-            return result[0]
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -68,12 +63,12 @@ const selectAllTipoIntervalo = async function () {
 
 const selectByIdTipoIntervalo = async function (id) {
     try {
-        let sql = `select * from tbl_tipo_intervalo where id = ${id};`
+        let sql = `call procTipoIntervalo(?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, ['SELECT_BY_ID', null, id])
 
-        if (Array.isArray(result))
-            return result[0]
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -83,15 +78,16 @@ const selectByIdTipoIntervalo = async function (id) {
 
 const deleteTipoIntervalo = async function (id) {
     try {
-        let sql = `delete from tbl_tipo_intervalo where id = ${id}`
+        let sql = `call procTipoIntervalo(?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, ['DELETE', null, id])
 
         if (result)
             return true
         else
             return false
     } catch (error) {
+        
         return false
     }
 }

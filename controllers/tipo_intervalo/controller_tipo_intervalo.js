@@ -1,51 +1,22 @@
 /*************************************************************************************************************************
  * Objetivo: Arquivo responsável pela validação, tratamento, manipulação de dados para realizar o CRUD do TIPO DE INTERVALO
  * Autor: Kayque Brenno Ferreira Almeida
- * Data: 15/10/2026
- * Versão: 1.0
+ * Data: 20/10/2026
+ * Versão: 2.0
 **************************************************************************************************************************/
 
 // IMPORT DO ARQUIVO DE CONFIGURAÇÕES DE MENSAGENS DO PROJETO
 const configMessages = require('../../utils/messages/configMessages.js')
 
-// IMPORT DA DAO
-const tipoIntervaloDAO = require('../../models/DAO/tipo_intervalo/tipo_intervalo.js')
-
-// IMPORT DO SCHEMAS DE VALIDAÇÃO
-const validarDados = require('../../utils/validar_dados/validarDados.js')
-const tipoIntervaloSchema = require('../../schemas/tipoIntervaloSchema.js')
-
-const validarDadosTipoIntervalo = function (tipoIntervalo) {
-    let customMessages = JSON.parse(JSON.stringify(configMessages))
-
-    return validarDados.validarDados(tipoIntervaloSchema, tipoIntervalo, customMessages)
-}
+// IMPORT DA SERVICE
+const tipoIntervaloService = require('../../services/tipo_intervalo/service_tipo_intervalo.js')
 
 const inserirNovoTipoIntervalo = async function (tipoIntervalo, contentType) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
-
     try {
-        if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
-            let validar = validarDadosTipoIntervalo(tipoIntervalo)
-
-            if (validar)
-                return validar
-            else {
-                let result = await tipoIntervaloDAO.insertTipoIntervalo(tipoIntervalo)
-
-                if (result) {
-                    tipoIntervalo.id = result
-
-                    customMessages.DEFAULT_MESSAGE.status       = customMessages.SUCCESS_CREATED_ITEM.status
-                    customMessages.DEFAULT_MESSAGE.status_code  = customMessages.SUCCESS_CREATED_ITEM.status_code
-                    customMessages.DEFAULT_MESSAGE.message      = customMessages.SUCCESS_CREATED_ITEM.message
-                    customMessages.DEFAULT_MESSAGE.response     = tipoIntervalo
-
-                    return customMessages.DEFAULT_MESSAGE
-                } else
-                    return customMessages.ERROR_INTERNAL_SERVER_MODEL
-            }
-        } else
+        if (String(contentType).toUpperCase() == 'APPLICATION/JSON')
+            return await tipoIntervaloService.inserirTipoIntervaloService(tipoIntervalo)
+        else
             return customMessages.ERROR_CONTENT_TYPE
     } catch (error) {
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
@@ -54,34 +25,10 @@ const inserirNovoTipoIntervalo = async function (tipoIntervalo, contentType) {
 
 const atualizarTipoIntervalo = async function (tipoIntervalo, id, contentType) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
-
     try {
-        if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
-            let resultBuscarID = await buscarTipoIntervalo(id)
-
-            if (resultBuscarID.status) {
-                let validar = await validarDadosTipoIntervalo(tipoIntervalo)
-
-                if (validar)
-                    return validar
-                else {
-                    tipoIntervalo.id = Number(id)
-
-                    let result = await tipoIntervaloDAO.updateTipoIntervalo(tipoIntervalo)
-
-                    if (result) {
-                        customMessages.DEFAULT_MESSAGE.status       = customMessages.SUCCESS_UPDATE_ITEM.status
-                        customMessages.DEFAULT_MESSAGE.status_code  = customMessages.SUCCESS_UPDATE_ITEM.status_code
-                        customMessages.DEFAULT_MESSAGE.message      = customMessages.SUCCESS_UPDATE_ITEM.message
-                        customMessages.DEFAULT_MESSAGE.response     = tipoIntervalo
-
-                        return customMessages.DEFAULT_MESSAGE
-                    } else
-                        return customMessages.ERROR_INTERNAL_SERVER_MODEL
-                }
-            } else
-                return resultBuscarID
-        } else
+        if (String(contentType).toUpperCase() == 'APPLICATION/JSON')
+            return await tipoIntervaloService.atualizarTipoIntervaloService(tipoIntervalo, id)
+        else
             return customMessages.ERROR_CONTENT_TYPE
     } catch (error) {
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
@@ -90,22 +37,8 @@ const atualizarTipoIntervalo = async function (tipoIntervalo, id, contentType) {
 
 const listarTipoIntervalo = async function () {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
-
     try {
-        let result = await tipoIntervaloDAO.selectAllTipoIntervalo()
-
-        if (result) {
-            if (result.length > 0) {
-                customMessages.DEFAULT_MESSAGE.status                   = customMessages.SUCCESS_RESPONSE.status
-                customMessages.DEFAULT_MESSAGE.status_code              = customMessages.SUCCESS_RESPONSE.status_code
-                customMessages.DEFAULT_MESSAGE.response.count           = result.length
-                customMessages.DEFAULT_MESSAGE.response.tipo_intervalo  = result
-
-                return customMessages.DEFAULT_MESSAGE
-            } else
-                return customMessages.ERROR_NOT_FOUND
-        } else
-            return customMessages.ERROR_INTERNAL_SERVER_MODEL
+        return await tipoIntervaloService.listarTipoIntervaloService()
     } catch (error) {
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
     }
@@ -113,27 +46,8 @@ const listarTipoIntervalo = async function () {
 
 const buscarTipoIntervalo = async function (id) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
-
     try {
-        let validarID = validarDados.validarIDs(id, customMessages)
-
-        if (validarID) {
-            return validarID
-        } else {
-            let result = await tipoIntervaloDAO.selectByIdTipoIntervalo(id)
-
-            if (result) {
-                if (result.length > 0) {
-                    customMessages.DEFAULT_MESSAGE.status                   = customMessages.SUCCESS_RESPONSE.status
-                    customMessages.DEFAULT_MESSAGE.status_code              = customMessages.SUCCESS_RESPONSE.status_code
-                    customMessages.DEFAULT_MESSAGE.response.tipo_intervalo  = result
-
-                    return customMessages.DEFAULT_MESSAGE
-                } else
-                    return customMessages.ERROR_NOT_FOUND
-            } else
-                return customMessages.ERROR_INTERNAL_SERVER_MODEL
-        }
+        return await tipoIntervaloService.buscarTipoIntervaloService(id)
     } catch (error) {
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
     }
@@ -141,19 +55,8 @@ const buscarTipoIntervalo = async function (id) {
 
 const excluirTipoIntervalo = async function (id) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
-
     try {
-        let resultBuscarID = await buscarTipoIntervalo(id)
-
-        if (resultBuscarID.status) {
-            let result = await tipoIntervaloDAO.deleteTipoIntervalo(id)
-
-            if (result)
-                return customMessages.SUCCESS_DELETE_ITEM
-            else
-                return customMessages.ERROR_INTERNAL_SERVER_MODEL
-        } else
-            return resultBuscarID
+        return await tipoIntervaloService.excluirTipoIntervaloService(id)
     } catch (error) {
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
     }

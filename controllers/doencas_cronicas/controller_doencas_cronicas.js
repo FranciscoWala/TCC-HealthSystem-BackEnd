@@ -1,51 +1,22 @@
 /*************************************************************************************************************************
  * Objetivo: Arquivo responsável pela validação, tratamento, manipulação de dados para realizar o CRUD de DOENÇAS CRONICAS
  * Autor: Kayque Brenno Ferreira Almeida
- * Data: 09/10/2026
- * Versão: 1.0
+ * Data: 20/10/2026
+ * Versão: 2.0
 **************************************************************************************************************************/
 
 // IMPORT DO ARQUIVO DE CONFIGURAÇÕES DE MENSAGENS DO PROJETO
 const configMessages = require('../../utils/messages/configMessages.js')
 
-// IMPORT DA DAO
-const doencaCronicaDAO = require('../../models/DAO/doencas_cronicas/doenca_cronica.js')
-
-// IMPORT DO SCHEMAS DE VALIDAÇÃO
-const validarDados = require('../../utils/validar_dados/validarDados.js')
-const doencaCronicasSchema = require('../../schemas/doencaCronicaSchema.js')
-
-const validarDadosDoencasCronicas = function (doencaCronica) {
-    let customMessages = JSON.parse(JSON.stringify(configMessages))
-
-    return validarDados.validarDados(doencaCronicasSchema, doencaCronica, customMessages)
-}
+// IMPORT DA SERVICE
+const doencaCronicaService = require('../../services/doencas_cronicas/service_doencas_cronicas.js')
 
 const inserirNovaDoencaCronica = async function (doencaCronica, contentType) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
-
     try {
-        if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
-            let validar = validarDadosDoencasCronicas(doencaCronica)
-
-            if (validar)
-                return validar
-            else {
-                let result = await doencaCronicaDAO.insertDoencaCronica(doencaCronica)
-
-                if (result) {
-                    doencaCronica.id = result
-
-                    customMessages.DEFAULT_MESSAGE.status       = customMessages.SUCCESS_CREATED_ITEM.status
-                    customMessages.DEFAULT_MESSAGE.status_code  = customMessages.SUCCESS_CREATED_ITEM.status_code
-                    customMessages.DEFAULT_MESSAGE.message      = customMessages.SUCCESS_CREATED_ITEM.message
-                    customMessages.DEFAULT_MESSAGE.response     = doencaCronica
-
-                    return customMessages.DEFAULT_MESSAGE
-                } else
-                    return customMessages.ERROR_INTERNAL_SERVER_MODEL
-            }
-        } else
+        if (String(contentType).toUpperCase() == 'APPLICATION/JSON')
+            return await doencaCronicaService.inserirDoencaCronicaService(doencaCronica)
+        else
             return customMessages.ERROR_CONTENT_TYPE
     } catch (error) {
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
@@ -54,34 +25,10 @@ const inserirNovaDoencaCronica = async function (doencaCronica, contentType) {
 
 const atualizarDoencaCronica = async function (doencaCronica, id, contentType) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
-
     try {
-        if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
-            let resultBuscarID = await buscarDoencaCronica(id)
-
-            if (resultBuscarID.status) {
-                let validar = await validarDadosDoencasCronicas(doencaCronica)
-
-                if (validar)
-                    return validar
-                else {
-                    doencaCronica.id = Number(id)
-
-                    let result = await doencaCronicaDAO.updateDoencaCronica(doencaCronica)
-
-                    if (result) {
-                        customMessages.DEFAULT_MESSAGE.status       = customMessages.SUCCESS_UPDATE_ITEM.status
-                        customMessages.DEFAULT_MESSAGE.status_code  = customMessages.SUCCESS_UPDATE_ITEM.status_code
-                        customMessages.DEFAULT_MESSAGE.message      = customMessages.SUCCESS_UPDATE_ITEM.message
-                        customMessages.DEFAULT_MESSAGE.response     = doencaCronica
-
-                        return customMessages.DEFAULT_MESSAGE
-                    } else
-                        return customMessages.ERROR_INTERNAL_SERVER_MODEL
-                }
-            } else
-                return resultBuscarID
-        } else
+        if (String(contentType).toUpperCase() == 'APPLICATION/JSON')
+            return await doencaCronicaService.atualizarDoencaCronicaService(doencaCronica, id)
+        else
             return customMessages.ERROR_CONTENT_TYPE
     } catch (error) {
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
@@ -90,22 +37,8 @@ const atualizarDoencaCronica = async function (doencaCronica, id, contentType) {
 
 const listarDoencaCronica = async function () {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
-
     try {
-        let result = await doencaCronicaDAO.selectAllDoencasCronicas()
-
-        if (result) {
-            if (result.length > 0) {
-                customMessages.DEFAULT_MESSAGE.status                       = customMessages.SUCCESS_RESPONSE.status
-                customMessages.DEFAULT_MESSAGE.status_code                  = customMessages.SUCCESS_RESPONSE.status_code
-                customMessages.DEFAULT_MESSAGE.response.count               = result.length
-                customMessages.DEFAULT_MESSAGE.response.doencas_cronicas    = result
-
-                return customMessages.DEFAULT_MESSAGE
-            } else
-                return customMessages.ERROR_NOT_FOUND
-        } else
-            return customMessages.ERROR_INTERNAL_SERVER_MODEL
+        return await doencaCronicaService.listarDoencaCronicaService()
     } catch (error) {
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
     }
@@ -113,27 +46,8 @@ const listarDoencaCronica = async function () {
 
 const buscarDoencaCronica = async function (id) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
-
     try {
-        let validarID = validarDados.validarIDs(id, customMessages)
-
-        if (validarID) {
-            return validarID
-        } else {
-            let result = await doencaCronicaDAO.selectByIdDoencasCronicas(id)
-
-            if (result) {
-                if (result.length > 0) {
-                    customMessages.DEFAULT_MESSAGE.status                       = customMessages.SUCCESS_RESPONSE.status
-                    customMessages.DEFAULT_MESSAGE.status_code                  = customMessages.SUCCESS_RESPONSE.status_code
-                    customMessages.DEFAULT_MESSAGE.response.doencas_cronicas    = result
-
-                    return customMessages.DEFAULT_MESSAGE
-                } else
-                    return customMessages.ERROR_NOT_FOUND
-            } else
-                return customMessages.ERROR_INTERNAL_SERVER_MODEL
-        }
+        return await doencaCronicaService.buscarDoencaCronicaService(id)
     } catch (error) {
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
     }
@@ -141,19 +55,8 @@ const buscarDoencaCronica = async function (id) {
 
 const excluirDoencaCronica = async function (id) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
-
     try {
-        let resultBuscarID = await buscarDoencaCronica(id)
-
-        if (resultBuscarID.status) {
-            let result = await doencaCronicaDAO.deleteDoencaCronica(id)
-
-            if (result)
-                return customMessages.SUCCESS_DELETE_ITEM
-            else
-                return customMessages.ERROR_INTERNAL_SERVER_MODEL
-        } else
-            return resultBuscarID
+        return await doencaCronicaService.excluirDoencaCronicaService(id)
     } catch (error) {
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
     }

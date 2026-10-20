@@ -5,110 +5,129 @@
  * Versão: 1.0
 ********************************************************************************************/
 
+// IMPORT DO ARQUIVO DE CONFIGURAÇÕES DE MENSAGENS DO PROJETO
 const configMessages = require('../../utils/messages/configMessages.js')
+
+// IMPORT DA DAO
 const unidadeMedidaDAO = require('../../models/DAO/unidade_medida/unidade_medida.js')
+
+// IMPORT DO SCHEMA DE VALIDAÇÃO
 const unidadeMedidaSchema = require('../../schemas/unidadeMedidaSchema.js')
 const validarDados = require('../../utils/validar_dados/validarDados.js')
 
-const inserirUnidadeMedidaService = async function (dadosUnidade) {
+// Função para validar os dados
+const validarDadosUnidadeMedida = function (dados) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
+    return validarDados.validarDados(unidadeMedidaSchema, dados, customMessages)
+}
 
+// Inserir um novo registro
+const inserirUnidadeMedidaService = async function (dados) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let validar = validarDados.validarDados(unidadeMedidaSchema, dadosUnidade, customMessages)
+        let validacao = validarDadosUnidadeMedida(dados)
+        if (validacao)
+             return validacao
 
-        if (validar)
-            return validar
-        else {
-            let result = await unidadeMedidaDAO.insertUnidadeMedida(dadosUnidade)
-            if (result) {
-                dadosUnidade.id = result
-                return { status: true, data: dadosUnidade }
-            } else {
-                return false
-            }
-        }
+        let result = await unidadeMedidaDAO.insertUnidadeMedida(dados)
+        if (result) {
+            dados.id = result
+            customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
+            customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_CREATED_ITEM.status_code
+            customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_CREATED_ITEM.message
+            customMessages.DEFAULT_MESSAGE.response = dados
+            return customMessages.DEFAULT_MESSAGE
+        } else
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
     } catch (error) {
         return customMessages.ERROR_INTERNAL_SERVER_SERVICE
     }
 }
 
+// Atualizar um registro
+const atualizarUnidadeMedidaService = async function (dados, id) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+    try {
+        let buscarID = await buscarUnidadeMedidaService(id)
+        if (!buscarID.status) 
+            return buscarID
+
+        let validacao = validarDadosUnidadeMedida(dados)
+        if (validacao) 
+            return validacao
+
+        dados.id = Number(id)
+        let result = await unidadeMedidaDAO.updateUnidadeMedida(dados)
+        if (result) {
+            customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
+            customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
+            customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_UPDATE_ITEM.message
+            customMessages.DEFAULT_MESSAGE.response = dados
+            return customMessages.DEFAULT_MESSAGE
+        } else
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
+    } catch (error) {
+        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
+    }
+}
+
+// Listar registros
 const listarUnidadeMedidaService = async function () {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
-
     try {
-        let result = unidadeMedidaDAO.selectAllUnidadeMedida()
-
-        if (result && result.length > 0)
-            return result
-
-        return false
+        let result = await unidadeMedidaDAO.selectAllUnidadeMedida()
+        if (result) {
+            if (result.length > 0) {
+                customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
+                customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
+                customMessages.DEFAULT_MESSAGE.response.count = result.length
+                customMessages.DEFAULT_MESSAGE.response.unidade_medida = result
+                return customMessages.DEFAULT_MESSAGE
+            } else
+                return customMessages.ERROR_NOT_FOUND
+        } else
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
     } catch (error) {
         return customMessages.ERROR_INTERNAL_SERVER_SERVICE
     }
 }
 
+// Buscar um registro pelo ID
 const buscarUnidadeMedidaService = async function (id) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
-
     try {
-        let validarID = validarDados.validarIDs(id, customMessages)
+        let validacaoId = validarDados.validarIDs(id, customMessages)
+        if (validacaoId) return validacaoId
 
-        if (validarID)
-            return validarID
-
-        let result = unidadeMedidaDAO.selectByIdUnidadeMedida(id)
-
-        if (result && result.length > 0)
-            return result[0]
-
-        return false
+        let result = await unidadeMedidaDAO.selectByIdUnidadeMedida(id)
+        if (result) {
+            if (result.length > 0) {
+                customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
+                customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
+                customMessages.DEFAULT_MESSAGE.response.unidade_medida = result
+                return customMessages.DEFAULT_MESSAGE
+            } else
+                return customMessages.ERROR_NOT_FOUND
+        } else
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
     } catch (error) {
         return customMessages.ERROR_INTERNAL_SERVER_SERVICE
     }
 }
 
-const atualizarUnidadeMedidaService = async function (dadosUnidade, id) {
-    let customMessages = JSON.parse(JSON.stringify(configMessages))
-
-    try {
-        let validarID = validarDados.validarIDs(id, customMessages)
-
-        if (validarID)
-            return validarID
-        else {
-            let validar = validarDados.validarDados(unidadeMedidaSchema, dadosUnidade, customMessages)
-
-            if (validar)
-                return validar
-
-            dadosUnidade.id = Number(id)
-            let result = await unidadeMedidaDAO.updateUnidadeMedida(dadosUnidade)
-            if (result) {
-                return { status: true, data: dadosUnidade }
-            }
-
-            return false
-        }
-    } catch (error) {
-        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
-    }
-}
-
+// Excluir um registro
 const excluirUnidadeMedidaService = async function (id) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
-
     try {
-        let validarID = validarDados.validarIDs(id)
+        let buscarID = await buscarUnidadeMedidaService(id)
+        if (!buscarID.status) 
+            return buscarID
 
-        if (validarID)
-            return validarID
-
-        let result = unidadeMedidaDAO.deleteUnidadeMedida(id)
-
-        if (result)
-            return { status: true, data: dadosUnidade }
-
-        return false
+        let result = await unidadeMedidaDAO.deleteUnidadeMedida(id)
+        if (result) 
+            return customMessages.SUCCESS_DELETE_ITEM
+        else
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
     } catch (error) {
         return customMessages.ERROR_INTERNAL_SERVER_SERVICE
     }
@@ -116,8 +135,8 @@ const excluirUnidadeMedidaService = async function (id) {
 
 module.exports = {
     inserirUnidadeMedidaService,
+    atualizarUnidadeMedidaService,
     listarUnidadeMedidaService,
     buscarUnidadeMedidaService,
-    atualizarUnidadeMedidaService,
     excluirUnidadeMedidaService
 }
