@@ -1,5 +1,33 @@
 const rolePermissoesDAO = require('../model/DAO/role_permissoes/role_permissoes.js')
 
+function verficarPermissao(permissao) {
+
+    return async function (request, response, next) {
+
+        try {
+            const roleUsuario = request.body.usuario.role
+
+            const possuiPermissao = await temPermissao(roleUsuario, permissao)
+
+            if (!possuiPermissao) {
+                response.status(401).json(
+                    {
+                        message: "USUÁRIO NÃO POSSUI PERMISSÃO"
+                    }
+                )
+            }
+
+            next()
+        } catch (error) {
+            console.log(error)
+            response.status(500).json({ message: "Erro interno no servidor" })
+        }
+    }
+}
+
+
+
+
 
 
 async function temPermissao(roleUsuario, permissao) {
@@ -13,13 +41,13 @@ async function temPermissao(roleUsuario, permissao) {
 
     } catch (error) {
         console.log(error)
-        return error
+        return false
     }
 }
 
 
 async function buscarPermissoesByRole(usuarioRole) {
-    let permissoes = await rolePermissoesDAO.selectPermissoesByRole(usuarioRole)    
+    let permissoes = await rolePermissoesDAO.selectPermissoesByRole(usuarioRole)
 
     if (
         permissoes
@@ -33,7 +61,12 @@ async function buscarPermissoesByRole(usuarioRole) {
     return permissoes
 }
 
-(async () => {
-    let resultado = await temPermissao("uso próprio", "gerenciar pessoas");
-    console.log("Tem permissão?", resultado);
-})();
+// (async () => {
+//     let resultado = await temPermissao("uso próprio", "gerenciar pessoas");
+//     console.log("Tem permissão?", resultado);
+// })();
+
+
+module.exports = {
+    verficarPermissao
+}

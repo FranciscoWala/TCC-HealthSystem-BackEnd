@@ -18,7 +18,8 @@ const corsOptions = {
 }
 
 const autenticarLogin = require("./middleware/autenticarLogin.js")
-
+const auth =require("./middleware/auth.js")
+const authorization = require("./middleware/authorization.js")
 
 //Aplica as configurações do CORS no app (EXPRESS)
 app.use(cors(corsOptions))
@@ -30,6 +31,18 @@ app.post("/v1/teste/usuario/login", async (request, response) => {
     response.status(200)
     response.json({message: "Usuário encontrado", usuario: result})
 })
+
+app.post(
+    "/v1/teste/medicamento", 
+    authorization.verficarPermissao("gerenciar pessoas"), 
+    async (request, response) => {
+        console.log(request.body);
+        
+
+        response.status(200)
+        response.json({message: "Tudo certo!!"})
+    }
+)
 
 app.listen(8080, () => {
     console.log("Aguardando requisições..."); 
