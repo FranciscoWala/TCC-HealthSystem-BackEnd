@@ -17,16 +17,16 @@ const knexConection = knex(knexDataBaseConfig.development)
 
 const insertPermissoes = async function (permissoes) {
     try {
-        let sql = `insert into tbl_permissoes (
-            permissao
-        ) values (
-            '${permissoes.permissao}' 
-        );`
+        let sql = `call procPermissoes(?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'INSERT',
+            permissoes.permissao,
+            null
+        ])
 
-        if (result)
-            return result[0].insertId
+        if (result && result[0][0][0].id)
+            return result[0][0][0].id
         else
             return false
     } catch (error) {
@@ -36,13 +36,15 @@ const insertPermissoes = async function (permissoes) {
 
 const updatePermissoes = async function (permissoes) {
     try {
-        let sql = `update tbl_permissoes set
-                        permissao = '${permissoes.permissao}'
-                    where id = ${permissoes.id}`
+        let sql = `call procPermissoes(?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'UPDATE',
+            permissoes.permissao,
+            permissoes.id
+        ])
 
-        if (result)
+        if (result && result[0][0][0].affectedRows > 0)
             return true
         else
             return false
@@ -53,12 +55,16 @@ const updatePermissoes = async function (permissoes) {
 
 const selectAllPermissoes = async function () {
     try {
-        let sql = `select * from tbl_permissoes order by id desc;`
+        let sql = `call procPermissoes(?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'SELECT_ALL',
+            null,
+            null
+        ])
 
-        if (Array.isArray(result))
-            return result[0]
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -68,12 +74,16 @@ const selectAllPermissoes = async function () {
 
 const selectByIdPermissoes = async function (id) {
     try {
-        let sql = `select * from tbl_permissoes where id = ${id};`
+        let sql = `call procPermissoes(?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'SELECT_BY_ID',
+            null,
+            id
+        ])
 
-        if (Array.isArray(result))
-            return result[0]
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -83,9 +93,13 @@ const selectByIdPermissoes = async function (id) {
 
 const deletePermissoes = async function (id) {
     try {
-        let sql = `delete from tbl_permissoes where id = ${id};`
+        let sql = `call procPermissoes(?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'DELETE',
+            null,
+            id
+        ])
 
         if (result)
             return true

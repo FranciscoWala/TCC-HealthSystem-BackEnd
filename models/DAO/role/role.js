@@ -17,16 +17,16 @@ const knexConection = knex(knexDataBaseConfig.development)
 
 const insertRole = async function (role) {
     try {
-        let sql = `insert into tbl_role (
-            role
-        ) values (
-            '${role.role}' 
-        );`
+        let sql = `call procRole(?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'INSERT',
+            role.role,
+            null
+        ])
 
-        if (result)
-            return result[0].insertId
+        if (result && result[0][0][0].id)
+            return result[0][0][0].id
         else
             return false
     } catch (error) {
@@ -36,13 +36,15 @@ const insertRole = async function (role) {
 
 const updateRole = async function (role) {
     try {
-        let sql = `update tbl_role set
-                        role = '${role.role}'
-                    where id = ${role.id};`
+        let sql = `call procRole(?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'UPDATE',
+            role.role,
+            role.id
+        ])
 
-        if (result)
+        if (result && result[0][0][0].affectedRows > 0)
             return true
         else
             return false
@@ -53,12 +55,16 @@ const updateRole = async function (role) {
 
 const selectAllRoles = async function () {
     try {
-        let sql = `select * from tbl_role order by id desc;`
+        let sql = `call procRole(?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'SELECT_ALL',
+            null,
+            null
+        ])
 
-        if (Array.isArray(result))
-            return result[0]
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -68,12 +74,16 @@ const selectAllRoles = async function () {
 
 const selectByIdRole = async function (id) {
     try {
-        let sql = `select * from tbl_role where id = ${id};`
+        let sql = `call procRole(?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'SELECT_BY_ID',
+            null,
+            id
+        ])
 
-        if (Array.isArray(result))
-            return result[0]
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -83,9 +93,13 @@ const selectByIdRole = async function (id) {
 
 const deleteRole = async function (id) {
     try {
-        let sql = `delete from tbl_role where id = ${id};`
+        let sql = `call procRole(?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'DELETE',
+            null,
+            id
+        ])
 
         if (result)
             return true

@@ -17,18 +17,17 @@ const knexConection = knex(knexDataBaseConfig.development)
 
 const insertHorario = async function (horario) {
     try {
-        let sql = `insert into tbl_horarios (
-            horario,
-            id_receita_medica
-        ) values (
-            '${horario.horario}',
-            ${horario.id_receita_medica}
-        );`
+        let sql = `call procHorario(?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'INSERT',
+            horario.horario,
+            horario.id_receita_medica,
+            null
+        ])
 
-        if (result)
-            return result[0].insertId
+        if (result && result[0][0][0].id)
+            return result[0][0][0].id
         else
             return false
     } catch (error) {
@@ -38,14 +37,16 @@ const insertHorario = async function (horario) {
 
 const updateHorario = async function (horario) {
     try {
-        let sql = `update tbl_horarios set
-                        horario = '${horario.horario}',
-                        id_receita_medica = ${horario.id_receita_medica}
-                    where id = ${horario.id};`
+        let sql = `call procHorario(?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'UPDATE',
+            horario.horario,
+            horario.id_receita_medica,
+            horario.id
+        ])
 
-        if (result)
+        if (result && result[0][0][0].affectedRows > 0)
             return true
         else
             return false
@@ -56,12 +57,17 @@ const updateHorario = async function (horario) {
 
 const selectAllHorarios = async function () {
     try {
-        let sql = `select * from tbl_horarios order by id desc;`
+        let sql = `call procHorario(?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'SELECT_ALL',
+            null,
+            null,
+            null
+        ])
 
-        if (Array.isArray(result))
-            return result[0]
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -71,12 +77,17 @@ const selectAllHorarios = async function () {
 
 const selectByIdHorario = async function (id) {
     try {
-        let sql = `select * from tbl_horarios where id = ${id};`
+        let sql = `call procHorario(?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'SELECT_BY_ID',
+            null,
+            null,
+            id
+        ])
 
-        if (Array.isArray(result))
-            return result[0]
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -86,14 +97,17 @@ const selectByIdHorario = async function (id) {
 
 const selectByIdHorarioCompleto = async function (id) {
     try {
-        let sql = `
-            select * from vw_select_horario_completo where id_horario = ${id};
-        `
+        let sql = `call procHorario(?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'SELECT_DADOS_HISTORICO',
+            null,
+            null,
+            id
+        ])
 
-        if (Array.isArray(result))
-            return result[0]
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -103,9 +117,14 @@ const selectByIdHorarioCompleto = async function (id) {
 
 const deleteHorario = async function (id) {
     try {
-        let sql = `delete from tbl_horarios where id = ${id};`
+        let sql = `call procHorario(?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'DELETE',
+            null,
+            null,
+            id
+        ])
 
         if (result)
             return true

@@ -17,24 +17,20 @@ const knexConection = knex(knexDataBaseConfig.development)
 
 const insertMedicamento = async function (medicamentos) {
     try {
-        let sql = `insert into tbl_medicamentos (
-            nome,
-            imagem,
-            concentracao,
-            id_unidade_medida_embalagem,
-            id_tipo_dosagem
-        ) values (
-            '${medicamentos.nome}',
-            '${medicamentos.imagem}',
-            '${medicamentos.concentracao}',
-            ${medicamentos.id_unidade_medida_embalagem},
-            ${medicamentos.id_tipo_dosagem}
-        );`
+        let sql = `call procMedicamento(?, ?, ?, ?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'INSERT',
+            medicamentos.nome,
+            medicamentos.imagem,
+            medicamentos.concentracao,
+            medicamentos.id_unidade_medida_embalagem,
+            medicamentos.id_tipo_dosagem,
+            null
+        ])
 
-        if (result)
-            return result[0].insertId
+        if (result && result[0][0][0].id)
+            return result[0][0][0].id
         else
             return false
     } catch (error) {
@@ -44,17 +40,19 @@ const insertMedicamento = async function (medicamentos) {
 
 const updateMedicamento = async function (medicamentos) {
     try {
-        let sql = `update tbl_medicamentos set
-                        nome = '${medicamentos.nome}',
-                        imagem = '${medicamentos.imagem}',
-                        concentracao = '${medicamentos.concentracao}',
-                        id_unidade_medida_embalagem = ${medicamentos.id_unidade_medida_embalagem},
-                        id_tipo_dosagem = ${medicamentos.id_tipo_dosagem}
-                    where id = ${medicamentos.id};`
+        let sql = `call procMedicamento(?, ?, ?, ?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'UPDATE',
+            medicamentos.nome,
+            medicamentos.imagem,
+            medicamentos.concentracao,
+            medicamentos.id_unidade_medida_embalagem,
+            medicamentos.id_tipo_dosagem,
+            medicamentos.id
+        ])
 
-        if (result)
+        if (result && result[0][0][0].affectedRows > 0)
             return true
         else
             return false
@@ -65,12 +63,20 @@ const updateMedicamento = async function (medicamentos) {
 
 const selectAllMedicamentos = async function () {
     try {
-        let sql = `select * from tbl_medicamentos order by id desc;`
+        let sql = `call procMedicamento(?, ?, ?, ?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'SELECT_ALL',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        ])
 
-        if (Array.isArray(result))
-            return result[0]
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -80,12 +86,20 @@ const selectAllMedicamentos = async function () {
 
 const selectByIdMedicamento = async function (id) {
     try {
-        let sql = `select * from tbl_medicamentos where id = ${id};`
+        let sql = `call procMedicamento(?, ?, ?, ?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'SELECT_BY_ID',
+            null,
+            null,
+            null,
+            null,
+            null,
+            id
+        ])
 
-        if (Array.isArray(result))
-            return result[0]
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -95,9 +109,17 @@ const selectByIdMedicamento = async function (id) {
 
 const deleteMedicamento = async function (id) {
     try {
-        let sql = `delete from tbl_medicamentos where id = ${id};`
+        let sql = `call procMedicamento(?, ?, ?, ?, ?, ?, ?)`
 
-        let result = knexConection.raw(sql)
+        let result = knexConection.raw(sql, [
+            'DELETE',
+            null,
+            null,
+            null,
+            null,
+            null,
+            id
+        ])
 
         if (result)
             return true

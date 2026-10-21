@@ -17,16 +17,16 @@ const knexConection = knex(knexDataBaseConfig.development)
 
 const insertTipoDosagem = async function (tipoDosagem) {
     try {
-        let sql = `insert into tbl_tipo_dosagem (
-            tipo_dosagem
-        ) values (
-            '${tipoDosagem.tipo_dosagem}' 
-        );`
+        let sql = `call procTipoDosagem(?, ?, ?);`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'INSERT',
+            tipoDosagem.tipo_dosagem,
+            null
+        ])
 
-        if (result)
-            return result[0].insertId
+        if (result && result[0][0][0].id)
+            return result[0][0][0].id
         else
             return false
     } catch (error) {
@@ -36,13 +36,15 @@ const insertTipoDosagem = async function (tipoDosagem) {
 
 const updateTipoDosagem = async function (tipoDosagem) {
     try {
-        let sql = `update tbl_tipo_dosagem set
-                        tipo_dosagem = '${tipoDosagem.tipo_dosagem}'
-                    where id = ${tipoDosagem.id};`
+        let sql = `call procTipoDosagem(?, ?, ?);`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'UPDATE',
+            tipoDosagem.tipo_dosagem,
+            tipoDosagem.id
+        ])
 
-        if (result)
+        if (result && result[0][0][0].affectedRows > 0)
             return true
         else
             return false
@@ -53,12 +55,16 @@ const updateTipoDosagem = async function (tipoDosagem) {
 
 const selectAllTipoDosagem = async function () {
     try {
-        let sql = `select * from tbl_tipo_dosagem order by id desc;`
+        let sql = `call procTipoDosagem(?, ?, ?);`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'SELECT_ALL',
+            null,
+            null
+        ])
 
-        if (Array.isArray(result))
-            return result[0]
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -68,12 +74,16 @@ const selectAllTipoDosagem = async function () {
 
 const selectByIdTipoDosagem = async function (id) {
     try {
-        let sql = `select * from tbl_tipo_dosagem where id = ${id};`
+        let sql = `call procTipoDosagem(?, ?, ?);`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'SELECT_BY_ID',
+            null,
+            id
+        ])
 
-        if (Array.isArray(result))
-            return result[0]
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -83,9 +93,13 @@ const selectByIdTipoDosagem = async function (id) {
 
 const deleteTipoDosagem = async function (id) {
     try {
-        let sql = `delete from tbl_tipo_dosagem where id = ${id}`
+        let sql = `call procTipoDosagem(?, ?, ?);`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'DELETE',
+            null,
+            id
+        ])
 
         if (result)
             return true

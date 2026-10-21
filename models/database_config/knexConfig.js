@@ -4,9 +4,9 @@ module.exports = {
         client: 'mysql2',
         connection: {
             host: 'localhost',
-            user: 'root', // Substitua pelo seu usuário
+            user: process.env.USER_DB, // Substitua pelo seu usuário
             password: process.env.PASSWORD_DB, // Substitua pela sua senha
-            database: 'db_medtime',
+            database: process.env.NAME_DB,
             port: 3306, // Porta padrão do MySQL
 
             // Opcional: Define charset (recomendado para UTF8)

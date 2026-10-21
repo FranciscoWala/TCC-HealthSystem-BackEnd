@@ -17,18 +17,17 @@ const knexConection = knex(knexDataBaseConfig.development)
 
 const insertUnidadeMedida = async function (unidadeMedida) {
     try {
-        let sql = `insert into tbl_unidade_medida (
-            unidade_medida,
-            sigla
-        ) values (
-            '${unidadeMedida.unidade_medida}',
-            '${unidadeMedida.sigla}'
-        );`
+        let sql = `call procUnidadeMedida(?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'INSERT',
+            unidadeMedida.unidade_medida,
+            unidadeMedida.sigla,
+            null
+        ])
 
-        if (result)
-            return result[0].insertId
+        if (result && result[0][0][0].id)
+            return result[0][0][0].id
         else
             return false
     } catch (error) {
@@ -38,14 +37,16 @@ const insertUnidadeMedida = async function (unidadeMedida) {
 
 const updateUnidadeMedida = async function (unidadeMedida) {
     try {
-        let sql = `update tbl_unidade_medida set
-                        unidade_medida = '${unidadeMedida.unidade_medida}',
-                        sigla = '${unidadeMedida.sigla}'
-                    where id = ${unidadeMedida.id};`
+        let sql = `call procUnidadeMedida(?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'UPDATE',
+            unidadeMedida.unidade_medida,
+            unidadeMedida.sigla,
+            unidadeMedida.id
+        ])
 
-        if (result)
+        if (result && result[0][0][0].affectedRows > 0)
             return true
         else
             return false
@@ -56,12 +57,17 @@ const updateUnidadeMedida = async function (unidadeMedida) {
 
 const selectAllUnidadeMedida = async function () {
     try {
-        let sql = `select * from tbl_unidade_medida order by id desc;`
+        let sql = `call procUnidadeMedida(?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'SELECT_ALL',
+            null,
+            null,
+            null
+        ])
 
-        if (Array.isArray(result))
-            return result[0]
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -71,12 +77,17 @@ const selectAllUnidadeMedida = async function () {
 
 const selectByIdUnidadeMedida = async function (id) {
     try {
-        let sql = `select * from tbl_unidade_medida where id = ${id};`
+        let sql = `call procUnidadeMedida(?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'SELECT_BY_ID',
+            null,
+            null,
+            id
+        ])
 
-        if (Array.isArray(result))
-            return result[0]
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -86,9 +97,14 @@ const selectByIdUnidadeMedida = async function (id) {
 
 const deleteUnidadeMedida = async function (id) {
     try {
-        let sql = `delete from tbl_unidade_medida where id = ${id}`
+        let sql = `call procUnidadeMedida(?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'DELETE',
+            null,
+            null,
+            id
+        ])
 
         if (result)
             return true

@@ -14,82 +14,104 @@ const knexDataBaseConfig = require('../../database_config/knexConfig.js')
 const knexConection = knex(knexDataBaseConfig.development)
 
 
-async function insertContatoEmergencia(contatoEmergencia){
-    let sql = 
-        `insert into tbl_contato_de_emergencia(
-           nome, 
-           telefone 
-        )values(
-            '${contatoEmergencia.nome}',
-            '${contatoEmergencia.telefone}'
-        );`
+async function insertContatoEmergencia(contatoEmergencia) {
+    try {
+        let sql = `call procContatoEmergencia(?, ?, ?, ?);`
 
-    let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'INSERT',
+            contatoEmergencia.nome,
+            contatoEmergencia.telefone,
+            null
+        ])
 
-    if (result)
-        return result[0].insertId
-    else
+        if (result && result[0][0][0].id)
+            return result[0][0][0].id
+        else
+            return false
+    } catch (error) {
         return false
+    }
 }
 
 async function updateContatoEmergencia(contatoEmergencia) {
-    let sql = 
-    `
-        update tbl_contato_de_emergencia
-            set 
-                nome = '${contatoEmergencia.nome}',
-                telefone = '${contatoEmergencia.telefone}'
-            where id = ${contatoEmergencia.id};
-    `
+    try {
+        let sql = `call procContatoEmergencia(?, ?, ?, ?);`
 
-    let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'UPDATE',
+            contatoEmergencia.nome,
+            contatoEmergencia.telefone,
+            contatoEmergencia.id
+        ])
 
-    if(result)
-        return true
-    else
+        if (result && result[0][0][0].affectedRows > 0)
+            return true
+        else
+            return false
+    } catch (error) {
         return false
+    }
 }
 
 async function getContatosEmergencia() {
-    let sql = 
-    `
-        select * from tbl_contato_de_emergencia;    
-    `
+    try {
+        let sql = `call procContatoEmergencia(?, ?, ?, ?)`
 
-    let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'SELECT_ALL',
+            null,
+            null,
+            null
+        ])
 
-    if(Array.isArray(result))
-        return result[0]
-    else
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
+        else
+            return false
+    } catch (error) {
         return false
+    }
 }
 
 async function getContatosEmergenciaByID(id) {
-    let sql =
-    `
-        select * from tbl_contato_de_emergencia where id = ${id}
-    `
+    try {
+        let sql = `call procContatoEmergencia(?, ?, ?, ?)`
 
-    let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'SELECT_BY_ID',
+            null,
+            null,
+            id
+        ])
 
-    if(Array.isArray(result))
-        return result[0]
-    else 
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
+        else
+            return false
+    } catch (error) {
         return false
+    }
 }
 
 async function deleteContatoEmergenciaByID(id) {
-    let sql =
-    `
-        delete from tbl_contato_de_emergencia where id = ${id}
-    `
+    try {
+        let sql = `call procContatoEmergencia(?, ?, ?, ?)`
 
-    let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'DELETE',
+            null,
+            null,
+            id
+        ])
 
-    if(result)
-        return true
-    else
+        if (result)
+            return true
+        else
+            return false
+    } catch (error) {
         return false
+    }
 }
 
 module.exports = {

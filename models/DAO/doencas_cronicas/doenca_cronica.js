@@ -17,16 +17,16 @@ const knexConection = knex(knexDataBaseConfig.development)
 
 const insertDoencaCronica = async function (doencaCronica) {
     try {
-        let sql = `insert into tbl_doencas_cronicas (
-            nome_doenca
-        ) values (
-            '${doencaCronica.nome_doenca}' 
-        );`
+        let sql = `call procDoencaCronica(?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'INSERT',
+            doencaCronica.nome_doenca,
+            null
+        ])
 
-        if (result)
-            return result[0].insertId
+        if (result && result[0][0][0].id)
+            return result[0][0][0].id
         else
             return false
     } catch (error) {
@@ -36,13 +36,15 @@ const insertDoencaCronica = async function (doencaCronica) {
 
 const updateDoencaCronica = async function (doencaCronica) {
     try {
-        let sql = `update tbl_doencas_cronicas set
-                        nome_doenca = '${doencaCronica.nome_doenca}'
-                    where id = ${doencaCronica.id};`
+        let sql = `call procDoencaCronica(?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'UPDATE',
+            doencaCronica.nome_doenca,
+            doencaCronica.id
+        ])
 
-        if (result)
+        if (result && result[0][0][0].affectedRows > 0)
             return true
         else
             return false
@@ -53,12 +55,16 @@ const updateDoencaCronica = async function (doencaCronica) {
 
 const selectAllDoencasCronicas = async function () {
     try {
-        let sql = `select * from tbl_doencas_cronicas order by id desc;`
+        let sql = `call procDoencaCronica(?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'SELECT_ALL',
+            null,
+            null
+        ])
 
-        if (Array.isArray(result))
-            return result[0]
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -68,12 +74,16 @@ const selectAllDoencasCronicas = async function () {
 
 const selectByIdDoencasCronicas = async function (id) {
     try {
-        let sql = `select * from tbl_doencas_cronicas where id = ${id};`
+        let sql = `call procDoencaCronica(?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'SELECT_BY_ID',
+            null,
+            id
+        ])
 
-        if (Array.isArray(result))
-            return result[0]
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -83,9 +93,13 @@ const selectByIdDoencasCronicas = async function (id) {
 
 const deleteDoencaCronica = async function (id) {
     try {
-        let sql = `delete from tbl_doencas_cronicas where id = ${id};`
+        let sql = `call procDoencaCronica(?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'DELETE',
+            null,
+            id
+        ])
 
         if (result)
             return true
