@@ -1,4 +1,5 @@
 const rolePermissoesDAO = require('../model/DAO/role_permissoes/role_permissoes.js')
+const receitaMedicaDAO = require('../model/DAO/vinculo_paciente/vinculo_paciente.js')
 
 function verficarPermissao(permissao) {
 
@@ -20,15 +21,60 @@ function verficarPermissao(permissao) {
             return next()
         } catch (error) {
             console.log(error)
-            response.status(500).json({ message: "Erro interno no servidor" })
+            return response.status(500).json({ message: "Erro interno no servidor" })
         }
     }
 }
 
+function verificarRelacao(){
+    
+    return async function(request, response, next){      
+
+        try {
+            const idPaciente = request.params.idPaciente
+            const idCuidador = request.user.id
 
 
+            const possuiRelacao = await possuiRelacionamento(idPaciente, idCuidador)
+            console.log("3. Passou do banco, resultado:", possuiRelacao);
 
+            if (!possuiRelacao) {
+                return response.status(404).json(
+                    {
+                        message: "INFORMAÇÕES NÃO ENCONTRADAS"
+                    }
+                )
+            }
 
+            return next()
+
+        } catch (error) {
+            console.log(error);
+            return response.status(500).json({ message: "Erro interno no servidor" })
+        }
+    }
+}
+
+async function possuiRelacionamento(idPaciente, idCuidador) {
+    try {
+        console.log(idPaciente);
+        
+
+        let relacao = await buscarVinculoByIDCuidador(idPaciente, idCuidador)
+
+        console.log(relacao);
+        
+
+        if (relacao && relacao.length > 0) 
+            return true
+        else
+            return false
+
+    } catch (error) {
+        console.log(error);
+        return false
+    }
+}
 
 async function temPermissao(roleUsuario, permissao) {
     try {
@@ -61,6 +107,17 @@ async function buscarPermissoesByRole(usuarioRole) {
     return permissoes
 }
 
+async function buscarVinculoByIDCuidador(idPaciente, idCuidador) {
+    try {
+        return await receitaMedicaDAO
+                    .selectVinculoPacienteByIDPacienteAndIDCuidador(idPaciente, idCuidador)
+
+    } catch (error) {
+        console.log(error)
+        throw error
+    }
+}
+
 // (async () => {
 //     let resultado = await temPermissao("uso próprio", "gerenciar pessoas");
 //     console.log("Tem permissão?", resultado);
@@ -68,5 +125,6 @@ async function buscarPermissoesByRole(usuarioRole) {
 
 
 module.exports = {
-    verficarPermissao
+    verficarPermissao,
+    verificarRelacao
 }

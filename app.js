@@ -45,6 +45,20 @@ app.post(
     }
 )
 
+app.get(
+    "/v1/teste/usuario/:idPaciente/medicamento/:idMedicamento",
+    auth.verificarToken,
+    authorization.verficarPermissao("gerenciar pessoas"),
+    authorization.verificarRelacao(),
+    async(request, response) => {
+        console.log(request.params);
+        
+
+        response.status(200)
+        response.json({message: "Os usuários possuem relação"})
+    }
+)
+
 app.listen(8080, () => {
     console.log("Aguardando requisições..."); 
 })
