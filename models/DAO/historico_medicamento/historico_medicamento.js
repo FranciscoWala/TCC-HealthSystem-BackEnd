@@ -14,126 +14,153 @@ const knexDataBaseConfig = require('../../database_config/knexConfig.js')
 const knexConection = knex(knexDataBaseConfig.development)
 
 
-async function insertHistoricoMedicamento(historicoMedicamento) {
-
+const insertHistoricoMedicamento = async function (historicoMedicamento) {
     try {
-        let sql =
-            `insert into tbl_historico_medicamento(
-           hora_ingestao, 
-           id_paciente,
-           dosagem_ingerida,
-           id_horario,
-           status_ingestao 
-        ).values(
-            '${historicoMedicamento.hora_ingestao}',
-            ${historicoMedicamento.id_paciente},
-            ${historicoMedicamento.dosagem_ingerida},
-            ${historicoMedicamento.id_horario},
-            '${historicoMedicamento.status_ingestao}'
-        );`
+        let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'INSERT',
+            historicoMedicamento.hora_ingestao,
+            historicoMedicamento.id_paciente,
+            historicoMedicamento.dosagem_ingerida,
+            historicoMedicamento.id_horario,
+            historicoMedicamento.status_ingestao,
+            historicoMedicamento.horario_programado,
+            historicoMedicamento.nome_medicamento,
+            historicoMedicamento.concentracao,
+            historicoMedicamento.unidade_concentracao,
+            historicoMedicamento.tipo_dosagem,
+            null
+        ])
 
-        if (result)
-            return result[0].insertId
+        if (result && result[0][0][0].id)
+            return result[0][0][0].id
         else
             return false
+
     } catch (error) {
-        console.log(error)
         return false
     }
 }
 
 async function updateHistoricoMedicamento(historicoMedicamento, id) {
-
     try {
-        let sql =
-            `
-        update tbl_historico_medicamento
-            set 
-                hora_ingestao = '${historicoMedicamento.hora_ingestao}',
-                id_paciente = ${historicoMedicamento.id_paciente},
-                dosagem_ingerida = ${historicoMedicamento.dosagem_ingerida},
-                id_horario = ${historicoMedicamento.id_horario},
-                status_ingestao = '${historicoMedicamento.status_ingestao}'
-            where id = ${id};
-    `
+        let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'UPDATE',
+            historicoMedicamento.hora_ingestao,
+            historicoMedicamento.id_paciente,
+            historicoMedicamento.dosagem_ingerida,
+            historicoMedicamento.id_horario,
+            historicoMedicamento.status_ingestao,
+            historicoMedicamento.horario_programado,
+            historicoMedicamento.nome_medicamento,
+            historicoMedicamento.concentracao,
+            historicoMedicamento.unidade_concentracao,
+            historicoMedicamento.tipo_dosagem,
+            id
+        ])
 
-        if (result)
+        if (result && result[0][0][0].affectedRows > 0)
             return true
         else
             return false
+
     } catch (error) {
-        console.log(error)
         return false
     }
 }
 
 async function getHistoricoMedicamento() {
-
     try {
-        let sql =
-            `
-        select * from tbl_historico_medicamento;    
-    `
+        let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'SELECT_ALL',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        ])
 
-        if (result)
-            return result[0]
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
+
     } catch (error) {
-        console.log(error)
         return false
     }
 }
 
 async function getHistoricoMedicamentoByID(id) {
-
     try {
-        let sql =
-            `
-        select * from tbl_historico where id = ${id}
-    `
+        let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'SELECT_BY_ID',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            id
+        ])
 
-        if (result)
-            return result[0]
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
+
     } catch (error) {
-        console.log(error)
         return false
     }
-
-
 }
 
 async function deleteHistoricoMedicamentoByID(id) {
-
     try {
-        let sql =
-            `
-        delete from tbl_historico_medicamento where id = ${id}
-    `
+        let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [
+            'DELETE',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            id
+        ])
 
-        if (result)
+        if (result && result[0][0][0].affectedRows > 0)
             return true
         else
             return false
+
     } catch (error) {
         console.log(error)
         return false
     }
 }
 
-exports.modules = {
+module.exports = {
     insertHistoricoMedicamento,
     updateHistoricoMedicamento,
     getHistoricoMedicamento,

@@ -42,6 +42,12 @@ app.use('/v1/healthSystem/medtime/unidade_medida', cors(), unidadeMedidaRouter)
 const medicamentoRouter = require('./routes/medicamento.router.js')
 app.use('/v1/healthSystem/medtime/medicamento', cors(), medicamentoRouter)
 
+const historicoMedicamentoRouter = require('./routes/historico_medicamento.router.js')
+app.use('/v1/healthSystem/medtime/historico_medicamento', cors(), historicoMedicamentoRouter)
+
+const medicamentosAgendamento = require('./utils/agendamentos/registrarMedicamentosNaoTomados.js')
+medicamentosAgendamento.iniciarVerificacaoMedicamentos()
+
 // FAZER O START DA API
 app.listen(8080, function() {
     console.log('API aguardando novas requisições...')

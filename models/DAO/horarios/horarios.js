@@ -115,6 +115,28 @@ const selectByIdHorarioCompleto = async function (id) {
     }
 }
 
+const selectHorariosNaoTomados = async function () {
+    try {
+        let sql = `call procHorario(?, ?, ?, ?)`
+
+        let result = await knexConection.raw(sql, [
+            'SELECT_NAO_TOMADOS',
+            null,
+            null,
+            null
+        ])
+
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
+        else
+            return false
+
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
 const deleteHorario = async function (id) {
     try {
         let sql = `call procHorario(?, ?, ?, ?)`
@@ -141,5 +163,6 @@ module.exports = {
     selectAllHorarios,
     selectByIdHorario,
     selectByIdHorarioCompleto,
+    selectHorariosNaoTomados,
     deleteHorario
 }

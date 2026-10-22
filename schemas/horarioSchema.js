@@ -5,10 +5,14 @@
  * Versão: 1.0
 **************************************************************************************/
 
-const Joi = require('joi')
+const JOI = require('joi')
 
-const horarioSchema = Joi.object({
-    id_receita_medica: Joi.number()
+const horarioSchema = JOI.object({
+    horario: JOI.date()
+                .iso()
+                .required(),
+                
+    id_receita_medica: JOI.number()
                         .integer()
                         .min(1)
                         .required()
