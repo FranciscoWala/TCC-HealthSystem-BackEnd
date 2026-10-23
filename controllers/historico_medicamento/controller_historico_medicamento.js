@@ -1,6 +1,6 @@
 
 /*************************************************************************************************************************
- * Objetivo: Arquivo responsável pela validação, tratamento, manipulação de dados para realizar o CRUD de HISTORICO MEDICAMENTO
+ * Objetivo: Arquivo responsável pela manipulação de dados para realizar o CRUD de HISTORICO MEDICAMENTO
  * Autor: Kayque Brenno Ferreira Almeida
  * Data: 22/10/2026
  * Versão: 2.0

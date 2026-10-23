@@ -1,5 +1,5 @@
 /*******************************************************************************************
- * Objetivo: Regras de negócio e chamada ao DAO
+ * Objetivo: Chamada ao DAO e validação dos dados com o retorno de mensagens
  * Data: 22/10/2026
  * Autor: Kayque Brenno Ferreira Almeida
  * Versão: 1.0

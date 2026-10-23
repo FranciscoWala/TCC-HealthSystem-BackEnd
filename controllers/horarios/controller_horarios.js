@@ -1,6 +1,6 @@
 
 /*************************************************************************************************************************
- * Objetivo: Arquivo responsável pela validação, tratamento, manipulação de dados para realizar o CRUD de HORÁRIOS
+ * Objetivo: Arquivo responsável pela manipulação de dados para realizar o CRUD de HORÁRIOS
  * Autor: Kayque Brenno Ferreira Almeida
  * Data: 22/10/2026
  * Versão: 1.0

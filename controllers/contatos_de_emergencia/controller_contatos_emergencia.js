@@ -1,6 +1,5 @@
 /**********************************************************************************************************************************
- * Objetivo: Arquivo responsável pela validação, tratamento, manipulação de dados para realizar o CRUD de CONTATOS DE EMERGÊNCIA,
- *  e também fazer a integração entre a API e a model
+ * Objetivo: Arquivo responsável pela manipulação de dados para realizar o CRUD de CONTATOS DE EMERGÊNCIA
  * Autor: Kayque Brenno Ferreira Almeida
  * Data: 20/10/2026
  * Versão: 2.0

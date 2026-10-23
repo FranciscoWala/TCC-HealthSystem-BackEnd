@@ -1,5 +1,5 @@
 /*************************************************************************************************************************
- * Objetivo: Arquivo responsável pela validação, tratamento, manipulação de dados para realizar o CRUD de DOENÇAS CRONICAS
+ * Objetivo: Arquivo responsável pela manipulação de dados para realizar o CRUD de DOENÇAS CRONICAS
  * Autor: Kayque Brenno Ferreira Almeida
  * Data: 20/10/2026
  * Versão: 2.0
