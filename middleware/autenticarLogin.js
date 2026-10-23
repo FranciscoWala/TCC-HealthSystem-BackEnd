@@ -45,6 +45,9 @@ async function autenticarLogin(request, response) {
         let jwt = await authenticate.createJWT(payload)
         usuario[0].jwt = jwt
 
+        delete usuario[0].senha
+        delete usuario[0].permissoes
+
         return usuario
     } catch (error) {
         console.log(error)
