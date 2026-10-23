@@ -7,22 +7,13 @@
  * Versão: 1.0
 ********************************************************************************************/
 
-const knex = require('knex')
-
-const knexDataBaseConfig = require('../../database_config/knexConfig.js')
-
-const knexConection = knex(knexDataBaseConfig.development)
+// Import da conexão global com o Banco de Dados MySQL
+const knexConection = require('../../global_knex/global_knex.js')
 
 
 async function insertContatoEmergenciaUsuario(contatoEmergenciaUsuario){
     let sql = 
-        `insert into tbl_contato_emergencia_usuario(
-           id_contato_de_emergencia, 
-           id_usuario 
-        ).values(
-            '${contatoEmergenciaUsuario.id_contato_de_emergencia}',
-            '${contatoEmergenciaUsuario.id_usuario}'
-        );`
+        `call procContatoEmergenciaUsuarios(?, ?, ?, ?);`
 
     let result = await knexConection.raw(sql)
 
