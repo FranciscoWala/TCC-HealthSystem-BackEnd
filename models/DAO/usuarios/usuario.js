@@ -90,9 +90,9 @@ const selectByIdUsuario = async function (id) {
     }
 }
 
-const selectDadosUsuarios = async function () {
+const selectDadosUsuarios = async function (id) {
     try {
-        let sql = `select * from vw_dados_usuarios;`
+        let sql = `select * from vw_dados_usuarios where=${id};`
 
         let result = await knexConection.raw(sql)
 

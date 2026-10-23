@@ -99,6 +99,7 @@ const buscarUsuarioService = async function (id) {
             return validacaoId
 
         let result = await usuarioDAO.selectByIdUsuario(id)
+        
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -132,10 +133,14 @@ const excluirUsuarioService = async function (id) {
     }
 }
 
-const listarDadosUsuariosService = async function () {
+const listarDadosUsuariosService = async function (id) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let result = await usuarioDAO.selectDadosUsuarios()
+        let validacaoId = validarDados.validarIDs(id, customMessages)
+        if (validacaoId) 
+            return validacaoId
+
+        let result = await usuarioDAO.selectDadosUsuarios(id)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
