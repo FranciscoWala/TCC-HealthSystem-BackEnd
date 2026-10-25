@@ -24,7 +24,7 @@ const inserirUsuarioService = async function (dados, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacao = validarDadosUsuario(dados)
-        if (validacao) 
+        if (validacao)
             return validacao
 
         let result = await usuarioDAO.insertUsuario(dados, transaction)
@@ -34,7 +34,7 @@ const inserirUsuarioService = async function (dados, transaction = null) {
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_CREATED_ITEM.status_code
             customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_CREATED_ITEM.message
             customMessages.DEFAULT_MESSAGE.response = dados
-            
+
             return customMessages.DEFAULT_MESSAGE
         } else
             return customMessages.ERROR_INTERNAL_SERVER_MODEL
@@ -47,11 +47,11 @@ const atualizarUsuarioService = async function (dados, id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let buscarID = await buscarUsuarioService(id, transaction)
-        if (!buscarID.status) 
+        if (!buscarID.status)
             return buscarID
 
         let validacao = validarDadosUsuario(dados)
-        if (validacao) 
+        if (validacao)
             return validacao
 
         dados.id = Number(id)
@@ -61,7 +61,7 @@ const atualizarUsuarioService = async function (dados, id, transaction = null) {
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
             customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_UPDATE_ITEM.message
             customMessages.DEFAULT_MESSAGE.response = dados
-            
+
             return customMessages.DEFAULT_MESSAGE
         } else
             return customMessages.ERROR_INTERNAL_SERVER_MODEL
@@ -80,7 +80,7 @@ const listarUsuarioService = async function (transaction = null) {
                 customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
                 customMessages.DEFAULT_MESSAGE.response.count = result.length
                 customMessages.DEFAULT_MESSAGE.response.usuario = result
-                
+
                 return customMessages.DEFAULT_MESSAGE
             } else
                 return customMessages.ERROR_NOT_FOUND
@@ -95,7 +95,7 @@ const buscarUsuarioService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacaoId = validarDados.validarIDs(id, customMessages)
-        if (validacaoId) 
+        if (validacaoId)
             return validacaoId
 
         let result = await usuarioDAO.selectByIdUsuario(id, transaction)
@@ -104,7 +104,7 @@ const buscarUsuarioService = async function (id, transaction = null) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
                 customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
                 customMessages.DEFAULT_MESSAGE.response.usuario = result
-                
+
                 return customMessages.DEFAULT_MESSAGE
             } else
                 return customMessages.ERROR_NOT_FOUND
@@ -118,8 +118,12 @@ const buscarUsuarioService = async function (id, transaction = null) {
 const buscarUsuarioPorEmailService = async function (email, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let validarEmail = validarDados.validarDados(email.email, customMessages)
-        if (validarEmail) 
+        let validarEmail = validarDados.validarDados(
+            usuarioSchema.extract('email'),
+            email.email,
+            customMessages
+        )
+        if (validarEmail)
             return validarEmail
 
         let result = await usuarioDAO.selectUsuarioByEmail(email, transaction)
@@ -128,7 +132,7 @@ const buscarUsuarioPorEmailService = async function (email, transaction = null) 
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
                 customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
                 customMessages.DEFAULT_MESSAGE.response.usuario = result
-                
+
                 return customMessages.DEFAULT_MESSAGE
             } else
                 return customMessages.ERROR_NOT_FOUND
@@ -143,11 +147,11 @@ const excluirUsuarioService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let buscarID = await buscarUsuarioService(id, transaction)
-        if (!buscarID.status) 
+        if (!buscarID.status)
             return buscarID
 
         let result = await usuarioDAO.deleteUsuario(id, transaction)
-        if (result) 
+        if (result)
             return customMessages.SUCCESS_DELETE_ITEM
         else
             return customMessages.ERROR_INTERNAL_SERVER_MODEL
