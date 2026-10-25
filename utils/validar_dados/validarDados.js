@@ -35,6 +35,8 @@ const validarIDs = function (id, customMessages) {
             errorMessages.push(detalhes.message)
 
         customMessages.ERROR_BAD_REQUEST.field = errorMessages
+
+        return customMessages.ERROR_BAD_REQUEST
     }
 
     return false

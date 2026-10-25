@@ -24,7 +24,7 @@ const inserirProgramacaoMedicamentoService = async function (dados, transaction 
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacao = validarDadosProgramacaoMedicamento(dados)
-        if (validacao) 
+        if (validacao)
             return validacao
 
         let result = await programacaoMedicamentoDAO.insertProgramacaoMedicamento(dados, transaction)
@@ -34,7 +34,7 @@ const inserirProgramacaoMedicamentoService = async function (dados, transaction 
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_CREATED_ITEM.status_code
             customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_CREATED_ITEM.message
             customMessages.DEFAULT_MESSAGE.response = dados
-            
+
             return customMessages.DEFAULT_MESSAGE
         } else
             return customMessages.ERROR_INTERNAL_SERVER_MODEL
@@ -47,11 +47,18 @@ const atualizarProgramacaoMedicamentoService = async function (dados, id, transa
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let buscarID = await buscarProgramacaoMedicamentoService(id, transaction)
-        if (!buscarID.status) 
+        if (!buscarID.status)
             return buscarID
 
-        let validacao = validarDadosProgramacaoMedicamento(dados)
-        if (validacao) 
+        let validacao = validarDados.validarDados(
+            programacaoMedicamentoSchema
+                .extract('data_hora_fim')
+                .required()
+                .invalid(null),
+            dados.data_hora_fim,
+            customMessages
+        )
+        if (validacao)
             return validacao
 
         dados.id = Number(id)
@@ -61,7 +68,7 @@ const atualizarProgramacaoMedicamentoService = async function (dados, id, transa
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
             customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_UPDATE_ITEM.message
             customMessages.DEFAULT_MESSAGE.response = dados
-            
+
             return customMessages.DEFAULT_MESSAGE
         } else
             return customMessages.ERROR_INTERNAL_SERVER_MODEL
@@ -80,7 +87,7 @@ const listarProgramacaoMedicamentoService = async function (transaction = null) 
                 customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
                 customMessages.DEFAULT_MESSAGE.response.count = result.length
                 customMessages.DEFAULT_MESSAGE.response.programacao_medicamento = result
-                
+
                 return customMessages.DEFAULT_MESSAGE
             } else
                 return customMessages.ERROR_NOT_FOUND
@@ -95,7 +102,7 @@ const buscarProgramacaoMedicamentoService = async function (id, transaction = nu
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacaoId = validarDados.validarIDs(id, customMessages)
-        if (validacaoId) 
+        if (validacaoId)
             return validacaoId
 
         let result = await programacaoMedicamentoDAO.selectByIdProgramacaoMedicamento(id, transaction)
@@ -104,7 +111,7 @@ const buscarProgramacaoMedicamentoService = async function (id, transaction = nu
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
                 customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
                 customMessages.DEFAULT_MESSAGE.response.programacao_medicamento = result
-                
+
                 return customMessages.DEFAULT_MESSAGE
             } else
                 return customMessages.ERROR_NOT_FOUND
@@ -143,11 +150,11 @@ const excluirProgramacaoMedicamentoService = async function (id, transaction = n
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let buscarID = await buscarProgramacaoMedicamentoService(id, transaction)
-        if (!buscarID.status) 
+        if (!buscarID.status)
             return buscarID
 
         let result = await programacaoMedicamentoDAO.deleteProgramacaoMedicamento(id, transaction)
-        if (result) 
+        if (result)
             return customMessages.SUCCESS_DELETE_ITEM
         else
             return customMessages.ERROR_INTERNAL_SERVER_MODEL
