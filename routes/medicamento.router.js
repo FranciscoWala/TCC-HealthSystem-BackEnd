@@ -26,17 +26,21 @@ router.post('/', bodyParserJSON, async function (request, response) {
     response.json(result)
 })
 
-router.get('/', async function (request, response) {
-    let result = await controllerMedicamento.listarMedicamento()
+router.get('/', bodyParserJSON, async function (request, response) {
+    //    let idUsuario = request.user.id
+    let idUsuario = request.body.id_usuario
+    let result = await controllerMedicamento.listarMedicamento(idUsuario)
 
     response.status(result.status_code)
     response.json(result)
 })
 
-router.get('/:id', async function (request, response) {
+router.get('/:id', bodyParserJSON, async function (request, response) {
+    //    let idUsuario = request.user.id
+    let idUsuario = request.body.id_usuario
     let id = request.params.id
 
-    let result = await controllerMedicamento.buscarMedicamento(id)
+    let result = await controllerMedicamento.buscarMedicamento(id, idUsuario)
 
     response.status(result.status_code)
     response.json(result)
@@ -53,10 +57,12 @@ router.put('/:id', bodyParserJSON, async function (request, response) {
     response.json(result)
 })
 
-router.delete('/:id', async function (request, response) {
+router.delete('/:id', bodyParserJSON, async function (request, response) {
+    //    let idUsuario = request.user.id
+    let idUsuario = request.body.id_usuario
     let id = request.params.id
 
-    let result = await controllerMedicamento.excluirMedicamento(id)
+    let result = await controllerMedicamento.excluirMedicamento(id, idUsuario)
 
     response.status(result.status_code)
     response.json(result)

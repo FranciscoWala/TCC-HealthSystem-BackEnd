@@ -21,14 +21,26 @@ app.use(cors(corsOptions))
 const roleRouter = require('./routes/role.router.js')
 app.use('/v1/healthSystem/medtime/role', cors(), roleRouter)
 
+const rolePermissoesRouter = require('./routes/role_permissoes.router.js')
+app.use('/v1/healthSystem/medtime/role_permissoes', cors(), rolePermissoesRouter)
+
 const permissoesRouter = require('./routes/permissoes.router.js')
 app.use('/v1/healthSystem/medtime/permissoes', cors(), permissoesRouter)
 
 const doencaCronicaRouter = require('./routes/doenca_cronica.router.js')
 app.use('/v1/healthSystem/medtime/doenca_cronica', cors(), doencaCronicaRouter)
 
+const doencaCronicaUsuarioRouter = require('./routes/doenca_cronica_usuario.router.js')
+app.use('/v1/healthSystem/medtime/doenca_cronica_usuario', cors(), doencaCronicaUsuarioRouter)
+
+const estoqueRouter = require('./routes/estoque.router.js')
+app.use('/v1/healthSystem/medtime/estoque', cors(), estoqueRouter)
+
 const contatoEmergenciaRouter = require('./routes/contato_emergencia.router.js')
 app.use('/v1/healthSystem/medtime/contato_emergencia', cors(), contatoEmergenciaRouter)
+
+const contatoEmergenciaUsuarioRouter = require('./routes/contato_emergencia_usuario.router.js')
+app.use('/v1/healthSystem/medtime/contato_emergencia_usuario', cors(), contatoEmergenciaUsuarioRouter)
 
 const tipoIntervaloRouter = require('./routes/tipo_intervalo.router.js')
 app.use('/v1/healthSystem/medtime/tipo_intervalo', cors(), tipoIntervaloRouter)
@@ -44,6 +56,21 @@ app.use('/v1/healthSystem/medtime/medicamento', cors(), medicamentoRouter)
 
 const historicoMedicamentoRouter = require('./routes/historico_medicamento.router.js')
 app.use('/v1/healthSystem/medtime/historico_medicamento', cors(), historicoMedicamentoRouter)
+
+const horariosRouter = require('./routes/horario.router.js')
+app.use('/v1/healthSystem/medtime/horarios', cors(), horariosRouter)
+
+const receitaMedicaRouter = require('./routes/receita_medica.router.js')
+app.use('/v1/healthSystem/medtime/receita_medica', cors(), receitaMedicaRouter)
+
+const usuarioRouter = require('./routes/usuario.router.js')
+app.use('/v1/healthSystem/medtime/usuario', cors(), usuarioRouter)
+
+const usuarioRoleRouter = require('./routes/usuario_role.router.js')
+app.use('/v1/healthSystem/medtime/usuario_role', cors(), usuarioRoleRouter)
+
+const vinculoPacienteRouter = require('./routes/vinculo_paciente.router.js')
+app.use('/v1/healthSystem/medtime/vinculo_paciente', cors(), vinculoPacienteRouter)
 
 const medicamentosAgendamento = require('./utils/agendamentos/registrarMedicamentosNaoTomados.js')
 medicamentosAgendamento.iniciarVerificacaoMedicamentos()

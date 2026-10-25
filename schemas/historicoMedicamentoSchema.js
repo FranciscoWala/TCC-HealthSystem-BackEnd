@@ -3,13 +3,17 @@ const JOI = require('joi')
 const historicoMedicamentoSchema = JOI.object({
     hora_ingestao: JOI.date()
                     .iso()
-                    .allow(null)
                     .required(),
 
     id_paciente: JOI.number()
                     .integer()
                     .min(1)
                     .required(),
+                    
+    id_receita_medica: JOI.number()
+                        .integer()
+                        .min(1)
+                        .allow(null),
 
     dosagem_ingerida: JOI.number()
                         .min(0)
@@ -17,15 +21,6 @@ const historicoMedicamentoSchema = JOI.object({
                         .precision(2)
                         .required(),
 
-    id_horario: JOI.number()
-                .integer()
-                .min(1)
-                .allow(null)
-                .required(),
-
-    status_ingestao: JOI.string()
-                        .max(20)
-                        .required(),
 
     horario_programado: JOI.date()
                         .iso()

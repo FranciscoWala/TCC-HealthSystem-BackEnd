@@ -13,18 +13,14 @@ async function insertReceitamedica(receitaMedica, transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procReceitaMedica(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procReceitaMedica(?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'INSERT',
             receitaMedica.id_usuario,
             receitaMedica.id_medicamento,
-            receitaMedica.frequencia,
             receitaMedica.dosagem,
-            receitaMedica.data_hora_inicio,
-            receitaMedica.data_inicio,
             receitaMedica.id_unidade_medida,
-            receitaMedica.id_tipo_intervalo,
             receitaMedica.descricao,
             null
         ])
@@ -43,18 +39,14 @@ async function updateReceitaMedica(receitaMedica, transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procReceitaMedica(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procReceitaMedica(?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'UPDATE',
             receitaMedica.id_usuario,
             receitaMedica.id_medicamento,
-            receitaMedica.frequencia,
             receitaMedica.dosagem,
-            receitaMedica.data_hora_inicio,
-            receitaMedica.data_inicio,
             receitaMedica.id_unidade_medida,
-            receitaMedica.id_tipo_intervalo,
             receitaMedica.descricao,
             receitaMedica.id
         ])
@@ -73,14 +65,10 @@ async function getReceitaMedica(transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procReceitaMedica(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procReceitaMedica(?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'SELECT_ALL',
-            null,
-            null,
-            null,
-            null,
             null,
             null,
             null,
@@ -103,14 +91,10 @@ async function getReceitaMedicaByID(id, transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procReceitaMedica(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procReceitaMedica(?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'SELECT_BY_ID',
-            null,
-            null,
-            null,
-            null,
             null,
             null,
             null,
@@ -133,14 +117,10 @@ async function deleteReceitaMedicaByID(id, transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procReceitaMedica(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procReceitaMedica(?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'DELETE',
-            null,
-            null,
-            null,
-            null,
             null,
             null,
             null,

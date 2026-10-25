@@ -1,23 +1,27 @@
 /*******************************************************************************************
- * Objetivo: Arquivo responsável pelo CRUD de dados dos HORÁRIOS no banco de dados
- *          MySQL
- * Data: 06/10/2026
+ * Objetivo: Arquivo responsável pelo CRUD de dados da tabela de PROGRAMACAO_MEDICAMENTO no 
+ *  banco de dados MySQL
+ *          
+ * Data: 25/10/2026
  * Autor: Kayque Brenno Ferreira Almeida
  * Versão: 1.0
 ********************************************************************************************/
 
 const knexConection = require('../../global_knex/global_knex.js')
 
-const insertHorario = async function (horario, transaction = null) {
+const insertProgramacaoMedicamento = async function (programacaoMedicamento, transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procHorario(?, ?, ?, ?)`
+        let sql = `call procProgramacaoMedicamento(?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'INSERT',
-            horario.horario,
-            horario.id_receita_medica,
+            programacaoMedicamento.frequencia,
+            programacaoMedicamento.data_hora_inicio,
+            programacaoMedicamento.data_hora_fim,
+            programacaoMedicamento.id_tipo_intervalo,
+            programacaoMedicamento.id_receita_medica,
             null
         ])
 
@@ -26,21 +30,25 @@ const insertHorario = async function (horario, transaction = null) {
         else
             return false
     } catch (error) {
+        console.log(error)
         return false
     }
 }
 
-const updateHorario = async function (horario, transaction = null) {
+const updateProgramacaoMedicamento = async function (programacaoMedicamento, transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procHorario(?, ?, ?, ?)`
+        let sql = `call procProgramacaoMedicamento(?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'UPDATE',
-            horario.horario,
-            horario.id_receita_medica,
-            horario.id
+            null,
+            null,
+            programacaoMedicamento.data_hora_fim,
+            null,
+            null,
+            programacaoMedicamento.id
         ])
 
         if (result && result[0][0][0].affectedRows > 0)
@@ -48,63 +56,22 @@ const updateHorario = async function (horario, transaction = null) {
         else
             return false
     } catch (error) {
+        console.log(error);
         return false
     }
 }
 
-const selectAllHorarios = async function (transaction = null) {
+const selectProgramacaoMedicamento = async function (transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procHorario(?, ?, ?, ?)`
+        let sql = `call procProgramacaoMedicamento(?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'SELECT_ALL',
             null,
             null,
-            null
-        ])
-
-        if (Array.isArray(result[0][0]))
-            return result[0][0]
-        else
-            return false
-    } catch (error) {
-        return false
-    }
-}
-
-const selectByIdHorario = async function (id, transaction = null) {
-    try {
-        let connection = transaction || knexConection
-
-        let sql = `call procHorario(?, ?, ?, ?)`
-
-        let result = await connection.raw(sql, [
-            'SELECT_BY_ID',
             null,
-            null,
-            id
-        ])
-
-        if (Array.isArray(result[0][0]))
-            return result[0][0]
-        else
-            return false
-    } catch (error) {
-        console.log('ERRO SELECT_BY_ID HORARIO:', error)
-        return false
-    }
-}
-
-const selectHorariosNaoTomados = async function (transaction = null) {
-    try {
-        let connection = transaction || knexConection
-
-        let sql = `call procHorario(?, ?, ?, ?)`
-
-        let result = await connection.raw(sql, [
-            'SELECT_NAO_TOMADOS',
             null,
             null,
             null
@@ -114,40 +81,95 @@ const selectHorariosNaoTomados = async function (transaction = null) {
             return result[0][0]
         else
             return false
-
     } catch (error) {
         console.log(error)
         return false
     }
 }
 
-const deleteHorario = async function (id, transaction = null) {
+const selectByIdProgramacaoMedicamento = async function (id, transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procHorario(?, ?, ?, ?)`
+        let sql = `call procProgramacaoMedicamento(?, ?, ?, ?, ?, ?, ?)`
+
+        let result = await connection.raw(sql, [
+            'SELECT_BY_ID',
+            null,
+            null,
+            null,
+            null,
+            null,
+            id
+        ])
+
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
+        else
+            return false
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
+const selectProgramacaoMedicamentoByIdReceita = async function (idReceitaMedica, transaction = null) {
+    try {
+        let connection = transaction || knexConection
+
+        let sql = `call procProgramacaoMedicamento(?, ?, ?, ?, ?, ?, ?)`
+
+        let result = await connection.raw(sql, [
+            'SELECT_BY_ID_RECEITA',
+            null,
+            null,
+            null,
+            null,
+            idReceitaMedica,
+            null
+        ])
+
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
+        else
+            return false
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
+const deleteProgramacaoMedicamento = async function (id, transaction = null) {
+    try {
+        let connection = transaction || knexConection
+
+        let sql = `call procProgramacaoMedicamento(?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'DELETE',
+            null,
+            null,
+            null,
             null,
             null,
             id
         ])
 
         if (result)
-            return true
+            return result
         else
             return false
     } catch (error) {
+        console.log(error)
         return false
     }
 }
 
 module.exports = {
-    insertHorario,
-    updateHorario,
-    selectAllHorarios,
-    selectByIdHorario,
-    selectHorariosNaoTomados,
-    deleteHorario
+    insertProgramacaoMedicamento,
+    updateProgramacaoMedicamento,
+    selectByIdProgramacaoMedicamento,
+    selectProgramacaoMedicamento,
+    selectProgramacaoMedicamentoByIdReceita,
+    deleteProgramacaoMedicamento
 }

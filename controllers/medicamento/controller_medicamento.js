@@ -35,28 +35,28 @@ const atualizarMedicamento = async function (medicamento, id, contentType) {
     }
 }
 
-const listarMedicamento = async function () {
+const listarMedicamento = async function (idUsuario) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        return await medicamentoService.listarMedicamentoService()
+        return await medicamentoService.listarMedicamentoService(idUsuario)
     } catch (error) {
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
     }
 }
 
-const buscarMedicamento = async function (id) {
+const buscarMedicamento = async function (id, idUsuario) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        return await medicamentoService.buscarMedicamentoService(id)
+        return await medicamentoService.buscarMedicamentoService(id, idUsuario)
     } catch (error) {
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
     }
 }
 
-const excluirMedicamento = async function (id) {
+const excluirMedicamento = async function (id, idUsuario) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        return await medicamentoService.excluirMedicamentoService(id)
+        return await medicamentoService.excluirMedicamentoService(id, idUsuario)
     } catch (error) {
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
     }

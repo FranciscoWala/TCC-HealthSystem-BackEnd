@@ -17,10 +17,6 @@ const receitaMedicaSchema = JOI.object({
                     .integer()
                     .min(1)
                     .required(),
-    
-    frequencia: JOI.string()
-                .pattern(/^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/)
-                .required(),
 
     dosagem: JOI.number()
                 .min(0)
@@ -28,20 +24,7 @@ const receitaMedicaSchema = JOI.object({
                 .precision(2)
                 .required(),
 
-    data_hora_inicio: JOI.string()
-                        .pattern(/^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/)
-                        .required(),
-
-    data_inicio: JOI.date()
-                .iso()
-                .required(),
-
     id_unidade_medida: JOI.number()
-                        .integer()
-                        .min(1)
-                        .required(),
-    
-    id_tipo_intervalo: JOI.number()
                         .integer()
                         .min(1)
                         .required(),

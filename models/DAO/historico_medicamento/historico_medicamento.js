@@ -13,15 +13,14 @@ const insertHistoricoMedicamento = async function (historicoMedicamento, transac
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'INSERT',
             historicoMedicamento.hora_ingestao,
             historicoMedicamento.id_paciente,
+            historicoMedicamento.id_receita_medica,
             historicoMedicamento.dosagem_ingerida,
-            historicoMedicamento.id_horario,
-            historicoMedicamento.status_ingestao,
             historicoMedicamento.horario_programado,
             historicoMedicamento.nome_medicamento,
             historicoMedicamento.concentracao,
@@ -44,21 +43,20 @@ async function updateHistoricoMedicamento(historicoMedicamento, transaction = nu
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'UPDATE',
             historicoMedicamento.hora_ingestao,
             historicoMedicamento.id_paciente,
+            historicoMedicamento.id_receita_medica,
             historicoMedicamento.dosagem_ingerida,
-            historicoMedicamento.id_horario,
-            historicoMedicamento.status_ingestao,
             historicoMedicamento.horario_programado,
             historicoMedicamento.nome_medicamento,
             historicoMedicamento.concentracao,
             historicoMedicamento.unidade_concentracao,
             historicoMedicamento.tipo_dosagem,
-            id
+            historicoMedicamento.id
         ])
 
         if (result && result[0][0][0].affectedRows > 0)
@@ -75,11 +73,10 @@ async function getHistoricoMedicamento(transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'SELECT_ALL',
-            null,
             null,
             null,
             null,
@@ -106,11 +103,10 @@ async function getHistoricoMedicamentoByID(id, transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'SELECT_BY_ID',
-            null,
             null,
             null,
             null,
@@ -133,18 +129,17 @@ async function getHistoricoMedicamentoByID(id, transaction = null) {
     }
 }
 
-const selectByIdHorarioHistoricoMedicamento = async function (idHorario, transaction = null) {
+const selectByIdReceitaHistoricoMedicamento = async function (idReceitaMedica, transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
+        let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
 
         let result = await connection.raw(sql, [
-            'SELECT_BY_ID_HORARIO',
+            'SELECT_BY_ID_RECEITA',
             null,
             null,
-            null,
-            idHorario,
+            idReceitaMedica,
             null,
             null,
             null,
@@ -168,11 +163,10 @@ async function deleteHistoricoMedicamentoByID(id, transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'DELETE',
-            null,
             null,
             null,
             null,
@@ -201,6 +195,6 @@ module.exports = {
     updateHistoricoMedicamento,
     getHistoricoMedicamento,
     getHistoricoMedicamentoByID,
-    selectByIdHorarioHistoricoMedicamento,
+    selectByIdReceitaHistoricoMedicamento,
     deleteHistoricoMedicamentoByID
 }
