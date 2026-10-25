@@ -20,14 +20,14 @@ const validarDadosReceitaMedica = function (dados) {
     return validarDados.validarDados(receitaMedicaSchema, dados, customMessages)
 }
 
-const inserirReceitaMedicaService = async function (dados) {
+const inserirReceitaMedicaService = async function (dados, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacao = validarDadosReceitaMedica(dados)
         if (validacao) 
             return validacao
 
-        let result = await receitaMedicaDAO.insertReceitamedica(dados)
+        let result = await receitaMedicaDAO.insertReceitamedica(dados, transaction)
         if (result) {
             dados.id = result
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
@@ -43,10 +43,10 @@ const inserirReceitaMedicaService = async function (dados) {
     }
 }
 
-const atualizarReceitaMedicaService = async function (dados, id) {
+const atualizarReceitaMedicaService = async function (dados, id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarReceitaMedicaService(id)
+        let buscarID = await buscarReceitaMedicaService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
@@ -55,7 +55,7 @@ const atualizarReceitaMedicaService = async function (dados, id) {
             return validacao
 
         dados.id = Number(id)
-        let result = await receitaMedicaDAO.updateReceitaMedica(dados, id)
+        let result = await receitaMedicaDAO.updateReceitaMedica(dados, id, transaction)
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
@@ -70,10 +70,10 @@ const atualizarReceitaMedicaService = async function (dados, id) {
     }
 }
 
-const listarReceitaMedicaService = async function () {
+const listarReceitaMedicaService = async function (transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let result = await receitaMedicaDAO.getReceitaMedica()
+        let result = await receitaMedicaDAO.getReceitaMedica(transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -91,14 +91,14 @@ const listarReceitaMedicaService = async function () {
     }
 }
 
-const buscarReceitaMedicaService = async function (id) {
+const buscarReceitaMedicaService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacaoId = validarDados.validarIDs(id, customMessages)
         if (validacaoId) 
             return validacaoId
 
-        let result = await receitaMedicaDAO.getReceitaMedicaByID(id)
+        let result = await receitaMedicaDAO.getReceitaMedicaByID(id, transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -115,14 +115,14 @@ const buscarReceitaMedicaService = async function (id) {
     }
 }
 
-const excluirReceitaMedicaService = async function (id) {
+const excluirReceitaMedicaService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarReceitaMedicaService(id)
+        let buscarID = await buscarReceitaMedicaService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
-        let result = await receitaMedicaDAO.deleteReceitaMedicaByID(id)
+        let result = await receitaMedicaDAO.deleteReceitaMedicaByID(id, transaction)
         if (result) 
             return customMessages.SUCCESS_DELETE_ITEM
         else

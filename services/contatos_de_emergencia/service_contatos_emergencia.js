@@ -20,14 +20,14 @@ const validarDadosContatoEmergencia = function (dados) {
     return validarDados.validarDados(contatoEmergenciaSchema, dados, customMessages)
 }
 
-const inserirContatoEmergenciaService = async function (dados) {
+const inserirContatoEmergenciaService = async function (dados, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacao = validarDadosContatoEmergencia(dados)
         if (validacao) 
             return validacao
 
-        let result = await contatoEmergenciaDAO.insertContatoEmergencia(dados)
+        let result = await contatoEmergenciaDAO.insertContatoEmergencia(dados, transaction)
         if (result) {
             dados.id = result
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
@@ -43,10 +43,10 @@ const inserirContatoEmergenciaService = async function (dados) {
     }
 }
 
-const atualizarContatoEmergenciaService = async function (dados, id) {
+const atualizarContatoEmergenciaService = async function (dados, id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarContatoEmergenciaService(id)
+        let buscarID = await buscarContatoEmergenciaService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
@@ -55,7 +55,7 @@ const atualizarContatoEmergenciaService = async function (dados, id) {
             return validacao
 
         dados.id = Number(id)
-        let result = await contatoEmergenciaDAO.updateContatoEmergencia(dados)
+        let result = await contatoEmergenciaDAO.updateContatoEmergencia(dados, transaction)
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
@@ -70,10 +70,10 @@ const atualizarContatoEmergenciaService = async function (dados, id) {
     }
 }
 
-const listarContatoEmergenciaService = async function () {
+const listarContatoEmergenciaService = async function (transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let result = await contatoEmergenciaDAO.getContatosEmergencia()
+        let result = await contatoEmergenciaDAO.getContatosEmergencia(transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -91,14 +91,14 @@ const listarContatoEmergenciaService = async function () {
     }
 }
 
-const buscarContatoEmergenciaService = async function (id) {
+const buscarContatoEmergenciaService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacaoId = validarDados.validarIDs(id, customMessages)
         if (validacaoId) 
             return validacaoId
 
-        let result = await contatoEmergenciaDAO.getContatosEmergenciaByID(id)
+        let result = await contatoEmergenciaDAO.getContatosEmergenciaByID(id, transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -115,14 +115,14 @@ const buscarContatoEmergenciaService = async function (id) {
     }
 }
 
-const excluirContatoEmergenciaService = async function (id) {
+const excluirContatoEmergenciaService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarContatoEmergenciaService(id)
+        let buscarID = await buscarContatoEmergenciaService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
-        let result = await contatoEmergenciaDAO.deleteContatoEmergenciaByID(id)
+        let result = await contatoEmergenciaDAO.deleteContatoEmergenciaByID(id, transaction)
         if (result) 
             return customMessages.SUCCESS_DELETE_ITEM
         else

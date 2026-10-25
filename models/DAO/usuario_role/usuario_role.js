@@ -7,35 +7,26 @@
  * Versão: 1.0
 ********************************************************************************************/
 
-const knex = require('knex')
+const knexConection = require('../../global_knex/global_knex.js')
 
-const knexDataBaseConfig = require('../../database_config/knexConfig.js')
-
-const knexConection = knex(knexDataBaseConfig.development)
-
-
-async function insertUsuarioRole(usuarioRole) {
-
+async function insertUsuarioRole(usuarioRole, transaction = null) {
     try {
-        let sql =
-            `insert into tbl_usuario_role(
-           ativo, 
-           data_ativacao,
-           data_desativacao,
-           id_usuario,
-           id_role 
-        ).values(
-            '${usuarioRole.ativo}',
-            '${usuarioRole.data_ativacao}',
-            '${usuarioRole.data_desativacao}',
-            ${usuarioRole.id_usuario},
-            ${usuarioRole.id_role}
-        );`
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql)
+        let sql = `call procUsuariosRole(?, ?, ?, ?, ?, ?, ?)`
 
-        if (result)
-            return result[0].insertId
+        let result = await connection.raw(sql, [
+            'INSERT',
+            usuarioRole.ativo,
+            usuarioRole.data_ativacao,
+            usuarioRole.data_desativacao,
+            usuarioRole.id_usuarios,
+            usuarioRole.id_role,
+            null
+        ])
+
+        if (result && result[0][0][0].id)
+            return result[0][0][0].id
         else
             return false
     } catch (error) {
@@ -44,24 +35,23 @@ async function insertUsuarioRole(usuarioRole) {
     }
 }
 
-async function updateUsuarioRole(usuarioRole, id) {
-
+async function updateUsuarioRole(usuarioRole, transaction = null) {
     try {
-        let sql =
-            `
-        update tbl_historico_medicamento
-            set 
-                ativo = '${usuarioRole.ativo}',
-                data_ativacao = '${usuarioRole.data_ativacao}',
-                data_desativacao = '${usuarioRole.data_desativacao}',
-                id_usuario = ${usuarioRole.id_usuario},
-                id_role = ${usuarioRole.id_role}
-            where id = ${id};
-    `
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql)
+        let sql = `call procUsuariosRole(?, ?, ?, ?, ?, ?, ?)`
 
-        if (result)
+        let result = await connection.raw(sql, [
+            'UPDATE',
+            usuarioRole.ativo,
+            usuarioRole.data_ativacao,
+            usuarioRole.data_desativacao,
+            usuarioRole.id_usuarios,
+            usuarioRole.id_role,
+            usuarioRole.id
+        ])
+
+        if (result && result[0][0][0].affectedRows > 0)
             return true
         else
             return false
@@ -71,18 +61,24 @@ async function updateUsuarioRole(usuarioRole, id) {
     }
 }
 
-async function selectUsuarioRole() {
-
+async function selectUsuarioRole(transaction = null) {
     try {
-        let sql =
-            `
-        select * from tbl_usuario_role;    
-    `
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql)
+        let sql = `call procUsuariosRole(?, ?, ?, ?, ?, ?, ?)`
 
-        if (result)
-            return result[0]
+        let result = await connection.raw(sql, [
+            'SELECT_ALL',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        ])
+
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -91,18 +87,24 @@ async function selectUsuarioRole() {
     }
 }
 
-async function selectUsuarioRoleByID(id) {
-
+async function selectUsuarioRoleByID(id, transaction = null) {
     try {
-        let sql =
-            `
-        select * from tbl_usuario_role where id = ${id}
-    `
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql)
+        let sql = `call procUsuariosRole(?, ?, ?, ?, ?, ?, ?)`
 
-        if (result)
-            return result[0]
+        let result = await connection.raw(sql, [
+            'SELECT_BY_ID',
+            null,
+            null,
+            null,
+            null,
+            null,
+            id
+        ])
+
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -113,15 +115,21 @@ async function selectUsuarioRoleByID(id) {
 
 }
 
-async function deleteUsuarioRoleByID(id) {
-
+async function deleteUsuarioRoleByID(id, transaction = null) {
     try {
-        let sql =
-            `
-        delete from tbl_usuario_role where id = ${id}
-    `
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql)
+        let sql = `call procUsuariosRole(?, ?, ?, ?, ?, ?, ?)`
+
+        let result = await connection.raw(sql, [
+            'DELETE',
+            null,
+            null,
+            null,
+            null,
+            null,
+            id
+        ])
 
         if (result)
             return true

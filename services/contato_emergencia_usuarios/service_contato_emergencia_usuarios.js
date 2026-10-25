@@ -20,14 +20,14 @@ const validarDadosContatoEmergenciaUsuario = function (dados) {
     return validarDados.validarDados(contatoEmergenciaUsuarioSchema, dados, customMessages)
 }
 
-const inserirContatoEmergenciaUsuarioService = async function (dados) {
+const inserirContatoEmergenciaUsuarioService = async function (dados, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacao = validarDadosContatoEmergenciaUsuario(dados)
         if (validacao) 
             return validacao
 
-        let result = await contatoEmergenciaUsuarioDAO.insertContatoEmergenciaUsuario(dados)
+        let result = await contatoEmergenciaUsuarioDAO.insertContatoEmergenciaUsuario(dados, transaction)
         if (result) {
             dados.id = result
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
@@ -43,10 +43,10 @@ const inserirContatoEmergenciaUsuarioService = async function (dados) {
     }
 }
 
-const atualizarContatoEmergenciaUsuarioService = async function (dados, id) {
+const atualizarContatoEmergenciaUsuarioService = async function (dados, id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarContatoEmergenciaUsuarioService(id)
+        let buscarID = await buscarContatoEmergenciaUsuarioService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
@@ -55,7 +55,7 @@ const atualizarContatoEmergenciaUsuarioService = async function (dados, id) {
             return validacao
 
         dados.id = Number(id)
-        let result = await contatoEmergenciaUsuarioDAO.updateContatoEmergenciaUsuario(dados, id)
+        let result = await contatoEmergenciaUsuarioDAO.updateContatoEmergenciaUsuario(dados, id, transaction)
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
@@ -70,10 +70,10 @@ const atualizarContatoEmergenciaUsuarioService = async function (dados, id) {
     }
 }
 
-const listarContatoEmergenciaUsuarioService = async function () {
+const listarContatoEmergenciaUsuarioService = async function (transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let result = await contatoEmergenciaUsuarioDAO.selectContatoEmergenciaUsuario()
+        let result = await contatoEmergenciaUsuarioDAO.selectContatoEmergenciaUsuario(transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -91,14 +91,14 @@ const listarContatoEmergenciaUsuarioService = async function () {
     }
 }
 
-const buscarContatoEmergenciaUsuarioService = async function (id) {
+const buscarContatoEmergenciaUsuarioService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacaoId = validarDados.validarIDs(id, customMessages)
         if (validacaoId) 
             return validacaoId
 
-        let result = await contatoEmergenciaUsuarioDAO.selectContatosEmergenciaByID(id)
+        let result = await contatoEmergenciaUsuarioDAO.selectContatosEmergenciaByID(id, transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -115,14 +115,14 @@ const buscarContatoEmergenciaUsuarioService = async function (id) {
     }
 }
 
-const excluirContatoEmergenciaUsuarioService = async function (id) {
+const excluirContatoEmergenciaUsuarioService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarContatoEmergenciaUsuarioService(id)
+        let buscarID = await buscarContatoEmergenciaUsuarioService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
-        let result = await contatoEmergenciaUsuarioDAO.deleteContatoEmergenciaUsuarioByID(id)
+        let result = await contatoEmergenciaUsuarioDAO.deleteContatoEmergenciaUsuarioByID(id, transaction)
         if (result) 
             return customMessages.SUCCESS_DELETE_ITEM
         else

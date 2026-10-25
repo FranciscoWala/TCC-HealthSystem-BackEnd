@@ -6,31 +6,24 @@
  * Versão: 1.0
 ********************************************************************************************/
 
-//IMPORT DA BIBLIOTECA PARA MANIPULAR DADOS NO BD MYSQL
-const knex = require('knex')
+const knexConection = require('../../global_knex/global_knex.js')
 
-//IMPORT DO ARQUIVO DE CONFIGURAÇÃO PARA ACESSO AO BD
-const knexDataBaseConfig = require('../../database_config/knexConfig.js')
-
-//CRIAR A CONEXÃO COM O BANCO DE DADOS CONFORME A CONFIGURAÇÃO
-const knexConection = knex(knexDataBaseConfig.development)
-
-const insertEstoque = async function (estoque) {
+const insertEstoque = async function (estoque, transaction = null) {
     try {
-        let sql = `insert into tbl_estoque (
-            quantidade_em_estoque,
-            id_usuarios,
-            id_medicamentos
-        ) values (
-            '${estoque.quantidade_em_estoque}',
-            ${estoque.id_usuarios},
-            ${estoque.id_medicamentos}
-        );`
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql)
+        let sql = `call procEstoque(?, ?, ?, ?, ?)`
 
-        if (result)
-            return result[0].insertId
+        let result = await connection.raw(sql, [
+            'INSERT',
+            estoque.quantidade_em_estoque,
+            estoque.id_usuarios,
+            estoque.id_medicamentos,
+            null
+        ])
+
+        if (result && result[0][0][0].id)
+            return result[0][0][0].id
         else
             return false
     } catch (error) {
@@ -38,17 +31,21 @@ const insertEstoque = async function (estoque) {
     }
 }
 
-const updateEstoque = async function (estoque) {
+const updateEstoque = async function (estoque, transaction = null) {
     try {
-        let sql = `update tbl_estoque set
-                        estoque = '${estoque.quantidade_em_estoque}',
-                        id_usuarios = ${estoque.id_usuarios},
-                        id_medicamentos = ${estoque.id_medicamentos}
-                    where id = ${estoque.id};`
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql)
+        let sql = `call procEstoque(?, ?, ?, ?, ?)`
 
-        if (result)
+        let result = await connection.raw(sql, [
+            'UPDATE',
+            estoque.quantidade_em_estoque,
+            estoque.id_usuarios,
+            estoque.id_medicamentos,
+            estoque.id
+        ])
+
+        if (result && result[0][0][0].affectedRows > 0)
             return true
         else
             return false
@@ -57,14 +54,22 @@ const updateEstoque = async function (estoque) {
     }
 }
 
-const selectAllEstoques = async function () {
+const selectAllEstoques = async function (transaction = null) {
     try {
-        let sql = `select * from tbl_estoque order by id desc;`
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql)
+        let sql = `call procEstoque(?, ?, ?, ?, ?)`
 
-        if (Array.isArray(result))
-            return result[0]
+        let result = await connection.raw(sql, [
+            'SELECT_ALL',
+            null,
+            null,
+            null,
+            null
+        ])
+
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -72,14 +77,22 @@ const selectAllEstoques = async function () {
     }
 }
 
-const selectByIdEstoque = async function (id) {
+const selectByIdEstoque = async function (id, transaction = null) {
     try {
-        let sql = `select * from tbl_estoque where id = ${id};`
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql)
+        let sql = `call procEstoque(?, ?, ?, ?, ?)`
 
-        if (Array.isArray(result))
-            return result[0]
+        let result = await connection.raw(sql, [
+            'SELECT_BY_ID',
+            null,
+            null,
+            null,
+            id
+        ])
+
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -87,11 +100,19 @@ const selectByIdEstoque = async function (id) {
     }
 }
 
-const deleteEstoque = async function (id) {
+const deleteEstoque = async function (id, transaction = null) {
     try {
-        let sql = `delete from tbl_estoque where id = ${id};`
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql)
+        let sql = `call procEstoque(?, ?, ?, ?, ?)`
+
+        let result = await connection.raw(sql, [
+            'DELETE',
+            null,
+            null,
+            null,
+            id
+        ])
 
         if (result)
             return true

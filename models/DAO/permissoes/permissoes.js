@@ -6,20 +6,15 @@
  * Versão: 1.0
 ********************************************************************************************/
 
-//IMPORT DA BIBLIOTECA PARA MANIPULAR DADOS NO BD MYSQL
-const knex = require('knex')
+const knexConection = require('../../global_knex/global_knex.js')
 
-//IMPORT DO ARQUIVO DE CONFIGURAÇÃO PARA ACESSO AO BD
-const knexDataBaseConfig = require('../../database_config/knexConfig.js')
-
-//CRIAR A CONEXÃO COM O BANCO DE DADOS CONFORME A CONFIGURAÇÃO
-const knexConection = knex(knexDataBaseConfig.development)
-
-const insertPermissoes = async function (permissoes) {
+const insertPermissoes = async function (permissoes, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procPermissoes(?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'INSERT',
             permissoes.permissao,
             null
@@ -34,11 +29,13 @@ const insertPermissoes = async function (permissoes) {
     }
 }
 
-const updatePermissoes = async function (permissoes) {
+const updatePermissoes = async function (permissoes, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procPermissoes(?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'UPDATE',
             permissoes.permissao,
             permissoes.id
@@ -53,11 +50,13 @@ const updatePermissoes = async function (permissoes) {
     }
 }
 
-const selectAllPermissoes = async function () {
+const selectAllPermissoes = async function (transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procPermissoes(?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'SELECT_ALL',
             null,
             null
@@ -72,11 +71,13 @@ const selectAllPermissoes = async function () {
     }
 }
 
-const selectByIdPermissoes = async function (id) {
+const selectByIdPermissoes = async function (id, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procPermissoes(?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'SELECT_BY_ID',
             null,
             id
@@ -91,11 +92,13 @@ const selectByIdPermissoes = async function (id) {
     }
 }
 
-const deletePermissoes = async function (id) {
+const deletePermissoes = async function (id, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procPermissoes(?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'DELETE',
             null,
             id

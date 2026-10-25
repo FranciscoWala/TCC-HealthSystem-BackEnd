@@ -7,18 +7,15 @@
  * Versão: 1.0
 ********************************************************************************************/
 
-const knex = require('knex')
+const knexConection = require('../../global_knex/global_knex.js')
 
-const knexDataBaseConfig = require('../../database_config/knexConfig.js')
-
-const knexConection = knex(knexDataBaseConfig.development)
-
-
-const insertHistoricoMedicamento = async function (historicoMedicamento) {
+const insertHistoricoMedicamento = async function (historicoMedicamento, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'INSERT',
             historicoMedicamento.hora_ingestao,
             historicoMedicamento.id_paciente,
@@ -43,11 +40,13 @@ const insertHistoricoMedicamento = async function (historicoMedicamento) {
     }
 }
 
-async function updateHistoricoMedicamento(historicoMedicamento, id) {
+async function updateHistoricoMedicamento(historicoMedicamento, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'UPDATE',
             historicoMedicamento.hora_ingestao,
             historicoMedicamento.id_paciente,
@@ -72,11 +71,13 @@ async function updateHistoricoMedicamento(historicoMedicamento, id) {
     }
 }
 
-async function getHistoricoMedicamento() {
+async function getHistoricoMedicamento(transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'SELECT_ALL',
             null,
             null,
@@ -101,11 +102,13 @@ async function getHistoricoMedicamento() {
     }
 }
 
-async function getHistoricoMedicamentoByID(id) {
+async function getHistoricoMedicamentoByID(id, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'SELECT_BY_ID',
             null,
             null,
@@ -130,11 +133,13 @@ async function getHistoricoMedicamentoByID(id) {
     }
 }
 
-const selectByIdHorarioHistoricoMedicamento = async function (idHorario) {
+const selectByIdHorarioHistoricoMedicamento = async function (idHorario, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'SELECT_BY_ID_HORARIO',
             null,
             null,
@@ -159,11 +164,13 @@ const selectByIdHorarioHistoricoMedicamento = async function (idHorario) {
     }
 }
 
-async function deleteHistoricoMedicamentoByID(id) {
+async function deleteHistoricoMedicamentoByID(id, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'DELETE',
             null,
             null,

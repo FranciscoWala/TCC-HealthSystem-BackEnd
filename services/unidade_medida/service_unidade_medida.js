@@ -22,14 +22,14 @@ const validarDadosUnidadeMedida = function (dados) {
 }
 
 // Inserir um novo registro
-const inserirUnidadeMedidaService = async function (dados) {
+const inserirUnidadeMedidaService = async function (dados, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacao = validarDadosUnidadeMedida(dados)
         if (validacao)
              return validacao
 
-        let result = await unidadeMedidaDAO.insertUnidadeMedida(dados)
+        let result = await unidadeMedidaDAO.insertUnidadeMedida(dados, transaction)
         if (result) {
             dados.id = result
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
@@ -45,10 +45,10 @@ const inserirUnidadeMedidaService = async function (dados) {
 }
 
 // Atualizar um registro
-const atualizarUnidadeMedidaService = async function (dados, id) {
+const atualizarUnidadeMedidaService = async function (dados, id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarUnidadeMedidaService(id)
+        let buscarID = await buscarUnidadeMedidaService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
@@ -57,7 +57,7 @@ const atualizarUnidadeMedidaService = async function (dados, id) {
             return validacao
 
         dados.id = Number(id)
-        let result = await unidadeMedidaDAO.updateUnidadeMedida(dados)
+        let result = await unidadeMedidaDAO.updateUnidadeMedida(dados, transaction)
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
@@ -72,10 +72,10 @@ const atualizarUnidadeMedidaService = async function (dados, id) {
 }
 
 // Listar registros
-const listarUnidadeMedidaService = async function () {
+const listarUnidadeMedidaService = async function (transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let result = await unidadeMedidaDAO.selectAllUnidadeMedida()
+        let result = await unidadeMedidaDAO.selectAllUnidadeMedida(transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -93,13 +93,13 @@ const listarUnidadeMedidaService = async function () {
 }
 
 // Buscar um registro pelo ID
-const buscarUnidadeMedidaService = async function (id) {
+const buscarUnidadeMedidaService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacaoId = validarDados.validarIDs(id, customMessages)
         if (validacaoId) return validacaoId
 
-        let result = await unidadeMedidaDAO.selectByIdUnidadeMedida(id)
+        let result = await unidadeMedidaDAO.selectByIdUnidadeMedida(id, transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -116,14 +116,14 @@ const buscarUnidadeMedidaService = async function (id) {
 }
 
 // Excluir um registro
-const excluirUnidadeMedidaService = async function (id) {
+const excluirUnidadeMedidaService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarUnidadeMedidaService(id)
+        let buscarID = await buscarUnidadeMedidaService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
-        let result = await unidadeMedidaDAO.deleteUnidadeMedida(id)
+        let result = await unidadeMedidaDAO.deleteUnidadeMedida(id, transaction)
         if (result) 
             return customMessages.SUCCESS_DELETE_ITEM
         else

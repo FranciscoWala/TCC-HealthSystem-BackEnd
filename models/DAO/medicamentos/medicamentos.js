@@ -6,26 +6,22 @@
  * Versão: 1.0
 ********************************************************************************************/
 
-//IMPORT DA BIBLIOTECA PARA MANIPULAR DADOS NO BD MYSQL
-const knex = require('knex')
+const knexConection = require('../../global_knex/global_knex')
 
-//IMPORT DO ARQUIVO DE CONFIGURAÇÃO PARA ACESSO AO BD
-const knexDataBaseConfig = require('../../database_config/knexConfig.js')
-
-//CRIAR A CONEXÃO COM O BANCO DE DADOS CONFORME A CONFIGURAÇÃO
-const knexConection = knex(knexDataBaseConfig.development)
-
-const insertMedicamento = async function (medicamentos) {
+const insertMedicamento = async function (medicamentos, transaction = null) {
     try {
-        let sql = `call procMedicamento(?, ?, ?, ?, ?, ?, ?)`
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql, [
+        let sql = `call procMedicamento(?, ?, ?, ?, ?, ?, ?, ?)`
+
+        let result = await connection.raw(sql, [
             'INSERT',
             medicamentos.nome,
             medicamentos.imagem,
             medicamentos.concentracao,
             medicamentos.id_unidade_medida_embalagem,
             medicamentos.id_tipo_dosagem,
+            medicamentos.id_usuario,
             null
         ])
 
@@ -38,17 +34,20 @@ const insertMedicamento = async function (medicamentos) {
     }
 }
 
-const updateMedicamento = async function (medicamentos) {
+const updateMedicamento = async function (medicamentos, transaction = null) {
     try {
-        let sql = `call procMedicamento(?, ?, ?, ?, ?, ?, ?)`
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql, [
+        let sql = `call procMedicamento(?, ?, ?, ?, ?, ?, ?, ?)`
+
+        let result = await connection.raw(sql, [
             'UPDATE',
             medicamentos.nome,
             medicamentos.imagem,
             medicamentos.concentracao,
             medicamentos.id_unidade_medida_embalagem,
             medicamentos.id_tipo_dosagem,
+            medicamentos.id_usuario,
             medicamentos.id
         ])
 
@@ -61,17 +60,20 @@ const updateMedicamento = async function (medicamentos) {
     }
 }
 
-const selectAllMedicamentos = async function () {
+const selectAllMedicamentos = async function (idUsuario, transaction = null) {
     try {
-        let sql = `call procMedicamento(?, ?, ?, ?, ?, ?, ?)`
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql, [
+        let sql = `call procMedicamento(?, ?, ?, ?, ?, ?, ?, ?)`
+
+        let result = await connection.raw(sql, [
             'SELECT_ALL',
             null,
             null,
             null,
             null,
             null,
+            idUsuario,
             null
         ])
 
@@ -84,17 +86,20 @@ const selectAllMedicamentos = async function () {
     }
 }
 
-const selectByIdMedicamento = async function (id) {
+const selectByIdMedicamento = async function (id, idUsuario, transaction = null) {
     try {
-        let sql = `call procMedicamento(?, ?, ?, ?, ?, ?, ?)`
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql, [
+        let sql = `call procMedicamento(?, ?, ?, ?, ?, ?, ?, ?)`
+
+        let result = await connection.raw(sql, [
             'SELECT_BY_ID',
             null,
             null,
             null,
             null,
             null,
+            idUsuario,
             id
         ])
 
@@ -107,21 +112,24 @@ const selectByIdMedicamento = async function (id) {
     }
 }
 
-const deleteMedicamento = async function (id) {
+const deleteMedicamento = async function (id, idUsuario, transaction = null) {
     try {
-        let sql = `call procMedicamento(?, ?, ?, ?, ?, ?, ?)`
+        let connection = transaction || knexConection
 
-        let result = knexConection.raw(sql, [
+        let sql = `call procMedicamento(?, ?, ?, ?, ?, ?, ?, ?)`
+
+        let result = await connection.raw(sql, [
             'DELETE',
             null,
             null,
             null,
             null,
             null,
+            idUsuario,
             id
         ])
 
-        if (result)
+        if (result && result[0][0][0].affectedRows > 0)
             return true
         else
             return false

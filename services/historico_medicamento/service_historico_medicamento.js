@@ -20,14 +20,14 @@ const validarDadosHistoricoMedicamento = function (dados) {
     return validarDados.validarDados(historicoMedicamentoSchema, dados, customMessages)
 }
 
-const inserirHistoricoMedicamentoService = async function (dados) {
+const inserirHistoricoMedicamentoService = async function (dados, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacao = validarDadosHistoricoMedicamento(dados)
         if (validacao)
             return validacao
 
-        let result = await historicoMedicamentoDAO.insertHistoricoMedicamento(dados)
+        let result = await historicoMedicamentoDAO.insertHistoricoMedicamento(dados, transaction)
         if (result) {
             dados.id = result
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
@@ -45,10 +45,10 @@ const inserirHistoricoMedicamentoService = async function (dados) {
     }
 }
 
-const atualizarHistoricoMedicamentoService = async function (dados, id) {
+const atualizarHistoricoMedicamentoService = async function (dados, id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarHistoricoMedicamentoService(id)
+        let buscarID = await buscarHistoricoMedicamentoService(id, transaction)
         if (!buscarID.status)
             return buscarID
 
@@ -57,7 +57,7 @@ const atualizarHistoricoMedicamentoService = async function (dados, id) {
             return validacao
 
         dados.id = Number(id)
-        let result = await historicoMedicamentoDAO.updateHistoricoMedicamento(dados, id)
+        let result = await historicoMedicamentoDAO.updateHistoricoMedicamento(dados, id, transaction)
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
@@ -72,10 +72,10 @@ const atualizarHistoricoMedicamentoService = async function (dados, id) {
     }
 }
 
-const listarHistoricoMedicamentoService = async function () {
+const listarHistoricoMedicamentoService = async function (transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let result = await historicoMedicamentoDAO.getHistoricoMedicamento()
+        let result = await historicoMedicamentoDAO.getHistoricoMedicamento(transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -93,14 +93,14 @@ const listarHistoricoMedicamentoService = async function () {
     }
 }
 
-const buscarHistoricoMedicamentoService = async function (id) {
+const buscarHistoricoMedicamentoService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacaoId = validarDados.validarIDs(id, customMessages)
         if (validacaoId)
             return validacaoId
 
-        let result = await historicoMedicamentoDAO.getHistoricoMedicamentoByID(id)
+        let result = await historicoMedicamentoDAO.getHistoricoMedicamentoByID(id, transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -117,7 +117,7 @@ const buscarHistoricoMedicamentoService = async function (id) {
     }
 }
 
-const buscarHistoricoPorIdHorarioService = async function (idHorario) {
+const buscarHistoricoPorIdHorarioService = async function (idHorario, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
@@ -125,7 +125,7 @@ const buscarHistoricoPorIdHorarioService = async function (idHorario) {
         if (validarID)
             return validarID
 
-        let result = await historicoMedicamentoDAO.selectByIdHorarioHistoricoMedicamento(idHorario)
+        let result = await historicoMedicamentoDAO.selectByIdHorarioHistoricoMedicamento(idHorario, transaction)
 
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -142,14 +142,14 @@ const buscarHistoricoPorIdHorarioService = async function (idHorario) {
     }
 }
 
-const excluirHistoricoMedicamentoService = async function (id) {
+const excluirHistoricoMedicamentoService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarHistoricoMedicamentoService(id)
+        let buscarID = await buscarHistoricoMedicamentoService(id, transaction)
         if (!buscarID.status)
             return buscarID
 
-        let result = await historicoMedicamentoDAO.deleteHistoricoMedicamentoByID(id)
+        let result = await historicoMedicamentoDAO.deleteHistoricoMedicamentoByID(id, transaction)
         if (result)
             return customMessages.SUCCESS_DELETE_ITEM
         else

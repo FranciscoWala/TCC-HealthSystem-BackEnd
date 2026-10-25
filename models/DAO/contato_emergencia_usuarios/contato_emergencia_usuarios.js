@@ -11,76 +11,115 @@
 const knexConection = require('../../global_knex/global_knex.js')
 
 
-async function insertContatoEmergenciaUsuario(contatoEmergenciaUsuario){
-    let sql = 
-        `call procContatoEmergenciaUsuarios(?, ?, ?, ?);`
+async function insertContatoEmergenciaUsuario(contatoEmergenciaUsuario, transaction = null) {
+    try {
+        let connection = transaction || knexConection
 
-    let result = await knexConection.raw(sql)
+        let sql =
+            `call procContatoEmergenciaUsuarios(?, ?, ?, ?);`
 
-    if (result)
-        return result[0].insertId
-    else
+        let result = await connection.raw(sql, [
+            'INSERT',
+            contatoEmergenciaUsuario.id_contato_de_emergencia,
+            contatoEmergenciaUsuario.id_usuarios,
+            null
+        ])
+
+        if (result && result[0][0][0].id)
+            return result[0][0][0].id
+        else
+            return false
+    } catch (error) {
         return false
+    }
 }
 
-async function updateContatoEmergenciaUsuario(contatoEmergenciaUsuario, id) {
-    let sql = 
-    `
-        update tbl_contato_emergencia_usuario
-            set 
-                id_contato_de_emergencia = '${contatoEmergenciaUsuario.id_contato_de_emergencia}',
-                id_usuario = '${contatoEmergenciaUsuario.id_usuario}'
-            where id = ${id};
-    `
+async function updateContatoEmergenciaUsuario(contatoEmergenciaUsuario, transaction = null) {
+    try {
+        let connection = transaction || knexConection
 
-    let result = await knexConection.raw(sql)
+        let sql = `call procContatoEmergenciaUsuarios(?, ?, ?, ?);`
 
-    if(result)
-        return true
-    else
+        let result = await connection.raw(sql, [
+            'UPDATE',
+            contatoEmergenciaUsuario.id_contato_de_emergencia,
+            contatoEmergenciaUsuario.id_usuarios,
+            contatoEmergenciaUsuario.id
+        ])
+
+        if (result && result[0][0][0].affectedRows > 0)
+            return true
+        else
+            return false
+    } catch (error) {
         return false
+    }
 }
 
-async function selectContatoEmergenciaUsuario() {
-    let sql = 
-    `
-        select * from tbl_contatos_emergencia_usuario;    
-    `
+async function selectContatoEmergenciaUsuario(transaction = null) {
+    try {
+        let connection = transaction || knexConection
 
-    let result = await knexConection.raw(sql)
+        let sql = `call procContatoEmergenciaUsuarios(?, ?, ?, ?);`
 
-    if(result)
-        return result[0]
-    else
+        let result = await connection.raw(sql, [
+            'SELECT_ALL',
+            null,
+            null,
+            null
+        ])
+
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
+        else
+            return false
+    } catch (error) {
         return false
+    }
 }
 
-async function selectContatosEmergenciaByID(id) {
-    let sql =
-    `
-        select * from tbl_contato_de_emergencia where id = ${id}
-    `
+async function selectContatosEmergenciaByID(id, transaction = null) {
+    try {
+        let connection = transaction || knexConection
 
-    let result = await knexConection.raw(sql)
+        let sql = `call procContatoEmergenciaUsuarios(?, ?, ?, ?);`
 
-    if(result)
-        return result[0]
-    else 
+        let result = await connection.raw(sql, [
+            'SELECT_BY_ID',
+            null,
+            null,
+            id
+        ])
+
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
+        else
+            return false
+    } catch (error) {
         return false
+    }
 }
 
-async function deleteContatoEmergenciaUsuarioByID(id) {
-    let sql =
-    `
-        delete from tbl_contato_emergencia_usuario where id = ${id}
-    `
+async function deleteContatoEmergenciaUsuarioByID(id, transaction = null) {
+    try {
+        let connection = transaction || knexConection
 
-    let result = await knexConection.raw(sql)
+        let sql = `call procContatoEmergenciaUsuarios(?, ?, ?, ?);`
 
-    if(result)
-        return true
-    else
+        let result = await connection.raw(sql, [
+            'DELETE',
+            null,
+            null,
+            id
+        ])
+
+        if (result)
+            return true
+        else
+            return false
+    } catch (error) {
         return false
+    }
 }
 
 module.exports = {

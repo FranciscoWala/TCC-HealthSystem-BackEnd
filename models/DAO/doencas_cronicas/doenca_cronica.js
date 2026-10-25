@@ -6,20 +6,15 @@
  * Versão: 1.0
 ********************************************************************************************/
 
-//IMPORT DA BIBLIOTECA PARA MANIPULAR DADOS NO BD MYSQL
-const knex = require('knex')
+const knexConection = require('../../global_knex/global_knex.js')
 
-//IMPORT DO ARQUIVO DE CONFIGURAÇÃO PARA ACESSO AO BD
-const knexDataBaseConfig = require('../../database_config/knexConfig.js')
-
-//CRIAR A CONEXÃO COM O BANCO DE DADOS CONFORME A CONFIGURAÇÃO
-const knexConection = knex(knexDataBaseConfig.development)
-
-const insertDoencaCronica = async function (doencaCronica) {
+const insertDoencaCronica = async function (doencaCronica, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procDoencaCronica(?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'INSERT',
             doencaCronica.nome_doenca,
             null
@@ -34,11 +29,13 @@ const insertDoencaCronica = async function (doencaCronica) {
     }
 }
 
-const updateDoencaCronica = async function (doencaCronica) {
+const updateDoencaCronica = async function (doencaCronica, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procDoencaCronica(?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'UPDATE',
             doencaCronica.nome_doenca,
             doencaCronica.id
@@ -53,11 +50,13 @@ const updateDoencaCronica = async function (doencaCronica) {
     }
 }
 
-const selectAllDoencasCronicas = async function () {
+const selectAllDoencasCronicas = async function (transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procDoencaCronica(?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'SELECT_ALL',
             null,
             null
@@ -72,11 +71,13 @@ const selectAllDoencasCronicas = async function () {
     }
 }
 
-const selectByIdDoencasCronicas = async function (id) {
+const selectByIdDoencasCronicas = async function (id, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procDoencaCronica(?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'SELECT_BY_ID',
             null,
             id
@@ -91,11 +92,13 @@ const selectByIdDoencasCronicas = async function (id) {
     }
 }
 
-const deleteDoencaCronica = async function (id) {
+const deleteDoencaCronica = async function (id, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procDoencaCronica(?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'DELETE',
             null,
             id

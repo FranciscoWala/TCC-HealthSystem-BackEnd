@@ -6,20 +6,15 @@
  * Versão: 1.0
 ********************************************************************************************/
 
-//IMPORT DA BIBLIOTECA PARA MANIPULAR DADOS NO BD MYSQL
-const knex = require('knex')
+const knexConection = require('../../global_knex/global_knex.js')
 
-//IMPORT DO ARQUIVO DE CONFIGURAÇÃO PARA ACESSO AO BD
-const knexDataBaseConfig = require('../../database_config/knexConfig.js')
-
-//CRIAR A CONEXÃO COM O BANCO DE DADOS CONFORME A CONFIGURAÇÃO
-const knexConection = knex(knexDataBaseConfig.development)
-
-const insertUnidadeMedida = async function (unidadeMedida) {
+const insertUnidadeMedida = async function (unidadeMedida, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procUnidadeMedida(?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'INSERT',
             unidadeMedida.unidade_medida,
             unidadeMedida.sigla,
@@ -35,11 +30,13 @@ const insertUnidadeMedida = async function (unidadeMedida) {
     }
 }
 
-const updateUnidadeMedida = async function (unidadeMedida) {
+const updateUnidadeMedida = async function (unidadeMedida, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procUnidadeMedida(?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'UPDATE',
             unidadeMedida.unidade_medida,
             unidadeMedida.sigla,
@@ -55,11 +52,13 @@ const updateUnidadeMedida = async function (unidadeMedida) {
     }
 }
 
-const selectAllUnidadeMedida = async function () {
+const selectAllUnidadeMedida = async function (transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procUnidadeMedida(?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'SELECT_ALL',
             null,
             null,
@@ -75,11 +74,13 @@ const selectAllUnidadeMedida = async function () {
     }
 }
 
-const selectByIdUnidadeMedida = async function (id) {
+const selectByIdUnidadeMedida = async function (id, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procUnidadeMedida(?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'SELECT_BY_ID',
             null,
             null,
@@ -95,11 +96,13 @@ const selectByIdUnidadeMedida = async function (id) {
     }
 }
 
-const deleteUnidadeMedida = async function (id) {
+const deleteUnidadeMedida = async function (id, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procUnidadeMedida(?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'DELETE',
             null,
             null,

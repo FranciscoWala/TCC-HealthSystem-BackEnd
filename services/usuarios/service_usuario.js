@@ -20,14 +20,14 @@ const validarDadosUsuario = function (dados) {
     return validarDados.validarDados(usuarioSchema, dados, customMessages)
 }
 
-const inserirUsuarioService = async function (dados) {
+const inserirUsuarioService = async function (dados, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacao = validarDadosUsuario(dados)
         if (validacao) 
             return validacao
 
-        let result = await usuarioDAO.insertUsuario(dados)
+        let result = await usuarioDAO.insertUsuario(dados, transaction)
         if (result) {
             dados.id = result
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
@@ -43,10 +43,10 @@ const inserirUsuarioService = async function (dados) {
     }
 }
 
-const atualizarUsuarioService = async function (dados, id) {
+const atualizarUsuarioService = async function (dados, id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarUsuarioService(id)
+        let buscarID = await buscarUsuarioService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
@@ -55,7 +55,7 @@ const atualizarUsuarioService = async function (dados, id) {
             return validacao
 
         dados.id = Number(id)
-        let result = await usuarioDAO.updateUsuario(dados)
+        let result = await usuarioDAO.updateUsuario(dados, transaction)
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
@@ -70,10 +70,10 @@ const atualizarUsuarioService = async function (dados, id) {
     }
 }
 
-const listarUsuarioService = async function () {
+const listarUsuarioService = async function (transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let result = await usuarioDAO.selectAllUsuarios()
+        let result = await usuarioDAO.selectAllUsuarios(transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -91,14 +91,14 @@ const listarUsuarioService = async function () {
     }
 }
 
-const buscarUsuarioService = async function (id) {
+const buscarUsuarioService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacaoId = validarDados.validarIDs(id, customMessages)
         if (validacaoId) 
             return validacaoId
 
-        let result = await usuarioDAO.selectByIdUsuario(id)
+        let result = await usuarioDAO.selectByIdUsuario(id, transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -115,14 +115,38 @@ const buscarUsuarioService = async function (id) {
     }
 }
 
-const excluirUsuarioService = async function (id) {
+const buscarUsuarioPorEmailService = async function (email, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarUsuarioService(id)
+        let validarEmail = validarDados.validarDados(email.email, customMessages)
+        if (validarEmail) 
+            return validarEmail
+
+        let result = await usuarioDAO.selectUsuarioByEmail(email, transaction)
+        if (result) {
+            if (result.length > 0) {
+                customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
+                customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
+                customMessages.DEFAULT_MESSAGE.response.usuario = result
+                
+                return customMessages.DEFAULT_MESSAGE
+            } else
+                return customMessages.ERROR_NOT_FOUND
+        } else
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
+    } catch (error) {
+        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
+    }
+}
+
+const excluirUsuarioService = async function (id, transaction = null) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+    try {
+        let buscarID = await buscarUsuarioService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
-        let result = await usuarioDAO.deleteUsuario(id)
+        let result = await usuarioDAO.deleteUsuario(id, transaction)
         if (result) 
             return customMessages.SUCCESS_DELETE_ITEM
         else
@@ -132,10 +156,10 @@ const excluirUsuarioService = async function (id) {
     }
 }
 
-const listarDadosUsuariosService = async function () {
+const listarDadosUsuariosService = async function (transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let result = await usuarioDAO.selectDadosUsuarios()
+        let result = await usuarioDAO.selectDadosUsuarios(transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -159,5 +183,6 @@ module.exports = {
     listarUsuarioService,
     buscarUsuarioService,
     excluirUsuarioService,
+    buscarUsuarioPorEmailService,
     listarDadosUsuariosService
 }

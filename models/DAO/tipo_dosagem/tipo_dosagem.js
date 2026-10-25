@@ -6,20 +6,15 @@
  * Versão: 1.0
 ********************************************************************************************/
 
-//IMPORT DA BIBLIOTECA PARA MANIPULAR DADOS NO BD MYSQL
-const knex = require('knex')
+const knexConection = require('../../global_knex/global_knex.js')
 
-//IMPORT DO ARQUIVO DE CONFIGURAÇÃO PARA ACESSO AO BD
-const knexDataBaseConfig = require('../../database_config/knexConfig.js')
-
-//CRIAR A CONEXÃO COM O BANCO DE DADOS CONFORME A CONFIGURAÇÃO
-const knexConection = knex(knexDataBaseConfig.development)
-
-const insertTipoDosagem = async function (tipoDosagem) {
+const insertTipoDosagem = async function (tipoDosagem, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procTipoDosagem(?, ?, ?);`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'INSERT',
             tipoDosagem.tipo_dosagem,
             null
@@ -34,11 +29,13 @@ const insertTipoDosagem = async function (tipoDosagem) {
     }
 }
 
-const updateTipoDosagem = async function (tipoDosagem) {
+const updateTipoDosagem = async function (tipoDosagem, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procTipoDosagem(?, ?, ?);`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'UPDATE',
             tipoDosagem.tipo_dosagem,
             tipoDosagem.id
@@ -53,11 +50,13 @@ const updateTipoDosagem = async function (tipoDosagem) {
     }
 }
 
-const selectAllTipoDosagem = async function () {
+const selectAllTipoDosagem = async function (transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procTipoDosagem(?, ?, ?);`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'SELECT_ALL',
             null,
             null
@@ -72,11 +71,13 @@ const selectAllTipoDosagem = async function () {
     }
 }
 
-const selectByIdTipoDosagem = async function (id) {
+const selectByIdTipoDosagem = async function (id, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procTipoDosagem(?, ?, ?);`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'SELECT_BY_ID',
             null,
             id
@@ -91,11 +92,13 @@ const selectByIdTipoDosagem = async function (id) {
     }
 }
 
-const deleteTipoDosagem = async function (id) {
+const deleteTipoDosagem = async function (id, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procTipoDosagem(?, ?, ?);`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'DELETE',
             null,
             id

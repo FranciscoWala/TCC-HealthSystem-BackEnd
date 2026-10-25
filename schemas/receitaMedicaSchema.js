@@ -5,44 +5,48 @@
  * Versão: 1.0
 **************************************************************************************/
 
-const Joi = require('joi')
+const JOI = require('joi')
 
-const receitaMedicaSchema = Joi.object({
-    id_usuario: Joi.number()
+const receitaMedicaSchema = JOI.object({
+    id_usuario: JOI.number()
                 .integer()
                 .min(1)
                 .required(),
 
-    id_medicamento: Joi.number()
+    id_medicamento: JOI.number()
                     .integer()
                     .min(1)
                     .required(),
     
-    frequencia: Joi.string()
+    frequencia: JOI.string()
                 .pattern(/^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/)
                 .required(),
 
-    dosagem: Joi.number()
+    dosagem: JOI.number()
                 .min(0)
                 .max(999.99)
                 .precision(2)
                 .required(),
 
-    data_hora_inicio: Joi.string()
+    data_hora_inicio: JOI.string()
                         .pattern(/^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/)
                         .required(),
 
-    id_unidade_medida: Joi.number()
+    data_inicio: JOI.date()
+                .iso()
+                .required(),
+
+    id_unidade_medida: JOI.number()
                         .integer()
                         .min(1)
                         .required(),
     
-    id_tipo_intervalo: Joi.number()
+    id_tipo_intervalo: JOI.number()
                         .integer()
                         .min(1)
                         .required(),
 
-    descricao: Joi.string()
+    descricao: JOI.string()
 })
 
 module.exports = receitaMedicaSchema

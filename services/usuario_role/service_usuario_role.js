@@ -20,14 +20,14 @@ const validarDadosUsuarioRole = function (dados) {
     return validarDados.validarDados(usuarioRoleSchema, dados, customMessages)
 }
 
-const inserirUsuarioRoleService = async function (dados) {
+const inserirUsuarioRoleService = async function (dados, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacao = validarDadosUsuarioRole(dados)
         if (validacao) 
             return validacao
 
-        let result = await usuarioRoleDAO.insertUsuarioRole(dados)
+        let result = await usuarioRoleDAO.insertUsuarioRole(dados, transaction)
         if (result) {
             dados.id = result
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
@@ -43,10 +43,10 @@ const inserirUsuarioRoleService = async function (dados) {
     }
 }
 
-const atualizarUsuarioRoleService = async function (dados, id) {
+const atualizarUsuarioRoleService = async function (dados, id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarUsuarioRoleService(id)
+        let buscarID = await buscarUsuarioRoleService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
@@ -55,7 +55,7 @@ const atualizarUsuarioRoleService = async function (dados, id) {
             return validacao
 
         dados.id = Number(id)
-        let result = await usuarioRoleDAO.updateUsuarioRole(dados, id)
+        let result = await usuarioRoleDAO.updateUsuarioRole(dados, id, transaction)
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
@@ -70,10 +70,10 @@ const atualizarUsuarioRoleService = async function (dados, id) {
     }
 }
 
-const listarUsuarioRoleService = async function () {
+const listarUsuarioRoleService = async function (transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let result = await usuarioRoleDAO.selectUsuarioRole()
+        let result = await usuarioRoleDAO.selectUsuarioRole(transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -91,14 +91,14 @@ const listarUsuarioRoleService = async function () {
     }
 }
 
-const buscarUsuarioRoleService = async function (id) {
+const buscarUsuarioRoleService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacaoId = validarDados.validarIDs(id, customMessages)
         if (validacaoId) 
             return validacaoId
 
-        let result = await usuarioRoleDAO.selectUsuarioRoleByID(id)
+        let result = await usuarioRoleDAO.selectUsuarioRoleByID(id, transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -115,14 +115,14 @@ const buscarUsuarioRoleService = async function (id) {
     }
 }
 
-const excluirUsuarioRoleService = async function (id) {
+const excluirUsuarioRoleService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarUsuarioRoleService(id)
+        let buscarID = await buscarUsuarioRoleService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
-        let result = await usuarioRoleDAO.deleteUsuarioRoleByID(id)
+        let result = await usuarioRoleDAO.deleteUsuarioRoleByID(id, transaction)
         if (result) 
             return customMessages.SUCCESS_DELETE_ITEM
         else

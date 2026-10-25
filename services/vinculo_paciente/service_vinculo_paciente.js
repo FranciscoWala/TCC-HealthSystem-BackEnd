@@ -20,14 +20,14 @@ const validarDadosVinculoPaciente = function (dados) {
     return validarDados.validarDados(vinculoPacienteSchema, dados, customMessages)
 }
 
-const inserirVinculoPacienteService = async function (dados) {
+const inserirVinculoPacienteService = async function (dados, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacao = validarDadosVinculoPaciente(dados)
         if (validacao) 
             return validacao
 
-        let result = await vinculoPacienteDAO.insertVinculoPaciente(dados)
+        let result = await vinculoPacienteDAO.insertVinculoPaciente(dados, transaction)
         if (result) {
             dados.id = result
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
@@ -43,10 +43,10 @@ const inserirVinculoPacienteService = async function (dados) {
     }
 }
 
-const atualizarVinculoPacienteService = async function (dados, id) {
+const atualizarVinculoPacienteService = async function (dados, id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarVinculoPacienteService(id)
+        let buscarID = await buscarVinculoPacienteService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
@@ -55,7 +55,7 @@ const atualizarVinculoPacienteService = async function (dados, id) {
             return validacao
 
         dados.id = Number(id)
-        let result = await vinculoPacienteDAO.updateVinculoPaciente(dados)
+        let result = await vinculoPacienteDAO.updateVinculoPaciente(dados, transaction)
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
@@ -70,10 +70,10 @@ const atualizarVinculoPacienteService = async function (dados, id) {
     }
 }
 
-const listarVinculoPacienteService = async function () {
+const listarVinculoPacienteService = async function (transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let result = await vinculoPacienteDAO.selectAllVinculosPacientes()
+        let result = await vinculoPacienteDAO.selectAllVinculosPacientes(transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -91,14 +91,14 @@ const listarVinculoPacienteService = async function () {
     }
 }
 
-const buscarVinculoPacienteService = async function (id) {
+const buscarVinculoPacienteService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacaoId = validarDados.validarIDs(id, customMessages)
         if (validacaoId) 
             return validacaoId
 
-        let result = await vinculoPacienteDAO.selectByIdVinculoPaciente(id)
+        let result = await vinculoPacienteDAO.selectByIdVinculoPaciente(id, transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -115,14 +115,14 @@ const buscarVinculoPacienteService = async function (id) {
     }
 }
 
-const excluirVinculoPacienteService = async function (id) {
+const excluirVinculoPacienteService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarVinculoPacienteService(id)
+        let buscarID = await buscarVinculoPacienteService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
-        let result = await vinculoPacienteDAO.deleteVinculoPaciente(id)
+        let result = await vinculoPacienteDAO.deleteVinculoPaciente(id, transaction)
         if (result) 
             return customMessages.SUCCESS_DELETE_ITEM
         else

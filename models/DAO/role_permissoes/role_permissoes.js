@@ -6,29 +6,23 @@
  * Versão: 1.0
 **************************************************************************************/
 
-//IMPORT DA BIBLIOTECA PARA MANIPULAR DADOS NO BD MYSQL
-const knex = require('knex')
+const knexConection = require('../../global_knex/global_knex.js')
 
-//IMPORT DO ARQUIVO DE CONFIGURAÇÃO PARA ACESSO AO BD
-const knexDataBaseConfig = require('../../database_config/knexConfig.js')
-
-//CRIAR A CONEXÃO COM O BANCO DE DADOS CONFORME A CONFIGURAÇÃO
-const knexConection = knex(knexDataBaseConfig.development)
-
-const insertRolePermissoes = async function (rolePermissoes) {
+const insertRolePermissoes = async function (rolePermissoes, transaction = null) {
     try {
-        let sql = `insert into tbl_role_permissoes (
-            id_role,
-            id_permissoes
-        ) values (
-            ${rolePermissoes.id_role},
-            ${rolePermissoes.id_permissoes}
-        );`
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql)
+        let sql = `call procRolePermissoes(?, ?, ?, ?)`
 
-        if (result)
-            return result[0].insertId
+        let result = await connection.raw(sql, [
+            'INSERT',
+            rolePermissoes.id_role,
+            rolePermissoes.id_permissoes,
+            null
+        ])
+
+        if (result && result[0][0][0].id)
+            return result[0][0][0].id
         else
             return false
     } catch (error) {
@@ -36,16 +30,20 @@ const insertRolePermissoes = async function (rolePermissoes) {
     }
 }
 
-const updateRolePermissoes = async function (rolePermissoes) {
+const updateRolePermissoes = async function (rolePermissoes, transaction = null) {
     try {
-        let sql = `update tbl_role_permissoes set
-                        id_role = ${rolePermissoes.id_role},
-                        id_permissoes = ${rolePermissoes.id_permissoes}
-                    where id = ${rolePermissoes.id};`
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql)
+        let sql = `call procRolePermissoes(?, ?, ?, ?)`
 
-        if (result)
+        let result = await connection.raw(sql, [
+            'UPDATE',
+            rolePermissoes.id_role,
+            rolePermissoes.id_permissoes,
+            rolePermissoes.id
+        ])
+
+        if (result && result[0][0][0].affectedRows > 0)
             return true
         else
             return false
@@ -54,14 +52,21 @@ const updateRolePermissoes = async function (rolePermissoes) {
     }
 }
 
-const selectAllRolePermissoes = async function () {
+const selectAllRolePermissoes = async function (transaction = null) {
     try {
-        let sql = `select * from tbl_role_permissoes order by id desc;`
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql)
+        let sql = `call procRolePermissoes(?, ?, ?, ?)`
 
-        if (Array.isArray(result))
-            return result[0]
+        let result = await connection.raw(sql, [
+            'SELECT_ALL',
+            null,
+            null,
+            null
+        ])
+
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -69,14 +74,21 @@ const selectAllRolePermissoes = async function () {
     }
 }
 
-const selectByIdRolePermissoes = async function (id) {
+const selectByIdRolePermissoes = async function (id, transaction = null) {
     try {
-        let sql = `select * from tbl_role_permissoes where id = ${id};`
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql)
+        let sql = `call procRolePermissoes(?, ?, ?, ?)`
 
-        if (Array.isArray(result))
-            return result[0]
+        let result = await connection.raw(sql, [
+            'SELECT_BY_ID',
+            null,
+            null,
+            id
+        ])
+
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -84,41 +96,18 @@ const selectByIdRolePermissoes = async function (id) {
     }
 }
 
-const selectPermissoesByIdRole = async function (idRole) {
+const deleteRolePermissoes = async function (id, transaction = null) {
     try {
-        let sql = ` select * from vw_permissoes_id_role where id_role = ${idRole};`
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql)
+        let sql = `call procRolePermissoes(?, ?, ?, ?)`
 
-        if (Array.isArray(result))
-            return result[0]
-        else 
-            return false
-    } catch (error) {
-        return false
-    }
-}
-
-const selectRolesByIdPermissoes = async function (idPermissoes) {
-    try {
-        let sql = ` select * from vw_role_id_permissoes where id_permissoes = ${idPermissoes};`
-
-        let result = await knexConection.raw(sql)
-
-        if (Array.isArray(result))
-            return result[0]
-        else 
-            return false
-    } catch (error) {
-        return false
-    }
-}
-
-const deleteRolePermissoes = async function (id) {
-    try {
-        let sql = `delete from tbl_role_permissoes where id = ${id};`
-
-        let result = await knexConection.raw(sql)
+        let result = await connection.raw(sql, [
+            'DELETE',
+            null,
+            null,
+            id
+        ])
 
         if (result)
             return true
@@ -134,7 +123,5 @@ module.exports = {
     updateRolePermissoes,
     selectAllRolePermissoes,
     selectByIdRolePermissoes,
-    selectPermissoesByIdRole,
-    selectRolesByIdPermissoes,
     deleteRolePermissoes
 }

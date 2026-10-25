@@ -7,71 +7,59 @@
  * Versão: 1.0
 ********************************************************************************************/
 
+const knexConection = require('../../global_knex/global_knex.js')
 
-const knex = require('knex')
-
-const knexDataBaseConfig = require('../../database_config/knexConfig.js')
-
-const knexConection = knex(knexDataBaseConfig.development)
-
-
-async function insertReceitamedica(receitaMedica) {
-
+async function insertReceitamedica(receitaMedica, transaction = null) {
     try {
-        let sql =
-            `insert into tbl_receita_medica(
-           id_usuario, 
-           id_medicamento,
-           frequencia,
-           dosagem,
-           data_hora_inicio,
-           id_unidade_medida,
-           id_tipo_intervalo,
-           descricao 
-        ).values(
-            ${receitaMedica.id_usuario},
-            ${receitaMedica.id_medicamento},
-            ${receitaMedica.frequencia},
-            ${receitaMedica.dosagem},
-            ${receitaMedica.data_hora_inicio},
-            ${receitaMedica.id_unidade_medida},
-            ${receitaMedica.id_tipo_intervalo},
-            ${receitaMedica.descricao}
-        );`
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql)
+        let sql = `call procReceitaMedica(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-        if (result)
-            return result[0].insertId
+        let result = await connection.raw(sql, [
+            'INSERT',
+            receitaMedica.id_usuario,
+            receitaMedica.id_medicamento,
+            receitaMedica.frequencia,
+            receitaMedica.dosagem,
+            receitaMedica.data_hora_inicio,
+            receitaMedica.data_inicio,
+            receitaMedica.id_unidade_medida,
+            receitaMedica.id_tipo_intervalo,
+            receitaMedica.descricao,
+            null
+        ])
+
+        if (result && result[0][0][0].id)
+            return result[0][0][0].id
         else
             return false
     } catch (error) {
         console.log(error)
-        return false + oila
+        return false
     }
 }
 
-async function updateReceitaMedica(receitaMedica, id) {
-
+async function updateReceitaMedica(receitaMedica, transaction = null) {
     try {
-        let sql =
-            `
-        update tbl_receita_medica
-            set 
-                id_usuario = ${receitaMedica.id_usuario},
-                id_medicamento = ${receitaMedica.id_medicamento},
-                frequencia = ${receitaMedica.frequencia},
-                dosagem = ${receitaMedica.dosagem},
-                data_hora_inicio = ${receitaMedica.data_hora_inicio},
-                id_unidade_medida = ${receitaMedica.id_unidade_medida},
-                id_tipo_intervalo = ${receitaMedica.id_tipo_intervalo},
-                descricao = ${receitaMedica.descricao}
-            where id = ${id};
-    `
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql)
+        let sql = `call procReceitaMedica(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-        if (result)
+        let result = await connection.raw(sql, [
+            'UPDATE',
+            receitaMedica.id_usuario,
+            receitaMedica.id_medicamento,
+            receitaMedica.frequencia,
+            receitaMedica.dosagem,
+            receitaMedica.data_hora_inicio,
+            receitaMedica.data_inicio,
+            receitaMedica.id_unidade_medida,
+            receitaMedica.id_tipo_intervalo,
+            receitaMedica.descricao,
+            receitaMedica.id
+        ])
+
+        if (result && result[0][0][0].affectedRows > 0)
             return true
         else
             return false
@@ -81,18 +69,28 @@ async function updateReceitaMedica(receitaMedica, id) {
     }
 }
 
-async function getReceitaMedica() {
-
+async function getReceitaMedica(transaction = null) {
     try {
-        let sql =
-            `
-            select * from tbl_receita_medica;    
-        `
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql)
+        let sql = `call procReceitaMedica(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-        if (result)
-            return result[0]
+        let result = await connection.raw(sql, [
+            'SELECT_ALL',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        ])
+
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -101,18 +99,28 @@ async function getReceitaMedica() {
     }
 }
 
-async function getReceitaMedicaByID(id) {
-
+async function getReceitaMedicaByID(id, transaction = null) {
     try {
-        let sql =
-            `
-        select * from tbl_receita_medica where id = ${id}
-    `
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql)
+        let sql = `call procReceitaMedica(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-        if (result)
-            return result[0]
+        let result = await connection.raw(sql, [
+            'SELECT_BY_ID',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            id
+        ])
+
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -121,17 +129,28 @@ async function getReceitaMedicaByID(id) {
     }
 }
 
-async function deleteReceitaMedicaByID(id) {
+async function deleteReceitaMedicaByID(id, transaction = null) {
     try {
-        let sql =
-            `
-        delete from tbl_contato_de_emergencia where id = ${id}
-    `
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql)
+        let sql = `call procReceitaMedica(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+
+        let result = await connection.raw(sql, [
+            'DELETE',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            id
+        ])
 
         if (result)
-            return true
+            return result
         else
             return false
     } catch (error) {

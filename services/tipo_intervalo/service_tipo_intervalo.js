@@ -20,14 +20,14 @@ const validarDadosTipoIntervalo = function (dados) {
     return validarDados.validarDados(tipoIntervaloSchema, dados, customMessages)
 }
 
-const inserirTipoIntervaloService = async function (dados) {
+const inserirTipoIntervaloService = async function (dados, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacao = validarDadosTipoIntervalo(dados)
         if (validacao) 
             return validacao
 
-        let result = await tipoIntervaloDAO.insertTipoIntervalo(dados)
+        let result = await tipoIntervaloDAO.insertTipoIntervalo(dados, transaction)
         if (result) {
             dados.id = result
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
@@ -43,11 +43,11 @@ const inserirTipoIntervaloService = async function (dados) {
     }
 }
 
-const atualizarTipoIntervaloService = async function (dados, id) {
+const atualizarTipoIntervaloService = async function (dados, id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
 
-        let buscarID = await buscarTipoIntervaloService(id)
+        let buscarID = await buscarTipoIntervaloService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
@@ -56,7 +56,7 @@ const atualizarTipoIntervaloService = async function (dados, id) {
             return validacao
 
         dados.id = Number(id)
-        let result = await tipoIntervaloDAO.updateTipoIntervalo(dados)
+        let result = await tipoIntervaloDAO.updateTipoIntervalo(dados, transaction)
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
@@ -71,10 +71,10 @@ const atualizarTipoIntervaloService = async function (dados, id) {
     }
 }
 
-const listarTipoIntervaloService = async function () {
+const listarTipoIntervaloService = async function (transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let result = await tipoIntervaloDAO.selectAllTipoIntervalo()
+        let result = await tipoIntervaloDAO.selectAllTipoIntervalo(transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -92,14 +92,14 @@ const listarTipoIntervaloService = async function () {
     }
 }
 
-const buscarTipoIntervaloService = async function (id) {
+const buscarTipoIntervaloService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacaoId = validarDados.validarIDs(id, customMessages)
         if (validacaoId) 
             return validacaoId
 
-        let result = await tipoIntervaloDAO.selectByIdTipoIntervalo(id)
+        let result = await tipoIntervaloDAO.selectByIdTipoIntervalo(id, transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -116,14 +116,14 @@ const buscarTipoIntervaloService = async function (id) {
     }
 }
 
-const excluirTipoIntervaloService = async function (id) {
+const excluirTipoIntervaloService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarTipoIntervaloService(id)
+        let buscarID = await buscarTipoIntervaloService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
-        let result = await tipoIntervaloDAO.deleteTipoIntervalo(id)
+        let result = await tipoIntervaloDAO.deleteTipoIntervalo(id, transaction)
         if (result) 
             return customMessages.SUCCESS_DELETE_ITEM
         else

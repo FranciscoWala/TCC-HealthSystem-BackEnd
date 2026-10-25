@@ -20,14 +20,14 @@ const validarDadosPermissao = function (dados) {
     return validarDados.validarDados(permissoesSchema, dados, customMessages)
 }
 
-const inserirPermissaoService = async function (dados) {
+const inserirPermissaoService = async function (dados, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacao = validarDadosPermissao(dados)
         if (validacao) 
             return validacao
 
-        let result = await permissoesDAO.insertPermissoes(dados)
+        let result = await permissoesDAO.insertPermissoes(dados, transaction)
         if (result) {
             dados.id = result
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
@@ -43,10 +43,10 @@ const inserirPermissaoService = async function (dados) {
     }
 }
 
-const atualizarPermissaoService = async function (dados, id) {
+const atualizarPermissaoService = async function (dados, id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarPermissaoService(id)
+        let buscarID = await buscarPermissaoService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
@@ -55,7 +55,7 @@ const atualizarPermissaoService = async function (dados, id) {
             return validacao
 
         dados.id = Number(id)
-        let result = await permissoesDAO.updatePermissoes(dados)
+        let result = await permissoesDAO.updatePermissoes(dados, transaction)
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
@@ -70,10 +70,10 @@ const atualizarPermissaoService = async function (dados, id) {
     }
 }
 
-const listarPermissaoService = async function () {
+const listarPermissaoService = async function (transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let result = await permissoesDAO.selectAllPermissoes()
+        let result = await permissoesDAO.selectAllPermissoes(transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -91,14 +91,14 @@ const listarPermissaoService = async function () {
     }
 }
 
-const buscarPermissaoService = async function (id) {
+const buscarPermissaoService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacaoId = validarDados.validarIDs(id, customMessages)
         if (validacaoId) 
             return validacaoId
 
-        let result = await permissoesDAO.selectByIdPermissoes(id)
+        let result = await permissoesDAO.selectByIdPermissoes(id, transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -115,14 +115,14 @@ const buscarPermissaoService = async function (id) {
     }
 }
 
-const excluirPermissaoService = async function (id) {
+const excluirPermissaoService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarPermissaoService(id)
+        let buscarID = await buscarPermissaoService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
-        let result = await permissoesDAO.deletePermissoes(id)
+        let result = await permissoesDAO.deletePermissoes(id, transaction)
         if (result) 
             return customMessages.SUCCESS_DELETE_ITEM
         else

@@ -6,31 +6,24 @@
  * Versão: 1.0
 ********************************************************************************************/
 
-//IMPORT DA BIBLIOTECA PARA MANIPULAR DADOS NO BD MYSQL
-const knex = require('knex')
+const knexConection = require('../../global_knex/global_knex.js')
 
-//IMPORT DO ARQUIVO DE CONFIGURAÇÃO PARA ACESSO AO BD
-const knexDataBaseConfig = require('../../database_config/knexConfig.js')
-
-//CRIAR A CONEXÃO COM O BANCO DE DADOS CONFORME A CONFIGURAÇÃO
-const knexConection = knex(knexDataBaseConfig.development)
-
-const insertVinculoPaciente = async function (vinculoPaciente) {
+const insertVinculoPaciente = async function (vinculoPaciente, transaction = null) {
     try {
-        let sql = `insert into tbl_vinculo_paciente (
-            data_vinculo,
-            id_paciente,
-            id_cuidador
-        ) values (
-            '${vinculoPaciente.data_vinculo}',
-            ${vinculoPaciente.id_paciente},
-            ${vinculoPaciente.id_cuidador}
-        );`
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql)
+        let sql = `call procVinculoPaciente(?, ?, ?, ?, ?)`
 
-        if (result)
-            return result[0].insertId
+        let result = await connection.raw(sql, [
+            'INSERT',
+            vinculoPaciente.data_vinculo,
+            vinculoPaciente.id_paciente,
+            vinculoPaciente.id_cuidador,
+            null
+        ])
+
+        if (result && result[0][0][0].id)
+            return result[0][0][0].id
         else
             return false
     } catch (error) {
@@ -38,18 +31,22 @@ const insertVinculoPaciente = async function (vinculoPaciente) {
     }
 }
 
-const updateVinculoPaciente = async function (vinculoPaciente) {
+const updateVinculoPaciente = async function (vinculoPaciente, transaction = null) {
     try {
-        let sql = `update tbl_vinculo_paciente set
-                        data_vinculo = '${vinculoPaciente.data_vinculo}',
-                        id_paciente = ${vinculoPaciente.id_paciente},
-                        id_cuidador = ${vinculoPaciente.id_cuidador}
-                    where id = ${vinculoPaciente.id};`
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql)
+        let sql = `call procVinculoPaciente(?, ?, ?, ?, ?)`
 
-        if (result)
-            return true
+        let result = await connection.raw(sql, [
+            'UPDATE',
+            vinculoPaciente.data_vinculo,
+            vinculoPaciente.id_paciente,
+            vinculoPaciente.id_cuidador,
+            vinculoPaciente.id
+        ])
+
+        if (result && result[0][0][0].affectedRows > 0)
+            return result
         else
             return false
     } catch (error) {
@@ -57,14 +54,22 @@ const updateVinculoPaciente = async function (vinculoPaciente) {
     }
 }
 
-const selectAllVinculosPacientes = async function () {
+const selectAllVinculosPacientes = async function (transaction = null) {
     try {
-        let sql = `select * from tbl_vinculo_paciente order by id desc;`
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql)
+        let sql = `call procVinculoPaciente(?, ?, ?, ?, ?)`
 
-        if (Array.isArray(result))
-            return result[0]
+        let result = await connection.raw(sql, [
+            'SELECT_ALL',
+            null,
+            null,
+            null,
+            null
+        ])
+
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -72,14 +77,22 @@ const selectAllVinculosPacientes = async function () {
     }
 }
 
-const selectByIdVinculoPaciente = async function (id) {
+const selectByIdVinculoPaciente = async function (id, transaction = null) {
     try {
-        let sql = `select * from tbl_vinculo_paciente where id = ${id};`
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql)
+        let sql = `call procVinculoPaciente(?, ?, ?, ?, ?)`
 
-        if (Array.isArray(result))
-            return result[0]
+        let result = await connection.raw(sql, [
+            'SELECT_BY_ID',
+            null,
+            null,
+            null,
+            id
+        ])
+
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
         else
             return false
     } catch (error) {
@@ -87,11 +100,19 @@ const selectByIdVinculoPaciente = async function (id) {
     }
 }
 
-const deleteVinculoPaciente = async function (id) {
+const deleteVinculoPaciente = async function (id, transaction = null) {
     try {
-        let sql = `delete from tbl_vinculo_paciente where id = ${id};`
+        let connection = transaction || knexConection
 
-        let result = await knexConection.raw(sql)
+        let sql = `call procVinculoPaciente(?, ?, ?, ?, ?)`
+
+        let result = await connection.raw(sql, [
+            'DELETE',
+            null,
+            null,
+            null,
+            id
+        ])
 
         if (result)
             return true

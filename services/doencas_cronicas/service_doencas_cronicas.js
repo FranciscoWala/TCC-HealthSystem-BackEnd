@@ -20,14 +20,14 @@ const validarDadosDoencaCronica = function (dados) {
     return validarDados.validarDados(doencaCronicasSchema, dados, customMessages)
 }
 
-const inserirDoencaCronicaService = async function (dados) {
+const inserirDoencaCronicaService = async function (dados, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacao = validarDadosDoencaCronica(dados)
         if (validacao) 
             return validacao
 
-        let result = await doencaCronicaDAO.insertDoencaCronica(dados)
+        let result = await doencaCronicaDAO.insertDoencaCronica(dados, transaction)
         if (result) {
             dados.id = result
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
@@ -43,10 +43,10 @@ const inserirDoencaCronicaService = async function (dados) {
     }
 }
 
-const atualizarDoencaCronicaService = async function (dados, id) {
+const atualizarDoencaCronicaService = async function (dados, id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarDoencaCronicaService(id)
+        let buscarID = await buscarDoencaCronicaService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
@@ -55,7 +55,7 @@ const atualizarDoencaCronicaService = async function (dados, id) {
             return validacao
 
         dados.id = Number(id)
-        let result = await doencaCronicaDAO.updateDoencaCronica(dados)
+        let result = await doencaCronicaDAO.updateDoencaCronica(dados, transaction)
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
@@ -70,10 +70,10 @@ const atualizarDoencaCronicaService = async function (dados, id) {
     }
 }
 
-const listarDoencaCronicaService = async function () {
+const listarDoencaCronicaService = async function (transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let result = await doencaCronicaDAO.selectAllDoencasCronicas()
+        let result = await doencaCronicaDAO.selectAllDoencasCronicas(transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -91,14 +91,14 @@ const listarDoencaCronicaService = async function () {
     }
 }
 
-const buscarDoencaCronicaService = async function (id) {
+const buscarDoencaCronicaService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacaoId = validarDados.validarIDs(id, customMessages)
         if (validacaoId) 
             return validacaoId
 
-        let result = await doencaCronicaDAO.selectByIdDoencasCronicas(id)
+        let result = await doencaCronicaDAO.selectByIdDoencasCronicas(id, transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -115,14 +115,14 @@ const buscarDoencaCronicaService = async function (id) {
     }
 }
 
-const excluirDoencaCronicaService = async function (id) {
+const excluirDoencaCronicaService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarDoencaCronicaService(id)
+        let buscarID = await buscarDoencaCronicaService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
-        let result = await doencaCronicaDAO.deleteDoencaCronica(id)
+        let result = await doencaCronicaDAO.deleteDoencaCronica(id, transaction)
         if (result) 
             return customMessages.SUCCESS_DELETE_ITEM
         else

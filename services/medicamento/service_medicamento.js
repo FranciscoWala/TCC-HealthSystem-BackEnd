@@ -20,14 +20,14 @@ const validarDadosMedicamento = function (dados) {
     return validarDados.validarDados(medicamentoSchema, dados, customMessages)
 }
 
-const inserirMedicamentoService = async function (dados) {
+const inserirMedicamentoService = async function (dados, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacao = validarDadosMedicamento(dados)
         if (validacao) 
             return validacao
 
-        let result = await medicamentoDAO.insertMedicamento(dados)
+        let result = await medicamentoDAO.insertMedicamento(dados, transaction)
         if (result) {
             dados.id = result
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
@@ -43,10 +43,10 @@ const inserirMedicamentoService = async function (dados) {
     }
 }
 
-const atualizarMedicamentoService = async function (dados, id) {
+const atualizarMedicamentoService = async function (dados, id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarMedicamentoService(id)
+        let buscarID = await buscarMedicamentoService(id, dados.id_usuario, transaction)
         if (!buscarID.status) 
             return buscarID
 
@@ -55,7 +55,7 @@ const atualizarMedicamentoService = async function (dados, id) {
             return validacao
 
         dados.id = Number(id)
-        let result = await medicamentoDAO.updateMedicamento(dados)
+        let result = await medicamentoDAO.updateMedicamento(dados, transaction)
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
@@ -70,10 +70,10 @@ const atualizarMedicamentoService = async function (dados, id) {
     }
 }
 
-const listarMedicamentoService = async function () {
+const listarMedicamentoService = async function (idUsuario, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let result = await medicamentoDAO.selectAllMedicamentos()
+        let result = await medicamentoDAO.selectAllMedicamentos(idUsuario, transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -91,14 +91,14 @@ const listarMedicamentoService = async function () {
     }
 }
 
-const buscarMedicamentoService = async function (id) {
+const buscarMedicamentoService = async function (id, idUsuario, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacaoId = validarDados.validarIDs(id, customMessages)
         if (validacaoId) 
             return validacaoId
 
-        let result = await medicamentoDAO.selectByIdMedicamento(id)
+        let result = await medicamentoDAO.selectByIdMedicamento(id, idUsuario, transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -115,14 +115,14 @@ const buscarMedicamentoService = async function (id) {
     }
 }
 
-const excluirMedicamentoService = async function (id) {
+const excluirMedicamentoService = async function (id, idUsuario, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarMedicamentoService(id)
+        let buscarID = await buscarMedicamentoService(id, idUsuario, transaction)
         if (!buscarID.status) 
             return buscarID
 
-        let result = await medicamentoDAO.deleteMedicamento(id)
+        let result = await medicamentoDAO.deleteMedicamento(id, idUsuario, transaction)
         if (result) 
             return customMessages.SUCCESS_DELETE_ITEM
         else

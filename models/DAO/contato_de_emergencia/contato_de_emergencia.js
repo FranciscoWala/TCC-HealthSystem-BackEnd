@@ -7,18 +7,15 @@
  * Versão: 1.0
 ********************************************************************************************/
 
-const knex = require('knex')
+const knexConection = require('../../global_knex/global_knex.js')
 
-const knexDataBaseConfig = require('../../database_config/knexConfig.js')
-
-const knexConection = knex(knexDataBaseConfig.development)
-
-
-async function insertContatoEmergencia(contatoEmergencia) {
+async function insertContatoEmergencia(contatoEmergencia, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procContatoEmergencia(?, ?, ?, ?);`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'INSERT',
             contatoEmergencia.nome,
             contatoEmergencia.telefone,
@@ -34,11 +31,13 @@ async function insertContatoEmergencia(contatoEmergencia) {
     }
 }
 
-async function updateContatoEmergencia(contatoEmergencia) {
+async function updateContatoEmergencia(contatoEmergencia, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procContatoEmergencia(?, ?, ?, ?);`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'UPDATE',
             contatoEmergencia.nome,
             contatoEmergencia.telefone,
@@ -54,11 +53,13 @@ async function updateContatoEmergencia(contatoEmergencia) {
     }
 }
 
-async function getContatosEmergencia() {
+async function getContatosEmergencia(transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procContatoEmergencia(?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'SELECT_ALL',
             null,
             null,
@@ -74,11 +75,13 @@ async function getContatosEmergencia() {
     }
 }
 
-async function getContatosEmergenciaByID(id) {
+async function getContatosEmergenciaByID(id, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procContatoEmergencia(?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'SELECT_BY_ID',
             null,
             null,
@@ -94,11 +97,13 @@ async function getContatosEmergenciaByID(id) {
     }
 }
 
-async function deleteContatoEmergenciaByID(id) {
+async function deleteContatoEmergenciaByID(id, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procContatoEmergencia(?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'DELETE',
             null,
             null,

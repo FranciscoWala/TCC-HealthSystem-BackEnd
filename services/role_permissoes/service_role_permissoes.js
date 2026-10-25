@@ -20,14 +20,14 @@ const validarDadosRolePermissoes = function (dados) {
     return validarDados.validarDados(rolePermissoesSchema, dados, customMessages)
 }
 
-const inserirRolePermissoesService = async function (dados) {
+const inserirRolePermissoesService = async function (dados, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacao = validarDadosRolePermissoes(dados)
         if (validacao) 
             return validacao
 
-        let result = await rolePermissoesDAO.insertRolePermissoes(dados)
+        let result = await rolePermissoesDAO.insertRolePermissoes(dados, transaction)
         if (result) {
             dados.id = result
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
@@ -43,10 +43,10 @@ const inserirRolePermissoesService = async function (dados) {
     }
 }
 
-const atualizarRolePermissoesService = async function (dados, id) {
+const atualizarRolePermissoesService = async function (dados, id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarRolePermissoesService(id)
+        let buscarID = await buscarRolePermissoesService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
@@ -55,7 +55,7 @@ const atualizarRolePermissoesService = async function (dados, id) {
             return validacao
 
         dados.id = Number(id)
-        let result = await rolePermissoesDAO.updateRolePermissoes(dados)
+        let result = await rolePermissoesDAO.updateRolePermissoes(dados, transaction)
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
@@ -70,10 +70,10 @@ const atualizarRolePermissoesService = async function (dados, id) {
     }
 }
 
-const listarRolePermissoesService = async function () {
+const listarRolePermissoesService = async function (transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let result = await rolePermissoesDAO.selectAllRolePermissoes()
+        let result = await rolePermissoesDAO.selectAllRolePermissoes(transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -91,14 +91,14 @@ const listarRolePermissoesService = async function () {
     }
 }
 
-const buscarRolePermissoesService = async function (id) {
+const buscarRolePermissoesService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacaoId = validarDados.validarIDs(id, customMessages)
         if (validacaoId) 
             return validacaoId
 
-        let result = await rolePermissoesDAO.selectByIdRolePermissoes(id)
+        let result = await rolePermissoesDAO.selectByIdRolePermissoes(id, transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -115,65 +115,17 @@ const buscarRolePermissoesService = async function (id) {
     }
 }
 
-const excluirRolePermissoesService = async function (id) {
+const excluirRolePermissoesService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarRolePermissoesService(id)
+        let buscarID = await buscarRolePermissoesService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
-        let result = await rolePermissoesDAO.deleteRolePermissoes(id)
+        let result = await rolePermissoesDAO.deleteRolePermissoes(id, transaction)
         if (result) 
             return customMessages.SUCCESS_DELETE_ITEM
         else
-            return customMessages.ERROR_INTERNAL_SERVER_MODEL
-    } catch (error) {
-        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
-    }
-}
-
-const listarPermissoesPorIdRoleService = async function (idRole) {
-    let customMessages = JSON.parse(JSON.stringify(configMessages))
-    try {
-        let validacaoId = validarDados.validarIDs(idRole, customMessages)
-        if (validacaoId)
-            return validacaoId
-
-        let result = await rolePermissoesDAO.selectPermissoesByIdRole(idRole)
-        if (result) {
-            if (result.length > 0) {
-                customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
-                customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
-                customMessages.DEFAULT_MESSAGE.response.permissoes = result
-
-                return customMessages.DEFAULT_MESSAGE
-            } else
-                return customMessages.ERROR_NOT_FOUND
-        } else
-            return customMessages.ERROR_INTERNAL_SERVER_MODEL
-    } catch (error) {
-        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
-    }
-}
-
-const listarRolesPorIdPermissoesService = async function (idPermissoes) {
-    let customMessages = JSON.parse(JSON.stringify(configMessages))
-    try {
-        let validacaoId = validarDados.validarIDs(idPermissoes, customMessages)
-        if (validacaoId)
-            return validacaoId
-
-        let result = await rolePermissoesDAO.selectRolesByIdPermissoes(idPermissoes)
-        if (result) {
-            if (result.length > 0) {
-                customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
-                customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
-                customMessages.DEFAULT_MESSAGE.response.roles = result
-
-                return customMessages.DEFAULT_MESSAGE
-            } else
-                return customMessages.ERROR_NOT_FOUND
-        } else
             return customMessages.ERROR_INTERNAL_SERVER_MODEL
     } catch (error) {
         return customMessages.ERROR_INTERNAL_SERVER_SERVICE
@@ -185,7 +137,5 @@ module.exports = {
     atualizarRolePermissoesService,
     listarRolePermissoesService,
     buscarRolePermissoesService,
-    excluirRolePermissoesService,
-    listarPermissoesPorIdRoleService,
-    listarRolesPorIdPermissoesService
+    excluirRolePermissoesService
 }

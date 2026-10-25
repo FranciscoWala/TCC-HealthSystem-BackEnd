@@ -20,14 +20,14 @@ const validarDadosTipoDosagem = function (dados) {
     return validarDados.validarDados(tipoDosagemSchema, dados, customMessages)
 }
 
-const inserirTipoDosagemService = async function (dados) {
+const inserirTipoDosagemService = async function (dados, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacao = validarDadosTipoDosagem(dados)
         if (validacao) 
             return validacao
 
-        let result = await tipoDosagemDAO.insertTipoDosagem(dados)
+        let result = await tipoDosagemDAO.insertTipoDosagem(dados, transaction)
         if (result) {
             dados.id = result
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
@@ -43,10 +43,10 @@ const inserirTipoDosagemService = async function (dados) {
     }
 }
 
-const atualizarTipoDosagemService = async function (dados, id) {
+const atualizarTipoDosagemService = async function (dados, id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarTipoDosagemService(id)
+        let buscarID = await buscarTipoDosagemService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
@@ -55,7 +55,7 @@ const atualizarTipoDosagemService = async function (dados, id) {
             return validacao
 
         dados.id = Number(id)
-        let result = await tipoDosagemDAO.updateTipoDosagem(dados)
+        let result = await tipoDosagemDAO.updateTipoDosagem(dados, transaction)
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
@@ -70,10 +70,10 @@ const atualizarTipoDosagemService = async function (dados, id) {
     }
 }
 
-const listarTipoDosagemService = async function () {
+const listarTipoDosagemService = async function (transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let result = await tipoDosagemDAO.selectAllTipoDosagem()
+        let result = await tipoDosagemDAO.selectAllTipoDosagem(transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -91,14 +91,14 @@ const listarTipoDosagemService = async function () {
     }
 }
 
-const buscarTipoDosagemService = async function (id) {
+const buscarTipoDosagemService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacaoId = validarDados.validarIDs(id, customMessages)
         if (validacaoId) 
             return validacaoId
 
-        let result = await tipoDosagemDAO.selectByIdTipoDosagem(id)
+        let result = await tipoDosagemDAO.selectByIdTipoDosagem(id, transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -115,14 +115,14 @@ const buscarTipoDosagemService = async function (id) {
     }
 }
 
-const excluirTipoDosagemService = async function (id) {
+const excluirTipoDosagemService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarTipoDosagemService(id)
+        let buscarID = await buscarTipoDosagemService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
-        let result = await tipoDosagemDAO.deleteTipoDosagem(id)
+        let result = await tipoDosagemDAO.deleteTipoDosagem(id, transaction)
         if (result) 
             return customMessages.SUCCESS_DELETE_ITEM
         else

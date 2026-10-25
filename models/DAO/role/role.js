@@ -6,20 +6,15 @@
  * Versão: 1.0
 ********************************************************************************************/
 
-//IMPORT DA BIBLIOTECA PARA MANIPULAR DADOS NO BD MYSQL
-const knex = require('knex')
+const knexConection = require('../../global_knex/global_knex.js')
 
-//IMPORT DO ARQUIVO DE CONFIGURAÇÃO PARA ACESSO AO BD
-const knexDataBaseConfig = require('../../database_config/knexConfig.js')
-
-//CRIAR A CONEXÃO COM O BANCO DE DADOS CONFORME A CONFIGURAÇÃO
-const knexConection = knex(knexDataBaseConfig.development)
-
-const insertRole = async function (role) {
+const insertRole = async function (role, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procRole(?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'INSERT',
             role.role,
             null
@@ -34,11 +29,13 @@ const insertRole = async function (role) {
     }
 }
 
-const updateRole = async function (role) {
+const updateRole = async function (role, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procRole(?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'UPDATE',
             role.role,
             role.id
@@ -53,11 +50,13 @@ const updateRole = async function (role) {
     }
 }
 
-const selectAllRoles = async function () {
+const selectAllRoles = async function (transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procRole(?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'SELECT_ALL',
             null,
             null
@@ -72,11 +71,13 @@ const selectAllRoles = async function () {
     }
 }
 
-const selectByIdRole = async function (id) {
+const selectByIdRole = async function (id, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procRole(?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'SELECT_BY_ID',
             null,
             id
@@ -91,11 +92,13 @@ const selectByIdRole = async function (id) {
     }
 }
 
-const deleteRole = async function (id) {
+const deleteRole = async function (id, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procRole(?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'DELETE',
             null,
             id

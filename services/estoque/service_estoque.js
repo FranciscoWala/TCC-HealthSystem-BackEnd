@@ -20,14 +20,14 @@ const validarDadosEstoque = function (dados) {
     return validarDados.validarDados(estoqueSchema, dados, customMessages)
 }
 
-const inserirEstoqueService = async function (dados) {
+const inserirEstoqueService = async function (dados, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacao = validarDadosEstoque(dados)
         if (validacao) 
             return validacao
 
-        let result = await estoqueDAO.insertEstoque(dados)
+        let result = await estoqueDAO.insertEstoque(dados, transaction)
         if (result) {
             dados.id = result
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
@@ -43,10 +43,10 @@ const inserirEstoqueService = async function (dados) {
     }
 }
 
-const atualizarEstoqueService = async function (dados, id) {
+const atualizarEstoqueService = async function (dados, id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarEstoqueService(id)
+        let buscarID = await buscarEstoqueService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
@@ -55,7 +55,7 @@ const atualizarEstoqueService = async function (dados, id) {
             return validacao
 
         dados.id = Number(id)
-        let result = await estoqueDAO.updateEstoque(dados)
+        let result = await estoqueDAO.updateEstoque(dados, transaction)
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
@@ -70,10 +70,10 @@ const atualizarEstoqueService = async function (dados, id) {
     }
 }
 
-const listarEstoqueService = async function () {
+const listarEstoqueService = async function (transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let result = await estoqueDAO.selectAllEstoques()
+        let result = await estoqueDAO.selectAllEstoques(transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -91,14 +91,14 @@ const listarEstoqueService = async function () {
     }
 }
 
-const buscarEstoqueService = async function (id) {
+const buscarEstoqueService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacaoId = validarDados.validarIDs(id, customMessages)
         if (validacaoId) 
             return validacaoId
 
-        let result = await estoqueDAO.selectByIdEstoque(id)
+        let result = await estoqueDAO.selectByIdEstoque(id, transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -115,14 +115,14 @@ const buscarEstoqueService = async function (id) {
     }
 }
 
-const excluirEstoqueService = async function (id) {
+const excluirEstoqueService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarEstoqueService(id)
+        let buscarID = await buscarEstoqueService(id, transaction)
         if (!buscarID.status) 
             return buscarID
 
-        let result = await estoqueDAO.deleteEstoque(id)
+        let result = await estoqueDAO.deleteEstoque(id, transaction)
         if (result) 
             return customMessages.SUCCESS_DELETE_ITEM
         else

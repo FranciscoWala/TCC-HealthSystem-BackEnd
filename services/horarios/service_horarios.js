@@ -21,14 +21,14 @@ const validarDadosHorario = function (dados) {
     return validarDados.validarDados(horarioSchema, dados, customMessages)
 }
 
-const inserirHorarioService = async function (dados) {
+const inserirHorarioService = async function (dados, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacao = validarDadosHorario(dados)
         if (validacao)
             return validacao
 
-        let result = await horariosDAO.insertHorario(dados)
+        let result = await horariosDAO.insertHorario(dados, transaction)
         if (result) {
             dados.id = result
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
@@ -44,10 +44,10 @@ const inserirHorarioService = async function (dados) {
     }
 }
 
-const atualizarHorarioService = async function (dados, id) {
+const atualizarHorarioService = async function (dados, id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarHorarioService(id)
+        let buscarID = await buscarHorarioService(id, transaction)
         if (!buscarID.status)
             return buscarID
 
@@ -56,7 +56,7 @@ const atualizarHorarioService = async function (dados, id) {
             return validacao
 
         dados.id = Number(id)
-        let result = await horariosDAO.updateHorario(dados)
+        let result = await horariosDAO.updateHorario(dados, transaction)
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
@@ -71,10 +71,10 @@ const atualizarHorarioService = async function (dados, id) {
     }
 }
 
-const listarHorarioService = async function () {
+const listarHorarioService = async function (transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let result = await horariosDAO.selectAllHorarios()
+        let result = await horariosDAO.selectAllHorarios(transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -92,14 +92,14 @@ const listarHorarioService = async function () {
     }
 }
 
-const buscarHorarioService = async function (id) {
+const buscarHorarioService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacaoId = validarDados.validarIDs(id, customMessages)
         if (validacaoId)
             return validacaoId
 
-        let result = await horariosDAO.selectByIdHorario(id)
+        let result = await horariosDAO.selectByIdHorario(id, transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -117,11 +117,11 @@ const buscarHorarioService = async function (id) {
 }
 
 // Listar horários de medicamentos não tomados
-const listarHorariosNaoTomadosService = async function () {
+const listarHorariosNaoTomadosService = async function (transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
-        let result = await horariosDAO.selectHorariosNaoTomados()
+        let result = await horariosDAO.selectHorariosNaoTomados(transaction)
 
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
@@ -138,14 +138,14 @@ const listarHorariosNaoTomadosService = async function () {
     }
 }
 
-const excluirHorarioService = async function (id) {
+const excluirHorarioService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let buscarID = await buscarHorarioService(id)
+        let buscarID = await buscarHorarioService(id, transaction)
         if (!buscarID.status)
             return buscarID
 
-        let result = await horariosDAO.deleteHorario(id)
+        let result = await horariosDAO.deleteHorario(id, transaction)
         if (result)
             return customMessages.SUCCESS_DELETE_ITEM
         else

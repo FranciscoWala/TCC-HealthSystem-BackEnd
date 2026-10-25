@@ -6,20 +6,15 @@
  * Versão: 1.0
 ********************************************************************************************/
 
-//IMPORT DA BIBLIOTECA PARA MANIPULAR DADOS NO BD MYSQL
-const knex = require('knex')
+const knexConection = require('../../global_knex/global_knex.js')
 
-//IMPORT DO ARQUIVO DE CONFIGURAÇÃO PARA ACESSO AO BD
-const knexDataBaseConfig = require('../../database_config/knexConfig.js')
-
-//CRIAR A CONEXÃO COM O BANCO DE DADOS CONFORME A CONFIGURAÇÃO
-const knexConection = knex(knexDataBaseConfig.development)
-
-const insertHorario = async function (horario) {
+const insertHorario = async function (horario, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procHorario(?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'INSERT',
             horario.horario,
             horario.id_receita_medica,
@@ -35,11 +30,13 @@ const insertHorario = async function (horario) {
     }
 }
 
-const updateHorario = async function (horario) {
+const updateHorario = async function (horario, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procHorario(?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'UPDATE',
             horario.horario,
             horario.id_receita_medica,
@@ -55,11 +52,13 @@ const updateHorario = async function (horario) {
     }
 }
 
-const selectAllHorarios = async function () {
+const selectAllHorarios = async function (transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procHorario(?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'SELECT_ALL',
             null,
             null,
@@ -75,11 +74,13 @@ const selectAllHorarios = async function () {
     }
 }
 
-const selectByIdHorario = async function (id) {
+const selectByIdHorario = async function (id, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procHorario(?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'SELECT_BY_ID',
             null,
             null,
@@ -96,11 +97,13 @@ const selectByIdHorario = async function (id) {
     }
 }
 
-const selectHorariosNaoTomados = async function () {
+const selectHorariosNaoTomados = async function (transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procHorario(?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'SELECT_NAO_TOMADOS',
             null,
             null,
@@ -118,11 +121,13 @@ const selectHorariosNaoTomados = async function () {
     }
 }
 
-const deleteHorario = async function (id) {
+const deleteHorario = async function (id, transaction = null) {
     try {
+        let connection = transaction || knexConection
+
         let sql = `call procHorario(?, ?, ?, ?)`
 
-        let result = await knexConection.raw(sql, [
+        let result = await connection.raw(sql, [
             'DELETE',
             null,
             null,

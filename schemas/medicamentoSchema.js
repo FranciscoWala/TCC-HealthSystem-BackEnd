@@ -8,29 +8,34 @@
 const Joi = require('joi')
 
 const medicamentoSchema = Joi.object({
-    nome: Joi.string()
-            .max(45)
-            .required(),
-    
-    imagem: Joi.string()
-            .max(255)
-            .required(),
+        nome: Joi.string()
+                .max(45)
+                .required(),
 
-    concentracao: Joi.number()
-                    .min(0)
-                    .max(999.99)
-                    .precision(2)
-                    .required(),
+        imagem: Joi.string()
+                .max(255)
+                .required(),
 
-    id_unidade_medida_embalagem: Joi.number()
-                                    .integer()
-                                    .min(1)
-                                    .required(),
+        concentracao: Joi.number()
+                        .min(0)
+                        .max(999.99)
+                        .precision(2)
+                        .required(),
 
-    id_tipo_dosagem: Joi.number()
+        id_unidade_medida_embalagem: Joi.number()
+                                        .integer()
+                                        .min(1)
+                                        .required(),
+
+        id_tipo_dosagem: Joi.number()
                         .integer()
                         .min(1)
-                        .required()
+                        .required(),
+        
+        id_usuario: Joi.number()
+                        .integer()
+                        .min(1)
+                        .allow(null)
 })
 
 module.exports = medicamentoSchema

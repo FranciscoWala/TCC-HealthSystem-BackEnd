@@ -5,21 +5,21 @@
  * Versão: 1.0
 **************************************************************************************/
 
-const Joi = require('joi')
+const JOI = require('joi')
 
-const estoqueSchema = Joi.object({
-    quantidade_em_estoque: Joi.number()
+const estoqueSchema = JOI.object({
+    quantidade_em_estoque: JOI.number()
                             .min(0)
                             .max(99999.99)
                             .precision(2)
                             .required(),
 
-    id_usuario: Joi.number()
+    id_usuarios: JOI.number()
                     .integer()
                     .min(1)
                     .required(),
 
-    id_medicamento: Joi.number()
+    id_medicamentos: JOI.number()
                         .integer()
                         .min(1)
                         .required()
