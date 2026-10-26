@@ -100,6 +100,52 @@ const selectByIdEstoque = async function (id, transaction = null) {
     }
 }
 
+const descontarEstoque = async function (id, quantidade, transaction = null) {
+    try {
+        let connection = transaction || knexConection
+
+        let sql = `call procEstoque(?, ?, ?, ?, ?)`
+
+        let result = await connection.raw(sql, [
+            'DESCONTAR',
+            quantidade,
+            null,
+            null,
+            id
+        ])
+
+        if (result && result[0][0][0].affectedRows > 0)
+            return true
+        else
+            return false
+    } catch (error) {
+        return false
+    }
+}
+
+const selectEstoqueByUsuarioMedicamento = async function (idUsuario, idMedicamento, transaction = null) {
+    try {
+        let connection = transaction || knexConection
+
+        let sql = `call procEstoque(?, ?, ?, ?, ?)`
+
+        let result = await connection.raw(sql, [
+            'SELECT_BY_USUARIO_MEDICAMENTO',
+            null,
+            idUsuario,
+            idMedicamento,
+            null
+        ])
+
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
+        else
+            return false
+    } catch (error) {
+        return false
+    }
+}
+
 const deleteEstoque = async function (id, transaction = null) {
     try {
         let connection = transaction || knexConection
@@ -114,7 +160,7 @@ const deleteEstoque = async function (id, transaction = null) {
             id
         ])
 
-        if (result)
+        if (result && result[0][0][0].affectedRows > 0)
             return true
         else
             return false
@@ -128,5 +174,7 @@ module.exports = {
     updateEstoque,
     selectAllEstoques,
     selectByIdEstoque,
+    descontarEstoque,
+    selectEstoqueByUsuarioMedicamento,
     deleteEstoque
 }

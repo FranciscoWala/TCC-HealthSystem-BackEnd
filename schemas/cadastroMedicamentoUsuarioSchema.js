@@ -1,6 +1,12 @@
+/*************************************************************************************
+ * Objetivo: Arquivo responsável por validar os dados recebidos
+ * Data: 26/10/2026
+ * Autor: Kayque Brenno Ferreira Almeida
+ * Versão: 1.0
+**************************************************************************************/
+
 const JOI = require('joi')
 
-// Schema do cadastro completo de medicamento do usuário
 const cadastroMedicamentoUsuarioSchema = JOI.object({
 
     // Medicamento existente no catálogo
@@ -43,7 +49,8 @@ const cadastroMedicamentoUsuarioSchema = JOI.object({
                     .required(),
 
         dosagem: JOI.number()
-                    .positive()
+                    .greater(0)
+                    .max(999.99)
                     .precision(2)
                     .required(),
 

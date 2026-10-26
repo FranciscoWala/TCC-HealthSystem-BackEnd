@@ -55,7 +55,7 @@ const atualizarContatoEmergenciaUsuarioService = async function (dados, id, tran
             return validacao
 
         dados.id = Number(id)
-        let result = await contatoEmergenciaUsuarioDAO.updateContatoEmergenciaUsuario(dados, id, transaction)
+        let result = await contatoEmergenciaUsuarioDAO.updateContatoEmergenciaUsuario(dados, transaction)
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code

@@ -57,7 +57,7 @@ const atualizarHistoricoMedicamentoService = async function (dados, id, transact
             return validacao
 
         dados.id = Number(id)
-        let result = await historicoMedicamentoDAO.updateHistoricoMedicamento(dados, id, transaction)
+        let result = await historicoMedicamentoDAO.updateHistoricoMedicamento(dados, transaction)
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
@@ -117,27 +117,24 @@ const buscarHistoricoMedicamentoService = async function (id, transaction = null
     }
 }
 
-const buscarHistoricoPorIdHorarioService = async function (idHorario, transaction = null) {
+const buscarHistoricoPorIdReceitaService = async function (idReceitaMedica, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
-
     try {
-        let validarID = validarDados.validarIDs(idHorario, customMessages)
+        let validarID = validarDados.validarIDs(idReceitaMedica, customMessages)
         if (validarID)
             return validarID
 
-        let result = await historicoMedicamentoDAO.selectByIdHorarioHistoricoMedicamento(idHorario, transaction)
+        let result = await historicoMedicamentoDAO.selectByIdReceitaHistoricoMedicamento(idReceitaMedica, transaction)
 
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
-            customMessages.DEFAULT_MESSAGE.response.historico = result
+            customMessages.DEFAULT_MESSAGE.response.historico_medicamento = result
 
             return customMessages.DEFAULT_MESSAGE
-        } else {
+        } else
             return customMessages.ERROR_INTERNAL_SERVER_MODEL
-        }
     } catch (error) {
-        console.log(error)
         return customMessages.ERROR_INTERNAL_SERVER_SERVICE
     }
 }
@@ -164,6 +161,6 @@ module.exports = {
     atualizarHistoricoMedicamentoService,
     listarHistoricoMedicamentoService,
     buscarHistoricoMedicamentoService,
-    buscarHistoricoPorIdHorarioService,
+    buscarHistoricoPorIdReceitaService,
     excluirHistoricoMedicamentoService
 }

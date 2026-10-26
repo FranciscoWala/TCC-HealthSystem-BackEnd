@@ -72,9 +72,6 @@ app.use('/v1/healthSystem/medtime/usuario_role', cors(), usuarioRoleRouter)
 const vinculoPacienteRouter = require('./routes/vinculo_paciente.router.js')
 app.use('/v1/healthSystem/medtime/vinculo_paciente', cors(), vinculoPacienteRouter)
 
-const medicamentosAgendamento = require('./utils/agendamentos/registrarMedicamentosNaoTomados.js')
-medicamentosAgendamento.iniciarVerificacaoMedicamentos()
-
 // FAZER O START DA API
 app.listen(8080, function() {
     console.log('API aguardando novas requisições...')

@@ -19,7 +19,7 @@ const insertProgramacaoMedicamento = async function (programacaoMedicamento, tra
             'INSERT',
             programacaoMedicamento.frequencia,
             programacaoMedicamento.data_hora_inicio,
-            programacaoMedicamento.data_hora_fim,
+            programacaoMedicamento.data_hora_fim ?? null,
             programacaoMedicamento.id_tipo_intervalo,
             programacaoMedicamento.id_receita_medica,
             null

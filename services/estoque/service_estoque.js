@@ -115,6 +115,67 @@ const buscarEstoqueService = async function (id, transaction = null) {
     }
 }
 
+const descontarEstoqueService = async function (id, quantidade, transaction = null) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+    try {
+        let validarID = validarDados.validarIDs(id, customMessages)
+        if (validarID)
+            return validarID
+
+        let validacao = validarDados.validarDados(
+            estoqueSchema.extract('quantidade_em_estoque')
+                        .greater(0)
+                        .required(),
+            quantidade,
+            customMessages
+        )
+        if (validacao)
+            return validacao
+
+        let result = await estoqueDAO.descontarEstoque(id, quantidade, transaction)
+
+        if (result) {
+            customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
+            customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
+            customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_UPDATE_ITEM.message
+
+            return customMessages.DEFAULT_MESSAGE
+        } else
+            return customMessages.ERROR_BAD_REQUEST
+    } catch (error) {
+        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
+    }
+}
+
+const buscarEstoquePorUsuarioMedicamentoService = async function (idUsuario, idMedicamento, transaction = null) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+    try {
+        let validarUsuario = validarDados.validarIDs(idUsuario, customMessages)
+        if (validarUsuario)
+            return validarUsuario
+
+        let validarMedicamento = validarDados.validarIDs(idMedicamento, customMessages)
+        if (validarMedicamento)
+            return validarMedicamento
+
+        let result = await estoqueDAO.selectEstoqueByUsuarioMedicamento(idUsuario, idMedicamento, transaction)
+
+        if (result) {
+            if (result.length > 0) {
+                customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
+                customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
+                customMessages.DEFAULT_MESSAGE.response.estoque = result
+
+                return customMessages.DEFAULT_MESSAGE
+            } else
+                return customMessages.ERROR_NOT_FOUND
+        } else
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
+    } catch (error) {
+        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
+    }
+}
+
 const excluirEstoqueService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
@@ -137,5 +198,7 @@ module.exports = {
     atualizarEstoqueService,
     listarEstoqueService,
     buscarEstoqueService,
+    descontarEstoqueService,
+    buscarEstoquePorUsuarioMedicamentoService,
     excluirEstoqueService
 }

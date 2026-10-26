@@ -55,7 +55,7 @@ const atualizarDoencaCronicaUsuarioService = async function (dados, id, transact
             return validacao
 
         dados.id = Number(id)
-        let result = await doencaCronicaUsuarioDAO.updateDoencaCronicaUsuario(dados, id, transaction)
+        let result = await doencaCronicaUsuarioDAO.updateDoencaCronicaUsuario(dados, transaction)
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code

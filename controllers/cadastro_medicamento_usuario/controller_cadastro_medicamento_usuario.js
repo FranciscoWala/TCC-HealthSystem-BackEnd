@@ -12,7 +12,7 @@ const configMessages = require('../../utils/messages/configMessages.js')
 // IMPORT DAS SERVICES
 const medicamentoService = require('../../services/medicamento/service_medicamento.js')
 const receitaMedicaService = require('../../services/receita_medica/service_receita_medica.js')
-const horarioService = require('../../services/horarios/service_horarios.js')
+const programacaoMedicamentoService = require('../../services/programacao_medicamento/service_programacao_medicamento.js')
 const estoqueService = require('../../services/estoque/service_estoque.js')
 
 // IMPORT DO SCHEMA DE VALIDAÇÃO
@@ -28,71 +28,20 @@ const validarDadosCadastroMedicamentoUsuario = function (dados) {
     return validarDados.validarDados(cadastroMedicamentoUsuarioSchema, dados, customMessages)
 }
 
-// Função para gerar os horários do medicamento
-const gerarHorariosMedicamento = function (frequencia, horarioInicio) {
-    let horarios = []
-
-    let frequenciaSeparada = frequencia.split(':')
-    let horarioSeparado = horarioInicio.split(':')
-
-    let intervaloSegundos = Number(frequenciaSeparada[0]) * 3600 +
-                            Number(frequenciaSeparada[1]) * 60 +
-                            Number(frequenciaSeparada[2])
-
-    let horarioInicialSegundos = Number(horarioSeparado[0]) * 3600 +
-                                Number(horarioSeparado[1]) * 60 +
-                                Number(horarioSeparado[2])
-
-    if (intervaloSegundos <= 0 || 86400 % intervaloSegundos != 0)
-        return false
-
-    let quantidadeHorarios = 86400 / intervaloSegundos
-
-    for (let contador = 0; contador < quantidadeHorarios; contador++) {
-        let horarioSegundos = (horarioInicialSegundos + contador * intervaloSegundos) % 86400
-
-        let horas = Math.floor(horarioSegundos / 3600)
-        let minutos = Math.floor((horarioSegundos % 3600) / 60)
-        let segundos = horarioSegundos % 60
-
-        let horario = String(horas).padStart(2, '0') + ':' +
-                      String(minutos).padStart(2, '0') + ':' +
-                      String(segundos).padStart(2, '0')
-
-        horarios.push(horario)
-    }
-
-    return horarios
-}
-
-// Cadastrar um tratamento para o usuário
 const cadastrarMedicamentoUsuario = async function (dados, contentType) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
         if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
-
-            // Valida os dados recebidos
             let validacao = validarDadosCadastroMedicamentoUsuario(dados)
 
             if (validacao)
                 return validacao
 
-            // Prepara os horários do medicamento
-            let horarios = gerarHorariosMedicamento(
-                dados.receita_medica.frequencia,
-                dados.receita_medica.data_hora_inicio
-            )
-
-            if (!horarios)
-                return customMessages.ERROR_BAD_REQUEST
-
-            // Inicia a transação
             let result = await knexConection.transaction(async function (transaction) {
 
                 let idMedicamento
 
-                // Verifica se o medicamento já existe no catálogo
                 if (dados.id_medicamento) {
 
                     let buscarMedicamento = await medicamentoService.buscarMedicamentoService(
@@ -108,10 +57,7 @@ const cadastrarMedicamentoUsuario = async function (dados, contentType) {
                     }
 
                     idMedicamento = dados.id_medicamento
-
                 } else {
-
-                    // Prepara os dados do medicamento particular
                     let medicamento = {
                         nome: dados.medicamento.nome,
                         imagem: dados.medicamento.imagem,
@@ -121,7 +67,6 @@ const cadastrarMedicamentoUsuario = async function (dados, contentType) {
                         id_usuario: dados.receita_medica.id_usuario
                     }
 
-                    // Cadastra o medicamento particular
                     let cadastrarMedicamento = await medicamentoService.inserirMedicamentoService(
                         medicamento,
                         transaction
@@ -136,20 +81,34 @@ const cadastrarMedicamentoUsuario = async function (dados, contentType) {
                     idMedicamento = cadastrarMedicamento.response.id
                 }
 
-                // Prepara os dados da receita médica
+                let estoque = {
+                    quantidade_em_estoque: dados.estoque.quantidade_em_estoque,
+                    id_usuarios: dados.receita_medica.id_usuario,
+                    id_medicamentos: idMedicamento
+                }
+
+                let cadastrarEstoque = await estoqueService.inserirEstoqueService(
+                    estoque,
+                    transaction
+                )
+
+                if (!cadastrarEstoque.status) {
+                    let error = new Error('Não foi possível cadastrar o estoque.')
+                    error.resposta = cadastrarEstoque
+                    throw error
+                }
+
+                let idEstoque = cadastrarEstoque.response.id
+
                 let receitaMedica = {
                     id_usuario: dados.receita_medica.id_usuario,
                     id_medicamento: idMedicamento,
-                    frequencia: dados.receita_medica.frequencia,
                     dosagem: dados.receita_medica.dosagem,
-                    data_hora_inicio: dados.receita_medica.data_hora_inicio,
-                    data_inicio: dados.receita_medica.data_inicio,
                     id_unidade_medida: dados.receita_medica.id_unidade_medida,
-                    id_tipo_intervalo: dados.receita_medica.id_tipo_intervalo,
-                    descricao: dados.receita_medica.descricao
+                    id_estoque: idEstoque,
+                    descricao: dados.receita_medica.descricao ?? null
                 }
 
-                // Cadastra a receita médica
                 let cadastrarReceita = await receitaMedicaService.inserirReceitaMedicaService(
                     receitaMedica,
                     transaction
@@ -163,51 +122,31 @@ const cadastrarMedicamentoUsuario = async function (dados, contentType) {
 
                 let idReceitaMedica = cadastrarReceita.response.id
 
-                // Cadastra os horários do medicamento
-                for (let horario of horarios) {
-
-                    let dadosHorario = {
-                        horario: horario,
-                        id_receita_medica: idReceitaMedica
-                    }
-
-                    let cadastrarHorario = await horarioService.inserirHorarioService(
-                        dadosHorario,
-                        transaction
-                    )
-
-                    if (!cadastrarHorario.status) {
-                        let error = new Error('Não foi possível cadastrar os horários.')
-                        error.resposta = cadastrarHorario
-                        throw error
-                    }
+                let programacaoMedicamento = {
+                    frequencia: dados.programacao_medicamento.frequencia,
+                    data_hora_inicio: dados.programacao_medicamento.data_hora_inicio,
+                    data_hora_fim: null,
+                    id_tipo_intervalo: dados.programacao_medicamento.id_tipo_intervalo,
+                    id_receita_medica: idReceitaMedica
                 }
 
-                // Prepara os dados do estoque
-                let estoque = {
-                    quantidade_em_estoque: dados.estoque.quantidade_em_estoque,
-                    id_usuarios: dados.receita_medica.id_usuario,
-                    id_medicamentos: idMedicamento
-                }
-
-                // Cadastra o estoque inicial
-                let cadastrarEstoque = await estoqueService.inserirEstoqueService(
-                    estoque,
+                let cadastrarProgramacao = await programacaoMedicamentoService.inserirProgramacaoMedicamentoService(
+                    programacaoMedicamento,
                     transaction
                 )
 
-                if (!cadastrarEstoque.status) {
-                    let error = new Error('Não foi possível cadastrar o estoque.')
-                    error.resposta = cadastrarEstoque
+                if (!cadastrarProgramacao.status) {
+                    let error = new Error('Não foi possível cadastrar a programação do medicamento.')
+                    error.resposta = cadastrarProgramacao
                     throw error
                 }
 
-                // Prepara a resposta do cadastro
                 let resposta = {
                     id_usuario: dados.receita_medica.id_usuario,
                     id_medicamento: idMedicamento,
+                    id_estoque: idEstoque,
                     id_receita_medica: idReceitaMedica,
-                    horarios: horarios,
+                    id_programacao_medicamento: cadastrarProgramacao.response.id,
                     quantidade_em_estoque: dados.estoque.quantidade_em_estoque
                 }
 
@@ -229,10 +168,7 @@ const cadastrarMedicamentoUsuario = async function (dados, contentType) {
         if (error.resposta)
             return error.resposta
 
+        console.log(error)
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
     }
-}
-
-module.exports = {
-    cadastrarMedicamentoUsuario
 }

@@ -19,7 +19,7 @@ const receitaMedicaSchema = JOI.object({
                     .required(),
 
     dosagem: JOI.number()
-                .min(0)
+                .greater(0)
                 .max(999.99)
                 .precision(2)
                 .required(),
@@ -28,6 +28,11 @@ const receitaMedicaSchema = JOI.object({
                         .integer()
                         .min(1)
                         .required(),
+    
+    id_estoque: JOI.number()
+                .integer()
+                .min(1)
+                .required(),
 
     descricao: JOI.string()
 })

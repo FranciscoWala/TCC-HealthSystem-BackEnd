@@ -55,7 +55,7 @@ const atualizarReceitaMedicaService = async function (dados, id, transaction = n
             return validacao
 
         dados.id = Number(id)
-        let result = await receitaMedicaDAO.updateReceitaMedica(dados, id, transaction)
+        let result = await receitaMedicaDAO.updateReceitaMedica(dados, transaction)
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code

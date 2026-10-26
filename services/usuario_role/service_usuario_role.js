@@ -55,7 +55,7 @@ const atualizarUsuarioRoleService = async function (dados, id, transaction = nul
             return validacao
 
         dados.id = Number(id)
-        let result = await usuarioRoleDAO.updateUsuarioRole(dados, id, transaction)
+        let result = await usuarioRoleDAO.updateUsuarioRole(dados, transaction)
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
