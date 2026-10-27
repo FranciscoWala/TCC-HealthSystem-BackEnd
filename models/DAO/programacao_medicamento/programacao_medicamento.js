@@ -139,6 +139,35 @@ const selectProgramacaoMedicamentoByIdReceita = async function (idReceitaMedica,
     }
 }
 
+
+const selectByIdUsuarioProgramacaoMedicamento = async function (idUsuario, transaction = null) {
+    try {
+        let sql = `call procProgramacaoMedicamento(?, ?, ?, ?, ?, ?, ?);`
+
+        let connection = transaction || knexConection
+
+        let result = await connection.raw(sql, [
+            'SELECT_BY_ID_USUARIO',
+            null,
+            null,
+            null,
+            null,
+            null,
+            idUsuario
+        ])
+
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
+        else
+            return false
+
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
+
 const deleteProgramacaoMedicamento = async function (id, transaction = null) {
     try {
         let connection = transaction || knexConection
@@ -171,5 +200,6 @@ module.exports = {
     selectByIdProgramacaoMedicamento,
     selectProgramacaoMedicamento,
     selectProgramacaoMedicamentoByIdReceita,
+    selectByIdUsuarioProgramacaoMedicamento,
     deleteProgramacaoMedicamento
 }

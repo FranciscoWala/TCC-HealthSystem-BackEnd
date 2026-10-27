@@ -146,6 +146,31 @@ const buscarProgramacaoPorIdReceitaService = async function (idReceitaMedica, tr
     }
 }
 
+const buscarProgramacaoPorIdUsuarioService = async function (idUsuario, transaction = null) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+    try {
+        let validacaoId = validarDados.validarIDs(idUsuario, customMessages)
+        if (validacaoId)
+            return validacaoId
+
+        let result = await programacaoMedicamentoDAO.selectByIdUsuarioProgramacaoMedicamento(idUsuario, transaction)
+        if (result) {
+            if (result.length > 0) {
+                customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
+                customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
+                customMessages.DEFAULT_MESSAGE.response.programacao_medicamento = result
+
+                return customMessages.DEFAULT_MESSAGE
+            } else
+                return customMessages.ERROR_NOT_FOUND
+        } else
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
+    } catch (error) {
+        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
+    }
+}
+
+
 const excluirProgramacaoMedicamentoService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
@@ -169,5 +194,6 @@ module.exports = {
     listarProgramacaoMedicamentoService,
     buscarProgramacaoMedicamentoService,
     buscarProgramacaoPorIdReceitaService,
+    buscarProgramacaoPorIdUsuarioService,
     excluirProgramacaoMedicamentoService
 }
