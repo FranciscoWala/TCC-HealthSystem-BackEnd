@@ -90,7 +90,24 @@ const selectByIdUsuario = async function (id) {
     }
 }
 
-const selectDadosUsuarios = async function (id) {
+const selectUsuarioByEmail = async function(email){
+    try {
+        let sql = `select * from vw_dados_usuarios_JWT where email ='${email}';`
+
+        let result = await knexConection.raw(sql)
+
+        if(Array.isArray(result))
+            return result[0]
+        else
+            return false
+
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
+const selectDadosUsuarios = async function () {
     try {
         let sql = `select * from vw_dados_usuarios where=${id};`
 

@@ -102,10 +102,29 @@ const deleteVinculoPaciente = async function (id) {
     }
 }
 
+const selectVinculoPacienteByIDPacienteAndIDCuidador = async function (idPaciente, idCuidador) {
+    try {
+        let sql = `select * from tbl_vinculo_paciente where id_paciente=${idPaciente} and id_cuidador=${idCuidador};`
+
+        let result = await knexConection.raw(sql)
+
+        if (result)
+            return result[0]
+        else
+            return false
+
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
 module.exports = {
     insertVinculoPaciente,
     updateVinculoPaciente,
     selectAllVinculosPacientes,
     selectByIdVinculoPaciente,
-    deleteVinculoPaciente
+    deleteVinculoPaciente,
+
+    selectVinculoPacienteByIDPacienteAndIDCuidador
 }
