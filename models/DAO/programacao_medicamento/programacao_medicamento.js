@@ -201,5 +201,5 @@ module.exports = {
     selectProgramacaoMedicamento,
     selectProgramacaoMedicamentoByIdReceita,
     selectByIdUsuarioProgramacaoMedicamento,
-    deleteProgramacaoMedicamento
+    deleteProgramacaoMedicamento,
 }

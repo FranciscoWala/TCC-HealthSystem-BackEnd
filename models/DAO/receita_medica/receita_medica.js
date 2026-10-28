@@ -117,6 +117,26 @@ async function getReceitaMedicaByID(id, transaction = null) {
     }
 }
 
+async function getReceitaMedicaByIDUsuarioAndIDMedicamento(idUsuario, idMedicamento) {
+    try {
+        let sql = `
+             select * from tbl_receita_medica
+                where id_usuario=${idUsuario} and id_medicamento=${idMedicamento}
+        `
+
+        let result = await knexConection.raw(sql)
+
+        if(result)
+            return result[0]
+        else
+            return false
+
+    } catch (error) {
+        console.log(error)
+        return false
+    }    
+}
+
 async function deleteReceitaMedicaByID(id, transaction = null) {
     try {
         let connection = transaction || knexConection
@@ -149,5 +169,6 @@ module.exports = {
     updateReceitaMedica,
     getReceitaMedicaByID,
     getReceitaMedica,
+    getReceitaMedicaByIDUsuarioAndIDMedicamento,
     deleteReceitaMedicaByID
 }

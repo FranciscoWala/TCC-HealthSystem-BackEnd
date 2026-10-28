@@ -208,5 +208,5 @@ module.exports = {
     buscarProgramacaoMedicamentoService,
     buscarProgramacaoPorIdReceitaService,
     buscarProgramacaoPorIdUsuarioService,
-    excluirProgramacaoMedicamentoService
+    excluirProgramacaoMedicamentoService,
 }

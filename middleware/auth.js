@@ -8,18 +8,30 @@
 const jwt = require('./authenticate.js')
 
 async function verificarToken(request, response, next) {
-    let token = request.headers.authorization
 
-    const autenticidadeToken = await jwt.validateToken(token)
+    try {
+        let token = request.headers.authorization
 
-    if(autenticidadeToken)
-        next()
-    else
-        return response.status(401).json(
-            {
-                message: "TOKEN INVÁLIDO OU NÃO INFORMADO"
-            }
-        )
+        const autenticidadeToken = await jwt.validateToken(token)
+
+        if (autenticidadeToken) {
+            request.user = autenticidadeToken
+            return next()
+        }
+        else
+            return response.status(401).json(
+                {
+                    message: "TOKEN INVÁLIDO OU NÃO INFORMADO"
+                }
+            )
+    } catch (error) {
+        console.log(error)
+        return response.status(500).json(
+                {
+                    message: "ERRO INTERNO DO SERVIDOR"
+                }
+            ) 
+    }
 }
 
 module.exports = {

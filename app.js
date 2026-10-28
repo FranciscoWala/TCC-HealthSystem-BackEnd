@@ -78,6 +78,12 @@ app.use('/v1/healthSystem/medtime/cadastro_medicamento', cors(), cadastroMedicam
 const alterarProgramacaoMedicamentoRouter = require('./routes/alterar_programacao_medicamento.router.js')
 app.use('/v1/healthSystem/medtime/alterar_programacao', cors(), alterarProgramacaoMedicamentoRouter)
 
+const excluirMedicamentoUsuarioRouter = require('./routes/excluir_medicamento_usuario.router.js')
+app.use('/v1/healthSystem/medtime/excluir_medicamento', cors(), excluirMedicamentoUsuarioRouter)
+
+const editarMedicamentoUsuarioRouter = require('./routes/editar_medicamento_usuario.router.js')
+app.use('/v1/healthSystem/medtime/editar_medicamento', cors(), editarMedicamentoUsuarioRouter)
+
 // FAZER O START DA API
 app.listen(8080, function() {
     console.log('API aguardando novas requisições...')
