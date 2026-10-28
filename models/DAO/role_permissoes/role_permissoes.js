@@ -118,10 +118,28 @@ const deleteRolePermissoes = async function (id, transaction = null) {
     }
 }
 
+const selectPermissoesByRole = async function(role){
+    try {
+        let sql = `select * from vw_role_permissoes where role = '${role}'`
+        
+        let result = await knexConection.raw(sql)
+        
+        if(result)
+            return result[0][0]
+        else
+            return false
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
 module.exports = {
     insertRolePermissoes,
     updateRolePermissoes,
     selectAllRolePermissoes,
     selectByIdRolePermissoes,
-    deleteRolePermissoes
+    deleteRolePermissoes,
+    deleteRolePermissoes,
+    selectPermissoesByRole
 }

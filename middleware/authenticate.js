@@ -11,9 +11,9 @@ const  SECRET = "abc123"
 const EXPIRES = 28800
 
 async function createJWT(payLoad) {
-    
+   
     const token = JWT.sign(
-        {userId: payLoad},
+        payLoad,
         SECRET,
         {expiresIn: EXPIRES}
     )
