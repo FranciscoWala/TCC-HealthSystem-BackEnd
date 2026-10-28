@@ -159,6 +159,36 @@ const selectByIdReceitaHistoricoMedicamento = async function (idReceitaMedica, t
     }
 }
 
+const desvincularReceitaHistoricoMedicamento = async function (idReceitaMedica, transaction = null) {
+    try {
+        let connection = transaction || knexConection
+
+        let sql = `call procHistoricoMedicamento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+
+        let result = await connection.raw(sql, [
+            'DESVINCULAR_RECEITA',
+            null,
+            null,
+            idReceitaMedica,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        ])
+
+        if (result)
+            return result[0][0][0].affectedRows
+        else
+            return false
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
 async function deleteHistoricoMedicamentoByID(id, transaction = null) {
     try {
         let connection = transaction || knexConection
@@ -196,5 +226,6 @@ module.exports = {
     getHistoricoMedicamento,
     getHistoricoMedicamentoByID,
     selectByIdReceitaHistoricoMedicamento,
+    desvincularReceitaHistoricoMedicamento,
     deleteHistoricoMedicamentoByID
 }

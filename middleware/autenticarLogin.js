@@ -1,13 +1,7 @@
-<<<<<<< HEAD
-
-
 const usuarioDAO = require("../models/DAO/usuarios/usuario.js")
 const auth = require("./auth.js")
-=======
 const authenticate = require("./authenticate.js")
-const usuarioDAO = require("../model/DAO/usuarios/usuario.js")
 const bcrypt = require("bcrypt")
->>>>>>> autenticacao_usuario_conflito
 
 async function autenticarLogin(request, response) {
 
@@ -15,18 +9,15 @@ async function autenticarLogin(request, response) {
         const { email, senha } = request.body
         
 
-<<<<<<< HEAD
     if(!buscaUsuario || buscaUsuario.length === 0)
         return response
         .status(401)
             .json(
                 {message: "EMAIL OU SENHA INVÁLIDOS"}
             )
-=======
         if (!email || !senha) {
             return response.status(400).json({ message: "É necessário fornecer e-mail e senha" })
         }
->>>>>>> autenticacao_usuario_conflito
 
 
         const usuario = await usuarioDAO.selectUsuarioByEmail(email)
