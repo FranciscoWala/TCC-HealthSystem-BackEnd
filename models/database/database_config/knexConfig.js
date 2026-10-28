@@ -10,7 +10,8 @@ module.exports = {
             port: 3306, // Porta padrão do MySQL
 
             // Opcional: Define charset (recomendado para UTF8)
-            charset: 'utf8mb4'
+            charset: 'utf8mb4',
+            timezone: '-03:00'
         },
 
         // Configurações de Migração

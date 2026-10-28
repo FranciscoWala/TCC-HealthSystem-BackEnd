@@ -6,7 +6,7 @@
 ****************************/
 
 const knex = require('knex')
-const knexDatabaseConfig = require('../database_config/knexConfig.js')
+const knexDatabaseConfig = require('../database/database_config/knexConfig.js')
 const knexConnection = knex(knexDatabaseConfig.development)
 
 module.exports = knexConnection

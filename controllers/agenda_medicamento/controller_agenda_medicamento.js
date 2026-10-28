@@ -8,13 +8,21 @@
 
 const configMessages = require('../../utils/messages/configMessages.js')
 
-const programacaoMedicamentoService = require('../../services/programacao_medicamento/services_programacao_medicamento.js')
+const programacaoMedicamentoService = require('../../services/programacao_medicamento/service_programacao_medicamento.js')
+const historicoMedicamentoService = require('../../services/historico_medicamento/service_historico_medicamento.js')
+
+const validarDados = require('../../utils/validar_dados/validarDados.js')
 
 // Gerar a agenda de medicamentos de um usuário
 const gerarAgendaMedicamento = async function (idUsuario, data) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
+        let validarID = validarDados.validarIDs(idUsuario, customMessages)
+
+        if (validarID)
+            return validarID
+
         // Validação da data
         if (!data || !/^\d{4}-\d{2}-\d{2}$/.test(data)) {
             customMessages.ERROR_BAD_REQUEST.field = ['DATA']
@@ -23,10 +31,8 @@ const gerarAgendaMedicamento = async function (idUsuario, data) {
 
         let dataConsulta = new Date(data + 'T00:00:00')
 
-        if (isNaN(dataConsulta.getTime()) ||
-            dataConsulta.getFullYear() != Number(data.substring(0, 4)) ||
-            dataConsulta.getMonth() + 1 != Number(data.substring(5, 7)) ||
-            dataConsulta.getDate() != Number(data.substring(8, 10))) {
+        if (isNaN(dataConsulta.getTime()) || dataConsulta.getFullYear() != Number(data.substring(0, 4)) ||
+            dataConsulta.getMonth() + 1 != Number(data.substring(5, 7)) || dataConsulta.getDate() != Number(data.substring(8, 10))) {
             customMessages.ERROR_BAD_REQUEST.field = ['DATA']
             return customMessages.ERROR_BAD_REQUEST
         }
@@ -40,11 +46,31 @@ const gerarAgendaMedicamento = async function (idUsuario, data) {
         let listaProgramacoes = programacoes.status ? programacoes.response.programacao_medicamento : []
 
         let agenda = []
+        let historicos = []
 
         let inicioDia = new Date(dataConsulta)
 
         let fimDia = new Date(dataConsulta)
         fimDia.setDate(fimDia.getDate() + 1)
+
+        // Buscar os históricos dos medicamentos
+        let receitasConsultadas = []
+
+        for (let programacao of listaProgramacoes) {
+            if (!receitasConsultadas.includes(programacao.id_receita_medica)) {
+                let historico = await historicoMedicamentoService.buscarHistoricoPorIdReceitaService(programacao.id_receita_medica)
+
+                if (!historico.status && historico.status_code != 404)
+                    return historico
+
+                if (historico.status) {
+                    for (let registro of historico.response.historico_medicamento)
+                        historicos.push(registro)
+                }
+
+                receitasConsultadas.push(programacao.id_receita_medica)
+            }
+        }
 
         // Percorrer as programações
         for (let programacao of listaProgramacoes) {
@@ -76,24 +102,32 @@ const gerarAgendaMedicamento = async function (idUsuario, data) {
 
             // Gerar os horários da programação
             while (horario < fimDia && (!dataFim || horario < dataFim)) {
-                let ano = horario.getFullYear()
-                let mes = String(horario.getMonth() + 1).padStart(2, '0')
-                let dia = String(horario.getDate()).padStart(2, '0')
-                let hora = String(horario.getHours()).padStart(2, '0')
-                let minuto = String(horario.getMinutes()).padStart(2, '0')
-                let segundo = String(horario.getSeconds()).padStart(2, '0')
+                if (horario >= inicioDia) {
+                    let ano = horario.getFullYear()
+                    let mes = String(horario.getMonth() + 1).padStart(2, '0')
+                    let dia = String(horario.getDate()).padStart(2, '0')
+                    let hora = String(horario.getHours()).padStart(2, '0')
+                    let minuto = String(horario.getMinutes()).padStart(2, '0')
+                    let segundo = String(horario.getSeconds()).padStart(2, '0')
 
-                let horarioFormatado = `${ano}-${mes}-${dia} ${hora}:${minuto}:${segundo}`
+                    let horarioFormatado = `${ano}-${mes}-${dia} ${hora}:${minuto}:${segundo}`
 
-                agenda.push({
-                    id_programacao_medicamento: programacao.id_programacao_medicamento,
-                    id_receita_medica: programacao.id_receita_medica,
-                    id_medicamento: programacao.id_medicamento,
-                    nome_medicamento: programacao.nome_medicamento,
-                    dosagem: programacao.dosagem,
-                    horario_programado: horarioFormatado,
-                    confirmado: false
-                })
+                    // Verificar se o medicamento já foi tomado
+                    let confirmado = historicos.some(function (historico) {
+                        return Number(historico.id_receita_medica) == Number(programacao.id_receita_medica) &&
+                            new Date(historico.horario_programado).getTime() == horario.getTime()
+                    })
+
+                    agenda.push({
+                        id_programacao_medicamento: programacao.id_programacao_medicamento,
+                        id_receita_medica: programacao.id_receita_medica,
+                        id_medicamento: programacao.id_medicamento,
+                        nome_medicamento: programacao.nome_medicamento,
+                        dosagem: programacao.dosagem,
+                        horario_programado: horarioFormatado,
+                        confirmado: confirmado
+                    })
+                }
 
                 horario = new Date(horario.getTime() + intervalo)
             }

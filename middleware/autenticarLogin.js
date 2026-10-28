@@ -1,6 +1,6 @@
 
 
-const usuarioDAO = require("../model/DAO/usuarios/usuario.js")
+const usuarioDAO = require("../models/DAO/usuarios/usuario.js")
 const auth = require("./auth.js")
 
 async function autenticarLogin(request, response, next) {
@@ -8,7 +8,7 @@ async function autenticarLogin(request, response, next) {
 
     const buscaUsuario = await usuarioDAO.selectUsuarioByEmail(email)
 
-    if(!buscaUsuario || buscaUsuario.lenght === 0)
+    if(!buscaUsuario || buscaUsuario.length === 0)
         return response
         .status(401)
             .json(

@@ -172,3 +172,7 @@ const cadastrarMedicamentoUsuario = async function (dados, contentType) {
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
     }
 }
+
+module.exports = {
+    cadastrarMedicamentoUsuario
+}

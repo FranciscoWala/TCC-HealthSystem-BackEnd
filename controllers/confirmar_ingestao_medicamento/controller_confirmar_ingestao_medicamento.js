@@ -8,7 +8,7 @@
 const configMessages = require('../../utils/messages/configMessages.js')
 
 const receitaMedicaService = require('../../services/receita_medica/service_receita_medica.js')
-const programacaoMedicamentoService = require('../../services/programacao_medicamento/services_programacao_medicamento.js')
+const programacaoMedicamentoService = require('../../services/programacao_medicamento/service_programacao_medicamento.js')
 const historicoMedicamentoService = require('../../services/historico_medicamento/service_historico_medicamento.js')
 const estoqueService = require('../../services/estoque/service_estoque.js')
 

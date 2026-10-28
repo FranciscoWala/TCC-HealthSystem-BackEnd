@@ -11,6 +11,8 @@ const configMessages = require('../../utils/messages/configMessages.js')
 // IMPORT DA DAO
 const programacaoMedicamentoDAO = require('../../models/DAO/programacao_medicamento/programacao_medicamento.js')
 
+const tipoIntervaloService = require('../tipo_intervalo/service_tipo_intervalo.js')
+
 // IMPORT DO SCHEMA DE VALIDAÇÃO
 const programacaoMedicamentoSchema = require('../../schemas/programacaoMedicamentoSchema.js')
 const validarDados = require('../../utils/validar_dados/validarDados.js')
@@ -26,6 +28,17 @@ const inserirProgramacaoMedicamentoService = async function (dados, transaction 
         let validacao = validarDadosProgramacaoMedicamento(dados)
         if (validacao)
             return validacao
+
+        let tipoIntervalo = await tipoIntervaloService.buscarTipoIntervaloService(dados.id_tipo_intervalo, transaction)
+
+        if (!tipoIntervalo.status) {
+            if (tipoIntervalo.status_code == 404) {
+                customMessages.ERROR_BAD_REQUEST.field = ['ID_TIPO_INTERVALO']
+                return customMessages.ERROR_BAD_REQUEST
+            }
+
+            return tipoIntervalo
+        }
 
         let result = await programacaoMedicamentoDAO.insertProgramacaoMedicamento(dados, transaction)
         if (result) {

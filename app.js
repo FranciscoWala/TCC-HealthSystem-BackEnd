@@ -57,9 +57,6 @@ app.use('/v1/healthSystem/medtime/medicamento', cors(), medicamentoRouter)
 const historicoMedicamentoRouter = require('./routes/historico_medicamento.router.js')
 app.use('/v1/healthSystem/medtime/historico_medicamento', cors(), historicoMedicamentoRouter)
 
-const horariosRouter = require('./routes/horario.router.js')
-app.use('/v1/healthSystem/medtime/horarios', cors(), horariosRouter)
-
 const receitaMedicaRouter = require('./routes/receita_medica.router.js')
 app.use('/v1/healthSystem/medtime/receita_medica', cors(), receitaMedicaRouter)
 
@@ -71,6 +68,15 @@ app.use('/v1/healthSystem/medtime/usuario_role', cors(), usuarioRoleRouter)
 
 const vinculoPacienteRouter = require('./routes/vinculo_paciente.router.js')
 app.use('/v1/healthSystem/medtime/vinculo_paciente', cors(), vinculoPacienteRouter)
+
+const agendaMedicamentoRouter = require('./routes/agenda_medicamentos.router.js')
+app.use('/v1/healthSystem/medtime/agenda_medicamento', cors(), agendaMedicamentoRouter)
+
+const cadastroMedicamentoUsuarioRouter = require('./routes/cadastro_medicamento_usuario.router.js')
+app.use('/v1/healthSystem/medtime/cadastro_medicamento', cors(), cadastroMedicamentoUsuarioRouter)
+
+const alterarProgramacaoMedicamentoRouter = require('./routes/alterar_programacao_medicamento.router.js')
+app.use('/v1/healthSystem/medtime/alterar_programacao', cors(), alterarProgramacaoMedicamentoRouter)
 
 // FAZER O START DA API
 app.listen(8080, function() {

@@ -24,7 +24,7 @@ const inserirEstoqueService = async function (dados, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacao = validarDadosEstoque(dados)
-        if (validacao) 
+        if (validacao)
             return validacao
 
         let result = await estoqueDAO.insertEstoque(dados, transaction)
@@ -34,7 +34,7 @@ const inserirEstoqueService = async function (dados, transaction = null) {
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_CREATED_ITEM.status_code
             customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_CREATED_ITEM.message
             customMessages.DEFAULT_MESSAGE.response = dados
-            
+
             return customMessages.DEFAULT_MESSAGE
         } else
             return customMessages.ERROR_INTERNAL_SERVER_MODEL
@@ -47,11 +47,11 @@ const atualizarEstoqueService = async function (dados, id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let buscarID = await buscarEstoqueService(id, transaction)
-        if (!buscarID.status) 
+        if (!buscarID.status)
             return buscarID
 
         let validacao = validarDadosEstoque(dados)
-        if (validacao) 
+        if (validacao)
             return validacao
 
         dados.id = Number(id)
@@ -61,7 +61,7 @@ const atualizarEstoqueService = async function (dados, id, transaction = null) {
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
             customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_UPDATE_ITEM.message
             customMessages.DEFAULT_MESSAGE.response = dados
-            
+
             return customMessages.DEFAULT_MESSAGE
         } else
             return customMessages.ERROR_INTERNAL_SERVER_MODEL
@@ -80,7 +80,7 @@ const listarEstoqueService = async function (transaction = null) {
                 customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
                 customMessages.DEFAULT_MESSAGE.response.count = result.length
                 customMessages.DEFAULT_MESSAGE.response.estoque = result
-                
+
                 return customMessages.DEFAULT_MESSAGE
             } else
                 return customMessages.ERROR_NOT_FOUND
@@ -95,7 +95,7 @@ const buscarEstoqueService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let validacaoId = validarDados.validarIDs(id, customMessages)
-        if (validacaoId) 
+        if (validacaoId)
             return validacaoId
 
         let result = await estoqueDAO.selectByIdEstoque(id, transaction)
@@ -104,7 +104,7 @@ const buscarEstoqueService = async function (id, transaction = null) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
                 customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
                 customMessages.DEFAULT_MESSAGE.response.estoque = result
-                
+
                 return customMessages.DEFAULT_MESSAGE
             } else
                 return customMessages.ERROR_NOT_FOUND
@@ -124,8 +124,8 @@ const descontarEstoqueService = async function (id, quantidade, transaction = nu
 
         let validacao = validarDados.validarDados(
             estoqueSchema.extract('quantidade_em_estoque')
-                        .greater(0)
-                        .required(),
+                .greater(0)
+                .required(),
             quantidade,
             customMessages
         )
@@ -140,8 +140,10 @@ const descontarEstoqueService = async function (id, quantidade, transaction = nu
             customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_UPDATE_ITEM.message
 
             return customMessages.DEFAULT_MESSAGE
-        } else
+        } else {
+            customMessages.ERROR_BAD_REQUEST.field = ['ESTOQUE_INSUFICIENTE']
             return customMessages.ERROR_BAD_REQUEST
+        }
     } catch (error) {
         return customMessages.ERROR_INTERNAL_SERVER_SERVICE
     }
@@ -180,11 +182,11 @@ const excluirEstoqueService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let buscarID = await buscarEstoqueService(id, transaction)
-        if (!buscarID.status) 
+        if (!buscarID.status)
             return buscarID
 
         let result = await estoqueDAO.deleteEstoque(id, transaction)
-        if (result) 
+        if (result)
             return customMessages.SUCCESS_DELETE_ITEM
         else
             return customMessages.ERROR_INTERNAL_SERVER_MODEL

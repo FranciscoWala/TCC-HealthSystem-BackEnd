@@ -9,21 +9,25 @@ const Joi = require('joi')
 
 const usuarioSchema = Joi.object({
     nome: Joi.string()
-            .max(80)
-            .required(),
+        .max(80)
+        .required(),
 
     email: Joi.string()
-            .max(255)
-            .email()
-            .required(),
+        .max(255)
+        .email()
+        .required(),
 
     senha: Joi.string()
-            .max(70)
-            .required(),
+        .max(70)
+        .required(),
+
+    cpf: Joi.string()
+            .max(20)
+            .allow(null),
 
     data_nascimento: Joi.date()
-                    .iso()
-                    .required()
+        .iso()
+        .required()
 })
 
 module.exports = usuarioSchema
