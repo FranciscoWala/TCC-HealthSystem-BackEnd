@@ -7,8 +7,8 @@
 
 const JWT = require('jsonwebtoken')
 
-const  SECRET = "abc123"
-const EXPIRES = 28800
+const SECRET = process.env.JWT_SECRET
+const EXPIRES = process.env.JWT_EXPIRES
 
 async function createJWT(payLoad) {
    
