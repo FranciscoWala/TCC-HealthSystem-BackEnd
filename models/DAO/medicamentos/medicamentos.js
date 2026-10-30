@@ -56,6 +56,7 @@ const updateMedicamento = async function (medicamentos, transaction = null) {
         else
             return false
     } catch (error) {
+        console.log('ERRO NA DAO UPDATE MEDICAMENTO:', error)
         return false
     }
 }
@@ -108,6 +109,7 @@ const selectByIdMedicamento = async function (id, idUsuario, transaction = null)
         else
             return false
     } catch (error) {
+        console.log('ERRO NA DAO SELECT ID MEDICAMENTO:', error)
         return false
     }
 }

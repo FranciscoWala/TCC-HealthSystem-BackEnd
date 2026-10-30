@@ -154,7 +154,7 @@ async function deleteReceitaMedicaByID(id, transaction = null) {
             id
         ])
 
-        if (result)
+        if (result && result[0][0][0].affectedRows > 0)
             return result
         else
             return false
