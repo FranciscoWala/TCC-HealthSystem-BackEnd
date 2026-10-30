@@ -56,6 +56,16 @@ const cadastrarMedicamentoUsuario = async function (dados, contentType) {
                         throw error
                     }
 
+                    let medicamentoEncontrado = buscarMedicamento.response.medicamento[0]
+
+                    if (medicamentoEncontrado.id_usuario != null) {
+                        customMessages.ERROR_BAD_REQUEST.field = ['MEDICAMENTO_PARTICULAR']
+
+                        let error = new Error('Medicamentos particulares não podem ser reutilizados.')
+                        error.resposta = customMessages.ERROR_BAD_REQUEST
+                        throw error
+                    }
+
                     idMedicamento = dados.id_medicamento
                 } else {
                     let medicamento = {

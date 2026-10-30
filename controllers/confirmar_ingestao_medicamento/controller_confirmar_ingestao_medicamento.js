@@ -46,7 +46,13 @@ const confirmarIngestaoMedicamento = async function (idReceitaMedica, idUsuario,
 
             let horaAtual = new Date()
 
-            if (dataHorario > horaAtual) {
+            let toleranciaAntecipacao = 30 * 60 * 1000
+
+            let horarioLiberacao = new Date(
+                dataHorario.getTime() - toleranciaAntecipacao
+            )
+
+            if (horaAtual < horarioLiberacao) {
                 customMessages.ERROR_BAD_REQUEST.field = ['HORARIO_PROGRAMADO']
                 return customMessages.ERROR_BAD_REQUEST
             }

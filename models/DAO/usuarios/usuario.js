@@ -185,6 +185,25 @@ const deleteUsuario = async function (id, transaction = null) {
     }
 }
 
+const buscarRolesAtivasDoUsuario = async (idUsuario, transaction = null) => {
+    try {
+        let connection = transaction || knexConection
+
+        let sql = `select * from tbl_usuarios_role where id_usuarios=${idUsuario} and ativo=1;`
+        
+        let result = await knexConection.raw(sql)
+
+        if(result)
+            return result[0]
+        else 
+            return false
+
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
 module.exports = {
     insertUsuario,
     updateUsuario,
@@ -192,5 +211,6 @@ module.exports = {
     selectByIdUsuario,
     selectDadosUsuarios,
     selectUsuarioByEmail,
-    deleteUsuario
+    deleteUsuario,
+    buscarRolesAtivasDoUsuario
 }

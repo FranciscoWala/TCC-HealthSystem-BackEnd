@@ -72,6 +72,9 @@ const gerarAgendaMedicamento = async function (idUsuario, data) {
             }
         }
 
+        // Horário atual para verificar o status dos medicamentos
+        let horaAtual = new Date()
+
         // Percorrer as programações
         for (let programacao of listaProgramacoes) {
             let dataInicio = new Date(programacao.data_hora_inicio)
@@ -118,6 +121,14 @@ const gerarAgendaMedicamento = async function (idUsuario, data) {
                             new Date(historico.horario_programado).getTime() == horario.getTime()
                     })
 
+                    // Verificar o status do medicamento
+                    let status = 'PENDENTE'
+
+                    if (confirmado)
+                        status = 'TOMADO'
+                    else if (horario < horaAtual)
+                        status = 'ATRASADO'
+
                     agenda.push({
                         id_programacao_medicamento: programacao.id_programacao_medicamento,
                         id_receita_medica: programacao.id_receita_medica,
@@ -125,7 +136,8 @@ const gerarAgendaMedicamento = async function (idUsuario, data) {
                         nome_medicamento: programacao.nome_medicamento,
                         dosagem: programacao.dosagem,
                         horario_programado: horarioFormatado,
-                        confirmado: confirmado
+                        confirmado: confirmado,
+                        status: status
                     })
                 }
 

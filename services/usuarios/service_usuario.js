@@ -181,6 +181,32 @@ const listarDadosUsuariosService = async function (transaction = null) {
     }
 }
 
+const buscarRolesAtivasUsuarioService = async (idUsuario, transaction = null) => {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+
+    try {
+        let result = await usuarioDAO.buscarRolesAtivasDoUsuario(idUsuario)
+
+        if(result){
+            if(result.length > 0){
+                customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
+                customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
+                customMessages.DEFAULT_MESSAGE.response.count = result.length
+                customMessages.DEFAULT_MESSAGE.response.roles = result
+
+                return customMessages.DEFAULT_MESSAGE
+            }else{
+                return customMessages.ERROR_NOT_FOUND
+            }
+        }else{
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
+        }
+    } catch (error) {
+        console.log(error)
+        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
+    }
+}
+
 module.exports = {
     inserirUsuarioService,
     atualizarUsuarioService,
@@ -188,5 +214,6 @@ module.exports = {
     buscarUsuarioService,
     excluirUsuarioService,
     buscarUsuarioPorEmailService,
-    listarDadosUsuariosService
+    listarDadosUsuariosService,
+    buscarRolesAtivasUsuarioService
 }
