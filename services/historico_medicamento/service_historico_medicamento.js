@@ -139,25 +139,6 @@ const buscarHistoricoPorIdReceitaService = async function (idReceitaMedica, tran
     }
 }
 
-const desvincularReceitaHistoricoMedicamentoService = async function (idReceitaMedica, transaction = null) {
-    let customMessages = JSON.parse(JSON.stringify(configMessages))
-    try {
-        let validacaoId = validarDados.validarIDs(idReceitaMedica, customMessages)
-        if (validacaoId)
-            return validacaoId
-
-        let result = await historicoMedicamentoDAO.desvincularReceitaHistoricoMedicamento(idReceitaMedica, transaction)
-
-        if (result !== false)
-            return customMessages.SUCCESS_UPDATE_ITEM
-        else
-            return customMessages.ERROR_INTERNAL_SERVER_MODEL
-
-    } catch (error) {
-        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
-    }
-}
-
 const excluirHistoricoMedicamentoService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
@@ -181,6 +162,5 @@ module.exports = {
     listarHistoricoMedicamentoService,
     buscarHistoricoMedicamentoService,
     buscarHistoricoPorIdReceitaService,
-    desvincularReceitaHistoricoMedicamentoService,
     excluirHistoricoMedicamentoService
 }

@@ -16,16 +16,16 @@ const programacaoMedicamentoService = require('../../services/programacao_medica
 const knexConection = require('../../models/global_knex/global_knex.js')
 
 // Alterar a programação de um medicamento
-const alterarProgramacaoMedicamento = async function (id, dados, contentType) {
+const alterarProgramacaoMedicamento = async function (id, dados, contentType, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     let erroTransacao = null
 
     try {
         if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
 
-            let result = await knexConection.transaction(async function (transaction) {
+            let executarAlteracao = async function (connection) {
 
-                let programacao = await programacaoMedicamentoService.buscarProgramacaoMedicamentoService(id, transaction)
+                let programacao = await programacaoMedicamentoService.buscarProgramacaoMedicamentoService(id, connection)
 
                 if (!programacao.status) {
                     erroTransacao = programacao
@@ -55,11 +55,7 @@ const alterarProgramacaoMedicamento = async function (id, dados, contentType) {
                     data_hora_fim: dados.data_hora_inicio
                 }
 
-                let resultadoAtualizacao = await programacaoMedicamentoService.atualizarProgramacaoMedicamentoService(
-                    dadosAtualizacao,
-                    id,
-                    transaction
-                )
+                let resultadoAtualizacao = await programacaoMedicamentoService.atualizarProgramacaoMedicamentoService(dadosAtualizacao, id, connection)
 
                 if (!resultadoAtualizacao.status) {
                     erroTransacao = resultadoAtualizacao
@@ -75,10 +71,7 @@ const alterarProgramacaoMedicamento = async function (id, dados, contentType) {
                     id_receita_medica: programacaoAtual.id_receita_medica
                 }
 
-                let resultadoInsercao = await programacaoMedicamentoService.inserirProgramacaoMedicamentoService(
-                    novaProgramacao,
-                    transaction
-                )
+                let resultadoInsercao = await programacaoMedicamentoService.inserirProgramacaoMedicamentoService(novaProgramacao, connection)
 
                 if (!resultadoInsercao.status) {
                     erroTransacao = resultadoInsercao
@@ -86,9 +79,12 @@ const alterarProgramacaoMedicamento = async function (id, dados, contentType) {
                 }
 
                 return resultadoInsercao
-            })
+            }
 
-            return result
+            if (transaction)
+                return await executarAlteracao(transaction)
+            else
+                return await knexConection.transaction(executarAlteracao)
 
         } else {
             return customMessages.ERROR_CONTENT_TYPE
