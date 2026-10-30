@@ -13,7 +13,7 @@ const bodyParserJSON = bodyParser.json()
 
 const router = express.Router()
 
-const usuarioController = require('../controllers/usuarios/controller_usuario.js')
+const usuarioController = require('../controllers/usuario/usuario.js')
 
 //                          ENDPOINTS USUARIO
 router.post('/', bodyParserJSON, async function (request, response) {

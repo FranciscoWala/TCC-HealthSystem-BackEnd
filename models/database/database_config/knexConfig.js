@@ -13,7 +13,7 @@ module.exports = {
 
             // Opcional: Define charset (recomendado para UTF8)
             charset: 'utf8mb4',
-            timezone: '-03:00'
+            timezone: 'Z'
         },
 
         // Configurações de Migração

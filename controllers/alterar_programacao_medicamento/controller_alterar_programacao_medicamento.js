@@ -12,6 +12,9 @@ const configMessages = require('../../utils/messages/configMessages.js')
 // IMPORT DA SERVICE
 const programacaoMedicamentoService = require('../../services/programacao_medicamento/service_programacao_medicamento.js')
 
+// IMPORT DA FUNÇÃO DE NORMALIZAÇÃO DE DATAS
+const normalizarDataUTC = require('../../utils/datas/normalizarDataUTC.js')
+
 // IMPORT DA CONFIGURAÇÃO GLOBAL DO KNEX
 const knexConection = require('../../models/global_knex/global_knex.js')
 
@@ -40,10 +43,18 @@ const alterarProgramacaoMedicamento = async function (id, dados, contentType, tr
                     throw new Error('PROGRAMACAO_ENCERRADA')
                 }
 
+                let dataInicioFormatada = normalizarDataUTC(dados.data_hora_inicio)
+
+                if (!dataInicioFormatada) {
+                    customMessages.ERROR_BAD_REQUEST.field = ['DATA_HORA_INICIO']
+                    erroTransacao = customMessages.ERROR_BAD_REQUEST
+                    throw new Error('DATA_HORA_INICIO')
+                }
+
                 let dataInicio = new Date(dados.data_hora_inicio)
                 let dataInicioAtual = new Date(programacaoAtual.data_hora_inicio)
 
-                if (!dados.data_hora_inicio || isNaN(dataInicio.getTime()) ||
+                if (isNaN(dataInicioAtual.getTime()) ||
                     dataInicio <= dataInicioAtual || dataInicio <= new Date()) {
 
                     customMessages.ERROR_BAD_REQUEST.field = ['DATA_HORA_INICIO']
@@ -52,7 +63,7 @@ const alterarProgramacaoMedicamento = async function (id, dados, contentType, tr
                 }
 
                 let dadosAtualizacao = {
-                    data_hora_fim: dados.data_hora_inicio
+                    data_hora_fim: dataInicioFormatada
                 }
 
                 let resultadoAtualizacao = await programacaoMedicamentoService.atualizarProgramacaoMedicamentoService(dadosAtualizacao, id, connection)
@@ -65,7 +76,7 @@ const alterarProgramacaoMedicamento = async function (id, dados, contentType, tr
                 // Criar uma nova programação para a mesma receita
                 let novaProgramacao = {
                     frequencia: dados.frequencia,
-                    data_hora_inicio: dados.data_hora_inicio,
+                    data_hora_inicio: dataInicioFormatada,
                     data_hora_fim: null,
                     id_tipo_intervalo: dados.id_tipo_intervalo,
                     id_receita_medica: programacaoAtual.id_receita_medica
