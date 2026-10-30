@@ -31,6 +31,9 @@ const knexConection = require('../../models/global_knex/global_knex.js')
         3. inserir os contatos de emergência do usuário na tbl_contato_emergencia
         4. buscar role
         5. vincular o usuário a role
+
+    ao atualizar os dados de cadastro do usuário deve-se:
+        1. 
 */
 function validarDadosUsuario(dados) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
@@ -77,6 +80,36 @@ async function cadastrarUsuario(dados, contentType) {
     }
 }
 
+async function atualizarUsuario(dados, contentType, id) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+
+    try {
+        if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
+            let validacao = await validarDadosUsuario(dados)
+            let buscaUsuario = await usuarioService.buscarUsuarioService(id)
+
+            if(validacao)
+                return validacao
+
+            if(!buscaUsuario.status)
+                return buscaUsuario
+
+            let result = await knexConection.transaction(async(transaction) => {
+                
+            })
+
+        }else{
+            return customMessages.ERROR_CONTENT_TYPE
+        }
+
+    } catch (error) {
+        console.log(error)
+        return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
+    }
+}
+
+
+//FUNÇÕES AUXILIARES
 async function realizarCadastroUsuario(dados, transaction) {
     let dadosPessoais = {
         nome: dados.nome,
