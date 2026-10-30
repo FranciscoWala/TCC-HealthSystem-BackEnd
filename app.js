@@ -72,6 +72,9 @@ app.use('/v1/healthSystem/medtime/vinculo_paciente', cors(), vinculoPacienteRout
 const agendaMedicamentoRouter = require('./routes/agenda_medicamentos.router.js')
 app.use('/v1/healthSystem/medtime/agenda_medicamento', cors(), agendaMedicamentoRouter)
 
+const programacaoMedicamentoRouter = require('./routes/programacao_medicamento.router.js')
+app.use('/v1/healthSystem/medtime/programacao_medicamento', cors(), programacaoMedicamentoRouter)
+
 const cadastroMedicamentoUsuarioRouter = require('./routes/cadastro_medicamento_usuario.router.js')
 app.use('/v1/healthSystem/medtime/cadastro_medicamento', cors(), cadastroMedicamentoUsuarioRouter)
 
