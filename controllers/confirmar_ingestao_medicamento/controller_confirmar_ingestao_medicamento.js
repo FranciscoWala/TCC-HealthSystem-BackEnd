@@ -37,9 +37,16 @@ const confirmarIngestaoMedicamento = async function (idReceitaMedica, idUsuario,
             if (!programacoes.status)
                 return programacoes
 
+            let formatoISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/i
+
+            if (typeof horarioProgramado != 'string' || !formatoISO.test(horarioProgramado)) {
+                customMessages.ERROR_BAD_REQUEST.field = ['HORARIO_PROGRAMADO']
+                return customMessages.ERROR_BAD_REQUEST
+            }
+
             let dataHorario = new Date(horarioProgramado)
 
-            if (!horarioProgramado || isNaN(dataHorario.getTime())) {
+            if (isNaN(dataHorario.getTime())) {
                 customMessages.ERROR_BAD_REQUEST.field = ['HORARIO_PROGRAMADO']
                 return customMessages.ERROR_BAD_REQUEST
             }
