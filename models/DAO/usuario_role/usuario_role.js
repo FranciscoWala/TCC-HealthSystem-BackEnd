@@ -141,10 +141,37 @@ async function deleteUsuarioRoleByID(id, transaction = null) {
     }
 }
 
+async function desactivateUsuarioRole(idUsuario, transaction = null) {
+    try {
+        let connection = transaction || knexConection
+
+        let sql = 
+            `
+                update tbl_usuarios_role
+                set data_desativacao = now(),
+                    ativo = false
+                where id_usuarios=${idUsuario};
+            `
+
+        let result = connection.raw(sql)
+
+
+        if(result)
+            return true
+        else
+            return false
+
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
 module.exports = {
     insertUsuarioRole,
     updateUsuarioRole,
     selectUsuarioRole,
     selectUsuarioRoleByID,
-    deleteUsuarioRoleByID
+    deleteUsuarioRoleByID,
+    desactivateUsuarioRole   
 }

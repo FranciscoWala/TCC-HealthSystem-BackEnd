@@ -38,6 +38,10 @@ const knexConection = require('../../models/global_knex/global_knex.js')
         3. atualizar os contatos de emergência  do usuario na tbl_contato_emergencia
         4. buscar role
         5. atribuir a nova role ao usuário
+
+    ao desativar os dado do usuário deve-se:
+        1. atualizar atributo de desativacao do usuário na tbl_usuarios
+        2. atualizar a data de dasativação da role do usuário
 */
 function validarDadosUsuario(dados) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
@@ -47,7 +51,7 @@ function validarDadosUsuario(dados) {
 
 
 
-async function cadastrarUsuario(dados, contentType) {
+async function cadastrarUsuarioTransaction(dados, contentType) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
@@ -84,7 +88,7 @@ async function cadastrarUsuario(dados, contentType) {
     }
 }
 
-async function atualizarUsuario(dados, contentType, idUsuario) {
+async function atualizarUsuarioTransaction(dados, contentType, idUsuario) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
@@ -125,6 +129,30 @@ async function atualizarUsuario(dados, contentType, idUsuario) {
 
 //FUNÇÕES AUXILIARES
 
+//Funções auxiliares para realizar safe delete do usuário
+async function desativarRoleUsuarioTransaction(idUsuario, transaction) {
+    try {
+        let buscaUsuario = await usuarioService.buscarUsuarioService(idUsuario)
+
+        if(!buscaUsuario.status){
+            let error = new Error("NÃO FOI POSSÍVEL ENCONTRAR O USUÁRIO")
+                error.resposta = buscaUsuario
+                throw error
+        }
+
+        let desativarUsuarioRole = await usuarioRoleService.desativarUsuarioRole(idUsuario, transaction)
+
+        if(!desativarUsuarioRole){
+            let error = new Error("NÃO FOI POSSÍVEL DESATIVAR ROLE DO USUÁRIO")
+                error.resposta = buscaUsuario
+                throw error
+        }
+    } catch (error) {
+        console.log(error)
+        return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
+    }
+}
+
 //Funções auxiliares para atualizar o usuário 
 async function gerenciarAtualizacaoRoles(transaction, idUsuario, dados) {
     let novasRoles = dados["usuario_role"] || []
@@ -134,7 +162,7 @@ async function gerenciarAtualizacaoRoles(transaction, idUsuario, dados) {
 
     if (buscaRolesAntigas.status) {
         rolesAntigas = buscaRolesAntigas.response.roles;
-    } else if (buscaRolesAntigas.status_code !== 404) {
+    } else if (buscaRolesAntigas.status_code === 404) {
         throw new Error("NÃO FOI POSSÍVEL BUSCAR AS ROLES ATUAIS DO USUÁRIO");
     }
 
@@ -186,7 +214,7 @@ async function atualizarCadastroUsuario(dados, transaction) {
 
     if (!atualizarUsuario.status) {
         let error = new Error("NÃO FOI POSSÍVEL REALIZAR O CADASTRO DO USUÁRIO")
-        error.resposta = cadastrarUsuario
+        error.resposta = atualizarUsuario
         throw error
     } else {
         return atualizarUsuario.response.id
@@ -259,7 +287,7 @@ async function realizarCadastroUsuario(dados, transaction) {
         let error = new Error("NÃO FOI POSSÍVEL REALIZAR O CADASTRO DO USUÁRIO")
         error.resposta = cadastrarUsuario
         throw error
-    }else{
+    } else {
         return cadastrarUsuario.response.id
     }
 }
@@ -291,7 +319,7 @@ async function inserirContatosEmergencia(dados, transaction) {
     if (Array.isArray(contatos_emergencia)) {
 
         for (const contato of contatos_emergencia) {
-            let inserirContato = await 
+            let inserirContato = await
                 contatoEmergenciaService.inserirContatoEmergenciaService(
                     contato, transaction
                 )
