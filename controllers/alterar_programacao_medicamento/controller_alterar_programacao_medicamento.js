@@ -9,6 +9,8 @@
 // IMPORT DO ARQUIVO DE CONFIGURAÇÕES DE MENSAGENS DO PROJETO
 const configMessages = require('../../utils/messages/configMessages.js')
 
+const luxon = require('luxon')
+
 // IMPORT DA SERVICE
 const programacaoMedicamentoService = require('../../services/programacao_medicamento/service_programacao_medicamento.js')
 
@@ -52,18 +54,39 @@ const alterarProgramacaoMedicamento = async function (id, dados, contentType, tr
                 }
 
                 let dataInicio = new Date(dados.data_hora_inicio)
-                let dataInicioAtual = new Date(programacaoAtual.data_hora_inicio)
 
-                if (isNaN(dataInicioAtual.getTime()) ||
-                    dataInicio <= dataInicioAtual || dataInicio <= new Date()) {
-
+                if (isNaN(dataInicio.getTime()) || dataInicio <= new Date()) {
                     customMessages.ERROR_BAD_REQUEST.field = ['DATA_HORA_INICIO']
                     erroTransacao = customMessages.ERROR_BAD_REQUEST
                     throw new Error('DATA_HORA_INICIO')
                 }
 
+                let dataInicioAtual = new Date(programacaoAtual.data_hora_inicio)
+
+                if (dataInicioAtual > new Date()) {
+
+                    let dadosAtualizacao = {
+                        frequencia: dados.frequencia,
+                        data_hora_inicio: dataInicioFormatada,
+                        id_tipo_intervalo: dados.id_tipo_intervalo
+                    }
+
+                    let resultadoAtualizacao = await programacaoMedicamentoService.atualizarDadosProgramacaoMedicamentoService(dadosAtualizacao, id, connection)
+
+                    if (!resultadoAtualizacao.status) {
+                        erroTransacao = resultadoAtualizacao
+                        throw new Error('ERRO_ATUALIZAR_DADOS_PROGRAMACAO')
+                    }
+
+                    return resultadoAtualizacao
+                }
+
+                let inicioDia = luxon.DateTime.fromISO(dados.data_hora_inicio, {
+                    setZone: true
+                }).startOf('day').toUTC().toFormat('yyyy-MM-dd HH:mm:ss')
+
                 let dadosAtualizacao = {
-                    data_hora_fim: dataInicioFormatada
+                    data_hora_fim: inicioDia
                 }
 
                 let resultadoAtualizacao = await programacaoMedicamentoService.atualizarProgramacaoMedicamentoService(dadosAtualizacao, id, connection)

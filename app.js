@@ -88,6 +88,6 @@ const editarMedicamentoUsuarioRouter = require('./routes/editar_medicamento_usua
 app.use('/v1/healthSystem/medtime/editar_medicamento', cors(), editarMedicamentoUsuarioRouter)
 
 // FAZER O START DA API
-app.listen(8080, function() {
+app.listen(8082, function() {
     console.log('API aguardando novas requisições...')
 })

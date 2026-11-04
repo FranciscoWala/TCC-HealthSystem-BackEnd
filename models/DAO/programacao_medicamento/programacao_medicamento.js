@@ -61,6 +61,32 @@ const updateProgramacaoMedicamento = async function (programacaoMedicamento, tra
     }
 }
 
+const updateDadosProgramacaoMedicamento = async function (programacaoMedicamento, transaction = null) {
+    try {
+        let connection = transaction || knexConection
+
+        let sql = `call procProgramacaoMedicamento(?, ?, ?, ?, ?, ?, ?)`
+
+        let result = await connection.raw(sql, [
+            'UPDATE_DADOS',
+            programacaoMedicamento.frequencia,
+            programacaoMedicamento.data_hora_inicio,
+            null,
+            programacaoMedicamento.id_tipo_intervalo,
+            null,
+            programacaoMedicamento.id
+        ])
+
+        if (result && result[0][0][0].affectedRows > 0)
+            return true
+        else
+            return false
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
 const selectProgramacaoMedicamento = async function (transaction = null) {
     try {
         let connection = transaction || knexConection
@@ -197,6 +223,7 @@ const deleteProgramacaoMedicamento = async function (id, transaction = null) {
 module.exports = {
     insertProgramacaoMedicamento,
     updateProgramacaoMedicamento,
+    updateDadosProgramacaoMedicamento,
     selectByIdProgramacaoMedicamento,
     selectProgramacaoMedicamento,
     selectProgramacaoMedicamentoByIdReceita,
