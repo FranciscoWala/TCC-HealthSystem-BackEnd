@@ -139,6 +139,32 @@ const buscarHistoricoPorIdReceitaService = async function (idReceitaMedica, tran
     }
 }
 
+const buscarHistoricoPorIdPacienteService = async function (idPaciente, transaction = null) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+    try {
+        let validarID = validarDados.validarIDs(idPaciente, customMessages)
+        if (validarID)
+            return validarID
+
+        let result = await historicoMedicamentoDAO.selectByIdPacienteHistoricoMedicamento(idPaciente, transaction)
+
+        if (result) {
+            if (result.length > 0) {
+                customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
+                customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
+                customMessages.DEFAULT_MESSAGE.response.count = result.length
+                customMessages.DEFAULT_MESSAGE.response.historico_medicamento = result
+
+                return customMessages.DEFAULT_MESSAGE
+            } else
+                return customMessages.ERROR_NOT_FOUND
+        } else
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
+    } catch (error) {
+        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
+    }
+}
+
 const excluirHistoricoMedicamentoService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
@@ -162,5 +188,6 @@ module.exports = {
     listarHistoricoMedicamentoService,
     buscarHistoricoMedicamentoService,
     buscarHistoricoPorIdReceitaService,
+    buscarHistoricoPorIdPacienteService,
     excluirHistoricoMedicamentoService
 }
