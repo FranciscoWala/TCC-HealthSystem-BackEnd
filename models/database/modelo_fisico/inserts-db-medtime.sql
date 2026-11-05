@@ -57,3 +57,14 @@ select
     cpf,
     data_nascimento
 from tbl_usuarios;
+
+select
+    id,
+    frequencia,
+    data_hora_inicio,
+    data_hora_fim,
+    id_tipo_intervalo,
+    id_receita_medica
+from tbl_programacao_medicamento
+where id_receita_medica = 2
+order by id;

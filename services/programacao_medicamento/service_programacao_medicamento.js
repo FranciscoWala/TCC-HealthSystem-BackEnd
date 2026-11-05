@@ -152,6 +152,43 @@ const atualizarDadosProgramacaoMedicamentoService = async function (dados, id, t
     }
 }
 
+const atualizarFimProgramacaoMedicamentoService = async function (dados, id, transaction = null) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+
+    try {
+        let buscarID = await buscarProgramacaoMedicamentoService(id, transaction)
+        if (!buscarID.status)
+            return buscarID
+
+        let validacao = validarDados.validarDados(
+            programacaoMedicamentoSchema
+                .extract('data_hora_fim')
+                .required()
+                .invalid(null),
+            dados.data_hora_fim,
+            customMessages
+        )
+
+        if (validacao)
+            return validacao
+
+        let result = await programacaoMedicamentoDAO.updateFimProgramacaoMedicamento(id, dados.data_hora_fim, transaction)
+
+        if (result) {
+            customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
+            customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
+            customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_UPDATE_ITEM.message
+            customMessages.DEFAULT_MESSAGE.response = dados
+
+            return customMessages.DEFAULT_MESSAGE
+        } else
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
+
+    } catch (error) {
+        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
+    }
+}
+
 const listarProgramacaoMedicamentoService = async function (transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
@@ -267,6 +304,7 @@ module.exports = {
     inserirProgramacaoMedicamentoService,
     atualizarProgramacaoMedicamentoService,
     atualizarDadosProgramacaoMedicamentoService,
+    atualizarFimProgramacaoMedicamentoService,
     listarProgramacaoMedicamentoService,
     buscarProgramacaoMedicamentoService,
     buscarProgramacaoPorIdReceitaService,
