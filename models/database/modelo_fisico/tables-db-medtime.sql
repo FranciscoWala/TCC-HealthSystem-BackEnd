@@ -10,7 +10,8 @@ create table tbl_usuarios (
     email 			varchar(255) not null,
     senha 			varchar(512) not null,
     cpf 			varchar(20),
-    data_nascimento date not null
+    data_nascimento date not null,
+    ativo			boolean not null default true
 );
 
 # Tabela Role

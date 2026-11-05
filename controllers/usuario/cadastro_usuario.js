@@ -43,7 +43,7 @@ function validarDadosUsuario(dados) {
 
 
 
-async function cadastrarUsuario(dados, contentType) {
+async function cadastrarUsuarioTransaction(dados, contentType) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
@@ -80,7 +80,7 @@ async function cadastrarUsuario(dados, contentType) {
     }
 }
 
-async function atualizarUsuario(dados, contentType, id) {
+async function atualizarUsuarioTransaction(dados, contentType, id) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
@@ -104,6 +104,25 @@ async function atualizarUsuario(dados, contentType, id) {
 
     } catch (error) {
         console.log(error)
+        return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
+    }
+}
+
+async function desativarUsuario(idUsuario) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+    try {
+        let buscaUsuario = await usuarioService.buscarUsuarioService(idUsuario)
+
+        if(!buscaUsuario.status)
+            return buscaUsuario
+
+        let result = await knexConection.transaction( transaction => {
+            await usuarioService.desativarUsuarioService(idUsuario, transaction) // Desativa o registro do usuário na tbl_usuarios
+            await usuarioRoleService.desativarUsuarioRoleService(idUsuario, transaction) // Desativa as Roles ativas do usuário
+        })
+        
+    } catch (error) {
+        console.log("ERROR IN CADASTRO_USUARIO: " + error);
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
     }
 }

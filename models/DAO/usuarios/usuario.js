@@ -185,6 +185,26 @@ const deleteUsuario = async function (id, transaction = null) {
     }
 }
 
+const desactivateUsuario = async function (id, transaction = null) {
+    try {
+        let connection = transaction || knexConection
+
+        let sql = `
+            update tbl_usuarios
+                set ativo = false
+            where id = ${id}
+        `
+
+        if(result)
+            return true
+        else
+            return false
+    } catch (error) {
+        console.log("ERROR IN USUARIO MODEL" + error);
+        return false
+    }
+}
+
 module.exports = {
     insertUsuario,
     updateUsuario,
@@ -192,5 +212,6 @@ module.exports = {
     selectByIdUsuario,
     selectDadosUsuarios,
     selectUsuarioByEmail,
-    deleteUsuario
+    deleteUsuario,
+    desactivateUsuario
 }
