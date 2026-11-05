@@ -69,7 +69,7 @@ async function cadastrarUsuarioTransaction(dados, contentType) {
             customMessages.DEFAULT_MESSAGE.response = result
 
             return customMessages.DEFAULT_MESSAGE
-        }else{
+        } else {
             return customMessages.ERROR_CONTENT_TYPE
         }
 
@@ -118,19 +118,28 @@ async function atualizarUsuarioTransaction(dados, contentType, idUsuario) {
     }
 }
 
-async function desativarUsuario(idUsuario) {
+async function desativarUsuarioTransaction(idUsuario) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let buscaUsuario = await usuarioService.buscarUsuarioService(idUsuario)
 
-        if(!buscaUsuario.status)
+        if (!buscaUsuario.status)
             return buscaUsuario
 
-        let result = await knexConection.transaction( transaction => {
+        //Necessário fazer uma revisão nesta transaction. 
+        // Talvez seja necessário colocar estes métodos internos dentro de funções que lançem erro para rollback 
+        let result = await knexConection.transaction(transaction => {
             await usuarioService.desativarUsuarioService(idUsuario, transaction) // Desativa o registro do usuário na tbl_usuarios
             await usuarioRoleService.desativarUsuarioRoleService(idUsuario, transaction) // Desativa as Roles ativas do usuário
         })
-        
+
+        customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
+        customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_CREATED_ITEM.status_code
+        customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_CREATED_ITEM.message
+        customMessages.DEFAULT_MESSAGE.response = result
+
+        return customMessages.DEFAULT_MESSAGE
+
     } catch (error) {
         console.log("ERROR IN CADASTRO_USUARIO: " + error);
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
@@ -349,4 +358,11 @@ async function atribuirRoleAoUsuario(transaction, idUsuario, rolesUsuario, opera
             }
         }
     }
+}
+
+
+module.exports = {
+    cadastrarUsuarioTransaction,
+    atualizarUsuarioTransaction,
+    desativarUsuarioTransaction
 }

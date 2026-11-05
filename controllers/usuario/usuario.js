@@ -8,13 +8,14 @@
 // IMPORT DO ARQUIVO DE CONFIGURAÇÕES DE MENSAGENS DO PROJETO
 const configMessages = require('../../utils/messages/configMessages.js')
 const usuarioService = require('../../services/usuarios/service_usuario.js')
+const usuarioTransactions = require('./usuario_transactions.js')
 
 async function inserirNovoUsuario(usuario, contentType) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
         if (String(contentType).toUpperCase() === 'APPLICATION/JSON')
-            return await usuarioService.inserirUsuarioService(usuario)
+            return await usuarioTransactions.cadastrarUsuarioTransaction(usuario, contentType)
         else
             return customMessages.ERROR_CONTENT_TYPE
     } catch (error) {
@@ -28,7 +29,7 @@ async function atualizarUsuario(usuario, id, contentType) {
 
     try {
         if (String(contentType).toUpperCase() == 'APPLICATION/JSON')
-            return await usuarioService.atualizarUsuarioService(usuario, id)
+            return await usuarioTransactions.atualizarUsuarioTransaction(usuario, contentType)
         else
             return customMessages.ERROR_CONTENT_TYPE
     } catch (error) {
@@ -74,7 +75,7 @@ async function excluirUsuario(id) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
-        return await usuarioService.excluirUsuarioService(id)
+        return await usuarioTransactions.desativarUsuarioTransaction(id) // Realiza o safe delete
     } catch (error) {
         console.log(error)
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
