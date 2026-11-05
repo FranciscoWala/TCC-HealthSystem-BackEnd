@@ -9,14 +9,14 @@
 const configMessages = require('../../utils/messages/configMessages.js')
 const usuarioService = require('../../services/usuarios/service_usuario.js')
 
-async function inserirNovoUsuario(usuario, contentType){
+async function inserirNovoUsuario(usuario, contentType) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
-        if(String(contentType).toUpperCase() === 'APPLICATION/JSON')
+        if (String(contentType).toUpperCase() === 'APPLICATION/JSON')
             return await usuarioService.inserirUsuarioService(usuario)
         else
-            return customMessages.ERROR_CONTENT_TYPE 
+            return customMessages.ERROR_CONTENT_TYPE
     } catch (error) {
         console.log(error)
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
@@ -25,9 +25,9 @@ async function inserirNovoUsuario(usuario, contentType){
 
 async function atualizarUsuario(usuario, id, contentType) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
-    
+
     try {
-        if(String(contentType).toUpperCase() == 'APPLICATION/JSON')
+        if (String(contentType).toUpperCase() == 'APPLICATION/JSON')
             return await usuarioService.atualizarUsuarioService(usuario, id)
         else
             return customMessages.ERROR_CONTENT_TYPE
@@ -82,14 +82,23 @@ async function excluirUsuario(id) {
 }
 
 //IMPLEMENTAR EM AUTENTICARLOGIN
-async function buscarUsuarioPorEmail() {
-    
+async function buscarUsuarioPorEmail(email) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+
+    try {
+        return await usuarioService.buscarUsuarioPorEmailService(email)
+    } catch (error) {
+        console.log(error)
+        return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
+    }
 }
 
 module.exports = {
     inserirNovoUsuario,
     atualizarUsuario,
     listarUsuario,
+    buscarUsuario,
     buscarDadosUsuario,
+    buscarUsuarioPorEmail,
     excluirUsuario
 }

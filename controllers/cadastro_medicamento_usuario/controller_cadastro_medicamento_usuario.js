@@ -19,6 +19,9 @@ const estoqueService = require('../../services/estoque/service_estoque.js')
 const cadastroMedicamentoUsuarioSchema = require('../../schemas/cadastroMedicamentoUsuarioSchema.js')
 const validarDados = require('../../utils/validar_dados/validarDados.js')
 
+// IMPORT DA FUNÇÃO DE NORMALIZAÇÃO DE DATAS
+const normalizarDataUTC = require('../../utils/datas/normalizarDataUTC.js')
+
 // IMPORT DA CONFIGURAÇÃO GLOBAL DO KNEX
 const knexConection = require('../../models/global_knex/global_knex.js')
 
@@ -38,7 +41,15 @@ const cadastrarMedicamentoUsuario = async function (dados, contentType) {
             if (validacao)
                 return validacao
 
+            let dataInicioFormatada = normalizarDataUTC(dados.programacao_medicamento.data_hora_inicio)
+
+            if (!dataInicioFormatada) {
+                customMessages.ERROR_BAD_REQUEST.field = ['DATA_HORA_INICIO']
+                return customMessages.ERROR_BAD_REQUEST
+            }
+
             let result = await knexConection.transaction(async function (transaction) {
+
 
                 let idMedicamento
 
@@ -134,7 +145,7 @@ const cadastrarMedicamentoUsuario = async function (dados, contentType) {
 
                 let programacaoMedicamento = {
                     frequencia: dados.programacao_medicamento.frequencia,
-                    data_hora_inicio: dados.programacao_medicamento.data_hora_inicio,
+                    data_hora_inicio: dataInicioFormatada,
                     data_hora_fim: null,
                     id_tipo_intervalo: dados.programacao_medicamento.id_tipo_intervalo,
                     id_receita_medica: idReceitaMedica

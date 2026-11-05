@@ -16,11 +16,13 @@ const controllerAgendaMedicamento = require('../controllers/agenda_medicamento/c
 router.get('/:id_usuario', async function (request, response) {
     let id = request.params.id_usuario
     let data = request.query.data
+    let fuso = request.query.fuso
 
-    let result = await controllerAgendaMedicamento.gerarAgendaMedicamento(id, data)
+    let result = await controllerAgendaMedicamento.gerarAgendaMedicamento(id, data, fuso)
 
     response.status(result.status_code)
     response.json(result)
 })
+
 
 module.exports = router

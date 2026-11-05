@@ -54,6 +54,15 @@ const buscarHistoricoMedicamento = async function (id) {
     }
 }
 
+const listarHistoricoPorPaciente = async function (idPaciente) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+    try {
+        return await historicoMedicamentoService.buscarHistoricoPorIdPacienteService(idPaciente)
+    } catch (error) {
+        return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
+    }
+}
+
 const excluirHistoricoMedicamento = async function (id) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
@@ -68,5 +77,6 @@ module.exports = {
     atualizarHistoricoMedicamento,
     listarHistoricoMedicamento,
     buscarHistoricoMedicamento,
+    listarHistoricoPorPaciente,
     excluirHistoricoMedicamento
 }
