@@ -128,7 +128,7 @@ async function desativarUsuarioTransaction(idUsuario) {
 
         //Necessário fazer uma revisão nesta transaction. 
         // Talvez seja necessário colocar estes métodos internos dentro de funções que lançem erro para rollback 
-        let result = await knexConection.transaction(transaction => {
+        let result = await knexConection.transaction(async (transaction) => {
             await usuarioService.desativarUsuarioService(idUsuario, transaction) // Desativa o registro do usuário na tbl_usuarios
             await usuarioRoleService.desativarUsuarioRoleService(idUsuario, transaction) // Desativa as Roles ativas do usuário
         })
