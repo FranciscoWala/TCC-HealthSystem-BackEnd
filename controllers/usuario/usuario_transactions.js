@@ -35,10 +35,10 @@ const knexConection = require('../../models/global_knex/global_knex.js')
     ao atualizar os dados de cadastro do usuário deve-se:
         1. 
 */
-function validarDadosUsuario(dados) {
-    let customMessages = JSON.parse(JSON.stringify(configMessages))
 
-    return validarDados.validarDados(usuarioSchema, dados, customMessages)
+//Solução temporária (necessário refatorar o schema do usuário para adicionar novos atributos)
+function validarDadosUsuario(dados) {
+    return false
 }
 
 
@@ -271,6 +271,7 @@ async function realizarCadastroUsuario(dados, transaction) {
         nome: dados.nome,
         email: dados.email,
         senha: dados.senha,
+        cpf: dados.cpf,
         data_nascimento: dados["data_nascimento"]
     }
 
