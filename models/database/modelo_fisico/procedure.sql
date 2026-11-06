@@ -1208,6 +1208,27 @@ BEGIN
 			and data_hora_inicio < data_hora_fim_param;
 
 		select row_count() as affectedRows;
+        
+	elseif operacao = 'UPDATE_DADOS' then
+		update tbl_programacao_medicamento
+		set
+			frequencia = frequencia_param,
+			data_hora_inicio = data_hora_inicio_param,
+			id_tipo_intervalo = id_tipo_intervalo_param
+		where id = id_param
+			and data_hora_fim is null
+			and data_hora_inicio > utc_timestamp();
+
+		select row_count() as affectedRows;
+        
+	elseif operacao = 'UPDATE_FIM' then
+		update tbl_programacao_medicamento
+		set data_hora_fim = data_hora_fim_param
+		where id = id_param
+			and data_hora_fim is not null
+			and data_hora_inicio < data_hora_fim_param;
+
+		select row_count() as affectedRows;
 
     elseif operacao = 'SELECT_ALL' then
         select

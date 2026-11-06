@@ -1,4 +1,3 @@
-
 /*************************************************************************************************************************
  * Objetivo: Arquivo responsável pela geração da agenda de medicamentos
  * Autor: Kayque Brenno Ferreira Almeida
@@ -58,85 +57,121 @@ const gerarAgendaMedicamento = async function (idUsuario, data, fuso) {
 
         let fimDia = dataConsulta.plus({ days: 1 }).startOf('day').toUTC().toJSDate()
 
-        // Buscar os históricos dos medicamentos
-        let receitasConsultadas = []
+        // Buscar os históricos dos medicamentos do paciente
+        let historico = await historicoMedicamentoService.buscarHistoricoPorIdPacienteService(idUsuario)
 
-        for (let programacao of listaProgramacoes) {
-            if (!receitasConsultadas.includes(programacao.id_receita_medica)) {
-                let historico = await historicoMedicamentoService.buscarHistoricoPorIdReceitaService(programacao.id_receita_medica)
+        if (!historico.status && historico.status_code != 404)
+            return historico
 
-                if (!historico.status && historico.status_code != 404)
-                    return historico
-
-                if (historico.status) {
-                    for (let registro of historico.response.historico_medicamento)
-                        historicos.push(registro)
-                }
-
-                receitasConsultadas.push(programacao.id_receita_medica)
-            }
-        }
+        if (historico.status)
+            historicos = historico.response.historico_medicamento
 
         // Horário atual para verificar o status dos medicamentos
         let horaAtual = new Date()
 
-        for (let programacao of listaProgramacoes) {
-            let dataInicio = new Date(programacao.data_hora_inicio)
-            let dataFim = programacao.data_hora_fim ? new Date(programacao.data_hora_fim) : null
+        // Verificar se a data consultada é anterior ao dia atual
+        let dataAtual = luxon.DateTime.fromJSDate(horaAtual).setZone(fuso).toISODate()
 
-            let intervalo = 0
+        let diaAnterior = data < dataAtual
 
-            if (String(programacao.tipo_intervalo).toUpperCase() == 'HORA')
-                intervalo = Number(programacao.frequencia) * 60 * 60 * 1000
+        // Gerar os horários das programações somente para o dia atual ou futuro
+        if (!diaAnterior) {
+            for (let programacao of listaProgramacoes) {
+                let dataInicio = new Date(programacao.data_hora_inicio)
+                let dataFim = programacao.data_hora_fim ? new Date(programacao.data_hora_fim) : null
 
-            else if (String(programacao.tipo_intervalo).toUpperCase() == 'DIA')
-                intervalo = Number(programacao.frequencia) * 24 * 60 * 60 * 1000
+                let intervalo = 0
 
-            if (intervalo <= 0 || isNaN(dataInicio.getTime()) ||
-                (dataFim && isNaN(dataFim.getTime())))
-                continue
+                if (String(programacao.tipo_intervalo).toUpperCase() == 'HORA')
+                    intervalo = Number(programacao.frequencia) * 60 * 60 * 1000
 
-            // Encontrar o primeiro horário do dia
-            let horario = new Date(dataInicio)
+                else if (String(programacao.tipo_intervalo).toUpperCase() == 'DIA')
+                    intervalo = Number(programacao.frequencia) * 24 * 60 * 60 * 1000
 
-            if (horario < inicioDia) {
-                let diferenca = inicioDia.getTime() - dataInicio.getTime()
-                let quantidade = Math.ceil(diferenca / intervalo)
+                // Verificar se a programação possui dados válidos
+                if (Number.isFinite(intervalo) && intervalo > 0 &&
+                    !isNaN(dataInicio.getTime()) &&
+                    (!dataFim || !isNaN(dataFim.getTime()))) {
 
-                horario = new Date(dataInicio.getTime() + quantidade * intervalo)
-            }
+                    // Encontrar o primeiro horário do dia
+                    let horario = new Date(dataInicio)
 
-            // Gerar os horários da programação
-            while (horario < fimDia && (!dataFim || horario < dataFim)) {
-                if (horario >= inicioDia) {
-                    let horarioFormatado = horario.toISOString()
+                    if (horario < inicioDia) {
+                        let diferenca = inicioDia.getTime() - dataInicio.getTime()
+                        let quantidade = Math.ceil(diferenca / intervalo)
 
-                    let confirmado = historicos.some(function (historico) {
-                        return Number(historico.id_receita_medica) == Number(programacao.id_receita_medica) &&
-                            new Date(historico.horario_programado).getTime() == horario.getTime()
+                        horario = new Date(dataInicio.getTime() + quantidade * intervalo)
+                    }
+
+                    // Verificar se a programação foi substituída no dia consultado
+                    let substituidaHoje = dataFim && listaProgramacoes.some(function (outraProgramacao) {
+                        let inicioOutra = new Date(outraProgramacao.data_hora_inicio)
+
+                        return Number(outraProgramacao.id_receita_medica) == Number(programacao.id_receita_medica) &&
+                            Number(outraProgramacao.id_programacao_medicamento) != Number(programacao.id_programacao_medicamento) && 
+                            inicioOutra.getTime() == dataFim.getTime() && luxon.DateTime.fromJSDate(inicioOutra).setZone(fuso).toISODate() == data
                     })
 
-                    // Verificar o status do medicamento
-                    let status = 'PENDENTE'
+                    // Gerar os horários da programação
+                    while (horario < fimDia && (!dataFim || horario < dataFim)) {
+                        if (horario >= inicioDia) {
+                            let horarioFormatado = horario.toISOString()
 
-                    if (confirmado)
-                        status = 'TOMADO'
-                    else if (horario < horaAtual)
-                        status = 'ATRASADO'
+                            // Verificar se o medicamento já foi tomado
+                            let confirmado = historicos.some(function (historico) {
+                                return Number(historico.id_receita_medica) == Number(programacao.id_receita_medica) &&
+                                    new Date(historico.horario_programado).getTime() == horario.getTime()
+                            })
 
-                    agenda.push({
-                        id_programacao_medicamento: programacao.id_programacao_medicamento,
-                        id_receita_medica: programacao.id_receita_medica,
-                        id_medicamento: programacao.id_medicamento,
-                        nome_medicamento: programacao.nome_medicamento,
-                        dosagem: programacao.dosagem,
-                        horario_programado: horarioFormatado,
-                        confirmado: confirmado,
-                        status: status
-                    })
+                            // Adicionar somente doses não confirmadas da programação
+                            if (!substituidaHoje && !confirmado) {
+                                let status = 'PENDENTE'
+
+                                if (horario < horaAtual)
+                                    status = 'ATRASADO'
+
+                                agenda.push({
+                                    id_programacao_medicamento: programacao.id_programacao_medicamento,
+                                    id_receita_medica: programacao.id_receita_medica,
+                                    id_medicamento: programacao.id_medicamento,
+                                    nome_medicamento: programacao.nome_medicamento,
+                                    dosagem: programacao.dosagem,
+                                    horario_programado: horarioFormatado,
+                                    confirmado: false,
+                                    status: status
+                                })
+                            }
+                        }
+
+                        horario = new Date(horario.getTime() + intervalo)
+                    }
                 }
+            }
+        }
 
-                horario = new Date(horario.getTime() + intervalo)
+        // Adicionar os medicamentos tomados na agenda
+        for (let historico of historicos) {
+            let horarioHistorico = new Date(historico.horario_programado)
+
+            // Verificar se o medicamento foi programado para o dia consultado
+            if (!isNaN(horarioHistorico.getTime()) &&
+                horarioHistorico >= inicioDia &&
+                horarioHistorico < fimDia) {
+
+                agenda.push({
+                    id_historico_medicamento: historico.id_historico_medicamento,
+                    id_programacao_medicamento: null,
+                    id_receita_medica: historico.id_receita_medica,
+                    id_medicamento: null,
+                    nome_medicamento: historico.nome_medicamento,
+                    concentracao: historico.concentracao,
+                    unidade_concentracao: historico.unidade_concentracao,
+                    tipo_dosagem: historico.tipo_dosagem,
+                    dosagem: historico.dosagem_ingerida,
+                    horario_programado: horarioHistorico.toISOString(),
+                    confirmado: true,
+                    status: 'TOMADO'
+                })
             }
         }
 
@@ -157,7 +192,6 @@ const gerarAgendaMedicamento = async function (idUsuario, data, fuso) {
         }
 
         return customMessages.DEFAULT_MESSAGE
-
     } catch (error) {
         console.log(error)
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER

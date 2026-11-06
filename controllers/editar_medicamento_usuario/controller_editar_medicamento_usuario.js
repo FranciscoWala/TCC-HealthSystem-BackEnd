@@ -171,10 +171,10 @@ const editarMedicamentoUsuario = async function (idReceitaMedica, idUsuario, dad
                 }
 
                 return {
-                    id_usuario: idUsuario,
-                    id_receita_medica: idReceitaMedica,
-                    id_medicamento: idMedicamento,
-                    id_estoque: idEstoque
+                    id_usuario: Number(idUsuario),
+                    id_receita_medica: Number(idReceitaMedica),
+                    id_medicamento: Number(idMedicamento),
+                    id_estoque: Number(idEstoque)
                 }
             })
 

@@ -90,6 +90,105 @@ const atualizarProgramacaoMedicamentoService = async function (dados, id, transa
     }
 }
 
+const atualizarDadosProgramacaoMedicamentoService = async function (dados, id, transaction = null) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+
+    try {
+        let buscarID = await buscarProgramacaoMedicamentoService(id, transaction)
+        if (!buscarID.status)
+            return buscarID
+
+        let validacao = validarDados.validarDados(
+            programacaoMedicamentoSchema.extract('frequencia'),
+            dados.frequencia,
+            customMessages
+        )
+        if (validacao)
+            return validacao
+
+        validacao = validarDados.validarDados(
+            programacaoMedicamentoSchema.extract('data_hora_inicio'),
+            dados.data_hora_inicio,
+            customMessages
+        )
+        if (validacao)
+            return validacao
+
+        validacao = validarDados.validarDados(
+            programacaoMedicamentoSchema.extract('id_tipo_intervalo'),
+            dados.id_tipo_intervalo,
+            customMessages
+        )
+        if (validacao)
+            return validacao
+
+        let tipoIntervalo = await tipoIntervaloService.buscarTipoIntervaloService(dados.id_tipo_intervalo, transaction)
+
+        if (!tipoIntervalo.status) {
+            if (tipoIntervalo.status_code == 404) {
+                customMessages.ERROR_BAD_REQUEST.field = ['ID_TIPO_INTERVALO']
+                return customMessages.ERROR_BAD_REQUEST
+            }
+
+            return tipoIntervalo
+        }
+
+        dados.id = Number(id)
+
+        let result = await programacaoMedicamentoDAO.updateDadosProgramacaoMedicamento(dados, transaction)
+
+        if (result) {
+            customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
+            customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
+            customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_UPDATE_ITEM.message
+            customMessages.DEFAULT_MESSAGE.response = dados
+
+            return customMessages.DEFAULT_MESSAGE
+        } else
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
+
+    } catch (error) {
+        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
+    }
+}
+
+const atualizarFimProgramacaoMedicamentoService = async function (dados, id, transaction = null) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+
+    try {
+        let buscarID = await buscarProgramacaoMedicamentoService(id, transaction)
+        if (!buscarID.status)
+            return buscarID
+
+        let validacao = validarDados.validarDados(
+            programacaoMedicamentoSchema
+                .extract('data_hora_fim')
+                .required()
+                .invalid(null),
+            dados.data_hora_fim,
+            customMessages
+        )
+
+        if (validacao)
+            return validacao
+
+        let result = await programacaoMedicamentoDAO.updateFimProgramacaoMedicamento(id, dados.data_hora_fim, transaction)
+
+        if (result) {
+            customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
+            customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
+            customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_UPDATE_ITEM.message
+            customMessages.DEFAULT_MESSAGE.response = dados
+
+            return customMessages.DEFAULT_MESSAGE
+        } else
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
+
+    } catch (error) {
+        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
+    }
+}
+
 const listarProgramacaoMedicamentoService = async function (transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
@@ -204,6 +303,8 @@ const excluirProgramacaoMedicamentoService = async function (id, transaction = n
 module.exports = {
     inserirProgramacaoMedicamentoService,
     atualizarProgramacaoMedicamentoService,
+    atualizarDadosProgramacaoMedicamentoService,
+    atualizarFimProgramacaoMedicamentoService,
     listarProgramacaoMedicamentoService,
     buscarProgramacaoMedicamentoService,
     buscarProgramacaoPorIdReceitaService,
