@@ -185,7 +185,7 @@ const buscarRolesAtivasUsuarioService = async (idUsuario, transaction = null) =>
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
-        let result = await usuarioDAO.buscarRolesAtivasDoUsuario(idUsuario)
+        let result = await usuarioDAO.buscarRolesAtivasDoUsuario(idUsuario, transaction)
 
         if(result){
             if(result.length > 0){
