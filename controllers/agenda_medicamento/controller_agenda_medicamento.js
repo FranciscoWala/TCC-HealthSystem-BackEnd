@@ -8,13 +8,15 @@
 
 const configMessages = require('../../utils/messages/configMessages.js')
 
+const luxon = require('luxon')
+
 const programacaoMedicamentoService = require('../../services/programacao_medicamento/service_programacao_medicamento.js')
 const historicoMedicamentoService = require('../../services/historico_medicamento/service_historico_medicamento.js')
 
 const validarDados = require('../../utils/validar_dados/validarDados.js')
 
 // Gerar a agenda de medicamentos de um usuário
-const gerarAgendaMedicamento = async function (idUsuario, data) {
+const gerarAgendaMedicamento = async function (idUsuario, data, fuso) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
@@ -29,15 +31,19 @@ const gerarAgendaMedicamento = async function (idUsuario, data) {
             return customMessages.ERROR_BAD_REQUEST
         }
 
-        let dataConsulta = new Date(data + 'T00:00:00')
+        // Validação do fuso horário
+        if (typeof fuso != 'string' || !luxon.DateTime.local().setZone(fuso).isValid) {
+            customMessages.ERROR_BAD_REQUEST.field = ['FUSO']
+            return customMessages.ERROR_BAD_REQUEST
+        }
 
-        if (isNaN(dataConsulta.getTime()) || dataConsulta.getFullYear() != Number(data.substring(0, 4)) ||
-            dataConsulta.getMonth() + 1 != Number(data.substring(5, 7)) || dataConsulta.getDate() != Number(data.substring(8, 10))) {
+        let dataConsulta = luxon.DateTime.fromISO(data, { zone: fuso })
+
+        if (!dataConsulta.isValid || dataConsulta.toISODate() != data) {
             customMessages.ERROR_BAD_REQUEST.field = ['DATA']
             return customMessages.ERROR_BAD_REQUEST
         }
 
-        // Buscar as programações do usuário
         let programacoes = await programacaoMedicamentoService.buscarProgramacaoPorIdUsuarioService(idUsuario)
 
         if (!programacoes.status && programacoes.status_code != 404)
@@ -48,10 +54,9 @@ const gerarAgendaMedicamento = async function (idUsuario, data) {
         let agenda = []
         let historicos = []
 
-        let inicioDia = new Date(dataConsulta)
+        let inicioDia = dataConsulta.startOf('day').toUTC().toJSDate()
 
-        let fimDia = new Date(dataConsulta)
-        fimDia.setDate(fimDia.getDate() + 1)
+        let fimDia = dataConsulta.plus({ days: 1 }).startOf('day').toUTC().toJSDate()
 
         // Buscar os históricos dos medicamentos
         let receitasConsultadas = []
@@ -75,14 +80,12 @@ const gerarAgendaMedicamento = async function (idUsuario, data) {
         // Horário atual para verificar o status dos medicamentos
         let horaAtual = new Date()
 
-        // Percorrer as programações
         for (let programacao of listaProgramacoes) {
             let dataInicio = new Date(programacao.data_hora_inicio)
             let dataFim = programacao.data_hora_fim ? new Date(programacao.data_hora_fim) : null
 
             let intervalo = 0
 
-            // Verificar o tipo de intervalo
             if (String(programacao.tipo_intervalo).toUpperCase() == 'HORA')
                 intervalo = Number(programacao.frequencia) * 60 * 60 * 1000
 
@@ -106,16 +109,8 @@ const gerarAgendaMedicamento = async function (idUsuario, data) {
             // Gerar os horários da programação
             while (horario < fimDia && (!dataFim || horario < dataFim)) {
                 if (horario >= inicioDia) {
-                    let ano = horario.getFullYear()
-                    let mes = String(horario.getMonth() + 1).padStart(2, '0')
-                    let dia = String(horario.getDate()).padStart(2, '0')
-                    let hora = String(horario.getHours()).padStart(2, '0')
-                    let minuto = String(horario.getMinutes()).padStart(2, '0')
-                    let segundo = String(horario.getSeconds()).padStart(2, '0')
+                    let horarioFormatado = horario.toISOString()
 
-                    let horarioFormatado = `${ano}-${mes}-${dia} ${hora}:${minuto}:${segundo}`
-
-                    // Verificar se o medicamento já foi tomado
                     let confirmado = historicos.some(function (historico) {
                         return Number(historico.id_receita_medica) == Number(programacao.id_receita_medica) &&
                             new Date(historico.horario_programado).getTime() == horario.getTime()
@@ -150,9 +145,8 @@ const gerarAgendaMedicamento = async function (idUsuario, data) {
             return a.horario_programado.localeCompare(b.horario_programado)
         })
 
-        let dataFormatada = dataConsulta.toLocaleDateString('pt-BR')
+        let dataFormatada = dataConsulta.toFormat('dd/MM/yyyy')
 
-        // Retorno da agenda
         customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
         customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
         customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_RESPONSE.message

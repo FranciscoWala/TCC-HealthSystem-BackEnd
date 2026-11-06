@@ -66,6 +66,15 @@ router.patch('/confirmar_ingestao/:id', bodyParserJSON, async function (request,
     response.json(result)
 })
 
+router.get('/usuario/:id', async function (request, response) {
+    let idPaciente = request.params.id
+
+    let result = await controllerHistoricoMedicamento.listarHistoricoPorPaciente(idPaciente)
+
+    response.status(result.status_code)
+    response.json(result)
+})
+
 router.delete('/:id', async function (request, response) {
     let id = request.params.id
 

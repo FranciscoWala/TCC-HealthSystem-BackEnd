@@ -185,6 +185,7 @@ const deleteUsuario = async function (id, transaction = null) {
     }
 }
 
+<<<<<<< HEAD
 const buscarRolesAtivasDoUsuario = async (idUsuario, transaction = null) => {
     try {
         let connection = transaction || knexConection
@@ -200,6 +201,24 @@ const buscarRolesAtivasDoUsuario = async (idUsuario, transaction = null) => {
 
     } catch (error) {
         console.log(error)
+=======
+const desactivateUsuario = async function (id, transaction = null) {
+    try {
+        let connection = transaction || knexConection
+
+        let sql = `
+            update tbl_usuarios
+                set ativo = false
+            where id = ${id}
+        `
+
+        if(result)
+            return true
+        else
+            return false
+    } catch (error) {
+        console.log("ERROR IN USUARIO MODEL" + error);
+>>>>>>> a2ba2cb60224829b2ffac051d2850a014453dae7
         return false
     }
 }
@@ -212,5 +231,9 @@ module.exports = {
     selectDadosUsuarios,
     selectUsuarioByEmail,
     deleteUsuario,
+<<<<<<< HEAD
     buscarRolesAtivasDoUsuario
+=======
+    desactivateUsuario
+>>>>>>> a2ba2cb60224829b2ffac051d2850a014453dae7
 }

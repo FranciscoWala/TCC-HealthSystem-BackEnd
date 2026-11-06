@@ -207,6 +207,26 @@ const buscarRolesAtivasUsuarioService = async (idUsuario, transaction = null) =>
     }
 }
 
+async function desativarUsuarioService(idUsuario, transaction = null) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+    try {
+        let buscaUsuario = await buscarUsuarioService(idUsuario, transaction)
+        if(!buscaUsuario.status)
+            return buscaUsuario
+
+        let result = await usuarioDAO.desactivateUsuario(idUsuario, transaction)
+
+        if(result)
+            return customMessages.SUCCESS_DELETE_ITEM
+        else
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
+
+    } catch (error) {
+        console.log("ERROR IN USUARIO SERVICE: " + error)
+        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
+    }
+}
+
 module.exports = {
     inserirUsuarioService,
     atualizarUsuarioService,
@@ -215,5 +235,6 @@ module.exports = {
     excluirUsuarioService,
     buscarUsuarioPorEmailService,
     listarDadosUsuariosService,
-    buscarRolesAtivasUsuarioService
+    buscarRolesAtivasUsuarioService,
+    desativarUsuarioService
 }
