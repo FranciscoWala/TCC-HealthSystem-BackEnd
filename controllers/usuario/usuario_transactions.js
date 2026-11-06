@@ -33,7 +33,12 @@ const knexConection = require('../../models/global_knex/global_knex.js')
         5. vincular o usuário a role
 
     ao atualizar os dados de cadastro do usuário deve-se:
-        1. 
+        1.
+        
+        
+    O que precisa concertar:
+        1. Atribuir contato de emergência ao usuário na intermediária
+        2. Atribuir doença crônica ao usuário na intermediária
 */
 
 //Solução temporária (necessário refatorar o schema do usuário para adicionar novos atributos)
@@ -48,18 +53,14 @@ async function cadastrarUsuarioTransaction(dados, contentType) {
 
     try {
         if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
-            let validacao = validarDadosUsuario(dados)
-
-            if (validacao)
-                return validacao
 
             let result = await knexConection.transaction(async (transaction) => {
 
                 let idUsuario = await realizarCadastroUsuario(dados, transaction)
 
                 await cadastrarDoencasCronicas(dados, transaction)
-                await inserirContatosEmergencia(dados, transaction)
-                await atribuirRoleAoUsuario(transaction, idUsuario, dados)
+                await inserirContatosEmergencia(dados, transaction)                
+                await atribuirRoleAoUsuario(transaction, idUsuario, dados['usuario_role'])
 
             })
 
@@ -129,24 +130,53 @@ async function desativarUsuarioTransaction(idUsuario) {
         //Necessário fazer uma revisão nesta transaction. 
         // Talvez seja necessário colocar estes métodos internos dentro de funções que lançem erro para rollback 
         let result = await knexConection.transaction(async (transaction) => {
-            await usuarioService.desativarUsuarioService(idUsuario, transaction) // Desativa o registro do usuário na tbl_usuarios
-            await usuarioRoleService.desativarUsuarioRoleService(idUsuario, transaction) // Desativa as Roles ativas do usuário
+            await desativarUsuario(idUsuario, transaction) // Desativa o registro do usuário na tbl_usuarios
+            await desativarRoleUsuario(idUsuario, transaction) // Desativa as Roles ativas do usuário
         })
 
-        customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
-        customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_CREATED_ITEM.status_code
-        customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_CREATED_ITEM.message
-        customMessages.DEFAULT_MESSAGE.response = result
-
-        return customMessages.DEFAULT_MESSAGE
+        return customMessages.SUCCESS_DELETE_ITEM
 
     } catch (error) {
-        console.log("ERROR IN CADASTRO_USUARIO: " + error);
+        console.log("ERROR IN USUARIO_TRANSACTIONS: " + error);
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
     }
 }
 
 //FUNÇÕES AUXILIARES
+
+//Funções auxiliares para o safe delete do usuário
+async function desativarRoleUsuario(idUsuario, transaction) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+    try {
+        let desativarUsuarioRole = await usuarioRoleService.desativarUsuarioRoleService(idUsuario, transaction)
+
+        if(!desativarUsuarioRole.status){
+            let error = new Error("NÃO FOI POSSÍVEL DESATIVAR ROLE DO USUÁRIO")
+                error.resposta = desativarUsuarioRole
+                throw error
+        }
+    } catch (error) {
+        console.log(error)
+        return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
+    }
+}
+
+async function desativarUsuario(idUsuario, transaction) {
+     let customMessages = JSON.parse(JSON.stringify(configMessages))
+    try {
+        let desativarUsuario = await usuarioService.desativarUsuarioService(idUsuario, transaction)
+
+        if(!desativarUsuario.status){
+            let error = new Error("NÃO FOI POSSÍVEL DESATIVAR O USUÁRIO")
+            error.resposta = desativarUsuario
+            throw error
+        }
+
+    } catch (error) {
+        console.log("ERROR IN USUARIO_TRANSACTIONS" + error);
+        return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
+    }
+}
 
 //Funções auxiliares para atualizar o usuário 
 async function gerenciarAtualizacaoRoles(transaction, idUsuario, dados) {
@@ -287,7 +317,17 @@ async function realizarCadastroUsuario(dados, transaction) {
         return cadastrarUsuario.response.id
     }
 }
-
+/**
+ *  Esta função esta apenas adicionando a doença cronica a tbl_doenca_cronica,
+ * porém não vincula ao usuário na tbl_doencas_cronicas_usuarios e nem verifica a existência de uma doença já cadastrada (CORRIGIR)
+ *  
+ * CORREÇÃO:
+ *      1. Adicionar validação de doença já cadastrada (considere criar uma função para)
+ *          ao fazer isso:
+ *              1. Se a doença já foi cadastrada, será somente atribuida ao usuário
+ *              2. Se não existir, somente cadastra no banco
+ *      2. Vincular as doencças ao usuário na tbl_doencas_usuario (considere criar uma função exclusiva para)
+ */
 async function cadastrarDoencasCronicas(dados, transaction) {
 
     let doencasCronicas = dados["doencas_cronicas"]
@@ -309,8 +349,20 @@ async function cadastrarDoencasCronicas(dados, transaction) {
     }
 }
 
+//Realizar a lógica posteriormente
+async function verificarExistênciaDoenca(doenca){
+    try {
+        
+
+    } catch (error) {
+        console.log(error)
+        throw error
+    }
+}
+
 async function inserirContatosEmergencia(dados, transaction) {
-    let contatos_emergencia = dados["contatos_emergencia"]
+    let contatos_emergencia = dados['contatos_emergencias']
+    
 
     if (Array.isArray(contatos_emergencia)) {
 
@@ -331,29 +383,35 @@ async function inserirContatosEmergencia(dados, transaction) {
 }
 
 async function buscarRole(rolesUsuario) {
+    let result
+
     if (Array.isArray(rolesUsuario)) {
         for (const roleID of rolesUsuario) {
-            await roleService.buscarRoleService(roleID)
+            result = await roleService.buscarRoleService(roleID)
+
+            if(!result.status)
+                return false
         }
     }
 }
 
-async function atribuirRoleAoUsuario(transaction, idUsuario, rolesUsuario, operacao) {
+async function atribuirRoleAoUsuario(transaction, idUsuario, rolesUsuario) {
     await buscarRole(rolesUsuario)
 
     if (Array.isArray(rolesUsuario)) {
-        for (const idRole of rolesUsuario) {
+        for (const role of rolesUsuario) {            
             let dadosRelacao = {
                 ativo: 1,
                 data_ativacao: new Date(),
-                id_usuario: idUsuario,
-                id_role: idRole
-            };
+                data_desativacao: null,
+                id_usuarios: Number(idUsuario),
+                id_role: Number(role['id_role'])
+            }
 
-            let atribuir = await operacao(dadosRelacao, transaction);
+            let atribuir = await usuarioRoleService.inserirUsuarioRoleService(dadosRelacao, transaction);
 
             if (!atribuir.status) {
-                let error = new Error(`NÃO FOI POSSÍVEL ATRIBUIR A ROLE ${idRole} AO USUÁRIO`);
+                let error = new Error(`NÃO FOI POSSÍVEL ATRIBUIR A ROLE ${role['id_role']} AO USUÁRIO`);
                 error.resposta = atribuir;
                 throw error;
             }

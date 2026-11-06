@@ -146,14 +146,16 @@ async function desactivateUsuarioRole(idUsuario, transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `
-            update tbl_usuarios_role
-                set ativo = false
-                    data_desativacao = now()
-            where id_usuarios = ${idUsuario}
-        `
+       let sql = `
+            UPDATE tbl_usuarios_role
+            SET
+                ativo = false,
+                data_desativacao = NOW()
+            WHERE id_usuarios = ?
+              AND ativo = true
+        `;
 
-        let result = await connection.raw(sql)
+        let result = await connection.raw(sql, idUsuario)
 
 
         if(result)

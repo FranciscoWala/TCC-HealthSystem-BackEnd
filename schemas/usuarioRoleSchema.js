@@ -18,7 +18,8 @@ const usuarioRoleSchema = Joi.object({
                     .required(),
                     
     data_desativacao: Joi.date()
-                        .iso(),
+                        .iso()
+                        .allow('', null),
     
     id_usuarios: Joi.number()
                     .integer()
