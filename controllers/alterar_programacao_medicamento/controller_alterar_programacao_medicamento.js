@@ -1,3 +1,4 @@
+
 /*************************************************************************************************************************
  * Objetivo: Arquivo responsável pelas regras de negócio da alteração de programação de medicamentos
  * Autor: Kayque Brenno Ferreira Almeida
@@ -26,7 +27,6 @@ const alterarProgramacaoMedicamento = async function (id, dados, contentType, tr
 
     try {
         if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
-
             let executarAlteracao = async function (connection) {
 
                 let programacao = await programacaoMedicamentoService.buscarProgramacaoMedicamentoService(id, connection)
@@ -53,8 +53,9 @@ const alterarProgramacaoMedicamento = async function (id, dados, contentType, tr
                 }
 
                 let dataInicio = new Date(dados.data_hora_inicio)
+                let dataAtual = new Date()
 
-                if (isNaN(dataInicio.getTime()) || dataInicio <= new Date()) {
+                if (isNaN(dataInicio.getTime()) || dataInicio <= dataAtual) {
                     customMessages.ERROR_BAD_REQUEST.field = ['DATA_HORA_INICIO']
                     erroTransacao = customMessages.ERROR_BAD_REQUEST
                     throw new Error('DATA_HORA_INICIO')
@@ -62,9 +63,29 @@ const alterarProgramacaoMedicamento = async function (id, dados, contentType, tr
 
                 let dataInicioAtual = new Date(programacaoAtual.data_hora_inicio)
 
+                let dataNova = luxon.DateTime.fromISO(dados.data_hora_inicio, {
+                    setZone: true
+                })
+
+                let inicioDiaNovo = dataNova.startOf('day').toUTC()
+
+                let inicioDiaAntigo = luxon.DateTime.fromJSDate(dataInicioAtual)
+                    .setZone(dataNova.zone)
+                    .startOf('day')
+                    .toUTC()
+
+                // Buscar as programações da mesma receita médica
+                let programacoes = await programacaoMedicamentoService.buscarProgramacaoPorIdReceitaService(programacaoAtual.id_receita_medica, connection)
+
+                if (!programacoes.status) {
+                    erroTransacao = programacoes
+                    throw new Error('ERRO_BUSCAR_PROGRAMACOES')
+                }
+
+                let listaProgramacoes = programacoes.response.programacao_medicamento
+
                 // Atualizar diretamente quando a programação ainda não começou
-                // e a nova data é anterior ou igual à data original
-                if (dataInicioAtual > new Date() && dataInicio <= dataInicioAtual) {
+                if (dataInicioAtual > dataAtual) {
 
                     let dadosAtualizacao = {
                         frequencia: dados.frequencia,
@@ -79,36 +100,19 @@ const alterarProgramacaoMedicamento = async function (id, dados, contentType, tr
                         throw new Error('ERRO_ATUALIZAR_DADOS_PROGRAMACAO')
                     }
 
-                    // Verificar se a programação foi alterada para outro dia
-                    let dataNova = luxon.DateTime.fromISO(dados.data_hora_inicio, {
-                        setZone: true
+                    // Ajustar o término da programação anterior, se existir
+                    let programacaoAnterior = listaProgramacoes.find(function (item) {
+                        return Number(item.id_programacao_medicamento) != Number(id) &&
+                            item.data_hora_fim != null &&
+                            new Date(item.data_hora_fim).getTime() == inicioDiaAntigo.toMillis()
                     })
 
-                    let inicioDiaAntigo = luxon.DateTime.fromJSDate(dataInicioAtual)
-                        .setZone(dataNova.zone)
-                        .startOf('day')
-                        .toUTC()
+                    if (programacaoAnterior) {
+                        let inicioAnterior = new Date(programacaoAnterior.data_hora_inicio)
 
-                    let inicioDiaNovo = dataNova.startOf('day').toUTC()
+                        // Não permitir que o término fique anterior ao início
+                        if (inicioDiaNovo.toMillis() > inicioAnterior.getTime()) {
 
-                    if (inicioDiaNovo.toMillis() != inicioDiaAntigo.toMillis()) {
-
-                        // Buscar as programações da mesma receita médica
-                        let programacoes = await programacaoMedicamentoService.buscarProgramacaoPorIdReceitaService(programacaoAtual.id_receita_medica, connection)
-
-                        if (!programacoes.status) {
-                            erroTransacao = programacoes
-                            throw new Error('ERRO_BUSCAR_PROGRAMACOES')
-                        }
-
-                        // Identificar a programação encerrada no início do dia antigo
-                        let programacaoAnterior = programacoes.response.programacao_medicamento.find(function (item) {
-                            return Number(item.id_programacao_medicamento) != Number(id) &&
-                                item.data_hora_fim != null &&
-                                new Date(item.data_hora_fim).getTime() == inicioDiaAntigo.toMillis()
-                        })
-
-                        if (programacaoAnterior) {
                             let dadosFim = {
                                 data_hora_fim: inicioDiaNovo.toFormat('yyyy-MM-dd HH:mm:ss')
                             }
@@ -125,14 +129,10 @@ const alterarProgramacaoMedicamento = async function (id, dados, contentType, tr
                     return resultadoAtualizacao
                 }
 
-                // Encerrar a programação antiga e criar uma nova
-                let inicioDia = luxon.DateTime.fromISO(dados.data_hora_inicio, {
-                    setZone: true
-                }).startOf('day').toUTC()
-
-                let dataFimProgramacao = inicioDia.toJSDate() <= dataInicioAtual
-                    ? dataInicioFormatada
-                    : inicioDia.toFormat('yyyy-MM-dd HH:mm:ss')
+                // Encerrar a programação que já começou
+                let dataFimProgramacao = inicioDiaNovo.toMillis() > dataInicioAtual.getTime()
+                    ? inicioDiaNovo.toFormat('yyyy-MM-dd HH:mm:ss')
+                    : dataInicioFormatada
 
                 let dadosAtualizacao = {
                     data_hora_fim: dataFimProgramacao
@@ -145,7 +145,7 @@ const alterarProgramacaoMedicamento = async function (id, dados, contentType, tr
                     throw new Error('ERRO_ATUALIZAR_PROGRAMACAO')
                 }
 
-                // Criar uma nova programação para a mesma receita
+                // Criar a nova programação
                 let novaProgramacao = {
                     frequencia: dados.frequencia,
                     data_hora_inicio: dataInicioFormatada,
