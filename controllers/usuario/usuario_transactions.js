@@ -60,7 +60,7 @@ async function cadastrarUsuarioTransaction(dados, contentType) {
 
                 let idUsuario = await realizarCadastroUsuario(dados, transaction)
 
-                await cadastrarDoencasCronicas(dados, transaction, idUsuario)
+                await cadastrarDoencasCronicasRefat(dados, transaction, idUsuario)
                 await inserirContatosEmergencia(dados, transaction, idUsuario)
                 await atribuirRoleAoUsuario(transaction, idUsuario, dados['usuario_role'])
 
@@ -375,17 +375,130 @@ async function atribuirUsuarioDoencaCronica(dadosAtribuicao, transaction) {
     }
 }
 
-//Realizar a lógica posteriormente
-async function verificarExistênciaDoenca(doenca) {
-    try {
+//Revisar código
+async function cadastrarDoencasCronicasRefat(dados, transaction, idUsuario) {
 
+    let doencasCronicas = dados['doencas_cronicas'];
 
-    } catch (error) {
-        console.log(error)
-        throw error
+    if (!Array.isArray(doencasCronicas)) return;
+
+    // Evita processar a mesma doença duas vezes
+    // dentro da própria requisição
+    let doencasProcessadas = new Set();
+
+    for (const doenca of doencasCronicas) {
+
+        if (!doenca || !doenca.trim()) {
+            throw new Error("NOME DA DOENÇA CRÔNICA INVÁLIDO");
+        }
+
+        let nomeNormalizado = doenca
+            .trim()
+            .toLowerCase();
+
+        if (doencasProcessadas.has(nomeNormalizado)) {
+            continue;
+        }
+
+        doencasProcessadas.add(nomeNormalizado);
+
+        // Obtém o ID existente ou cadastra uma nova doença
+        let idDoenca = await obterOuCadastrarDoenca(
+            doenca,
+            transaction
+        );
+
+        // Prepara o relacionamento entre usuário e doença
+        let dadosAtribuicao = {
+            id_usuarios: idUsuario,
+            id_doenca_cronica: idDoenca
+        };
+
+        // Vincula a doença ao usuário
+        await atribuirUsuarioDoencaCronica(
+            dadosAtribuicao,
+            transaction
+        );
     }
 }
 
+async function obterOuCadastrarDoenca(doenca, transaction) {
+
+    let nomeDoenca = doenca.trim();
+
+    // 1. Verifica se a doença já existe
+    let idDoenca = await verificarExistenciaDoenca(
+        nomeDoenca,
+        transaction
+    );
+
+    // 2. Se existir, reutiliza o ID
+    if (idDoenca) {
+        return idDoenca;
+    }
+
+    // 3. Se não existir, realiza o cadastro
+    let cadastro = await doencasCronicasService
+        .inserirDoencaCronicaService(
+            { nome_doenca: nomeDoenca },
+            transaction
+        );
+
+    if (!cadastro.status) {
+        let error = new Error(
+            "NÃO FOI POSSÍVEL CADASTRAR A DOENÇA CRÔNICA"
+        );
+
+        error.resposta = cadastro;
+        throw error;
+    }
+
+    // 4. Retorna o ID da doença recém-cadastrada
+    return cadastro.response.id;
+}
+
+
+//Realizar a lógica posteriormente
+// async function verificarExistênciaDoenca(doenca) {
+//     try {
+
+
+//     } catch (error) {
+//         console.log(error)
+//         throw error
+//     }
+// }
+//Revisar código
+async function verificarExistenciaDoenca(nomeDoenca, transaction) {
+    try {
+        let busca = await doencasCronicasService
+            .buscarDoencaCronicaPorNomeService(
+                nomeDoenca,
+                transaction
+            );
+
+        if (busca.status) {
+            return busca.response.doencas_cronicas[0].id;
+        }
+
+        // Doença não encontrada
+        if (busca.status_code === 404) {
+            return null;
+        }
+
+        // Qualquer outro erro precisa interromper a transaction
+        let error = new Error(
+            "NÃO FOI POSSÍVEL VERIFICAR A EXISTÊNCIA DA DOENÇA CRÔNICA"
+        );
+
+        error.resposta = busca;
+        throw error;
+
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
 async function inserirContatosEmergencia(dados, transaction, idUsuario) {
     let contatos_emergencia = dados['contatos_emergencias']
     let dadosAtribuicao
@@ -464,6 +577,7 @@ async function atribuirRoleAoUsuario(transaction, idUsuario, rolesUsuario) {
         }
     }
 }
+
 
 
 module.exports = {

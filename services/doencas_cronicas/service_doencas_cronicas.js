@@ -132,10 +132,51 @@ const excluirDoencaCronicaService = async function (id, transaction = null) {
     }
 }
 
+//Revisar este código
+const buscarDoencaCronicaPorNomeService = async function (nome, transaction = null) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages));
+
+    try {
+        // Validação básica do nome
+        if (typeof nome !== 'string' || !nome.trim()) {
+            return customMessages.ERROR_INVALID_DATA;
+        }
+
+        let result = await doencaCronicaDAO.selectByNomeDoencasCronicas(
+            nome.trim(),
+            transaction
+        );
+
+        if (result === false) {
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL;
+        }
+
+        if (result) {
+            customMessages.DEFAULT_MESSAGE.status =
+                customMessages.SUCCESS_RESPONSE.status;
+
+            customMessages.DEFAULT_MESSAGE.status_code =
+                customMessages.SUCCESS_RESPONSE.status_code;
+
+            customMessages.DEFAULT_MESSAGE.response.doencas_cronicas = [result];
+
+            return customMessages.DEFAULT_MESSAGE;
+        }
+
+        return customMessages.ERROR_NOT_FOUND;
+
+    } catch (error) {
+        console.log(error);
+        return customMessages.ERROR_INTERNAL_SERVER_SERVICE;
+    }
+}
+
+
 module.exports = {
     inserirDoencaCronicaService,
     atualizarDoencaCronicaService,
     listarDoencaCronicaService,
     buscarDoencaCronicaService,
-    excluirDoencaCronicaService
+    excluirDoencaCronicaService,
+    buscarDoencaCronicaPorNomeService
 }

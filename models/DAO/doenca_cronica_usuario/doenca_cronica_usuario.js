@@ -133,6 +133,9 @@ async function deleteDoencaCronicaUsuarioByID(id, transaction = null) {
     }
 }
 
+
+
+
 module.exports = {
     insertDoencaCronicaUsuario,
     updateDoencaCronicaUsuario,
