@@ -60,7 +60,7 @@ async function cadastrarUsuarioTransaction(dados, contentType) {
 
                 let idUsuario = await realizarCadastroUsuario(dados, transaction)
 
-                await cadastrarDoencasCronicas(dados, transaction, idUsuario)
+                await cadastrarDoencasCronicasRefat(dados, transaction, idUsuario)
                 await inserirContatosEmergencia(dados, transaction, idUsuario)
                 await atribuirRoleAoUsuario(transaction, idUsuario, dados['usuario_role'])
 
@@ -375,6 +375,54 @@ async function atribuirUsuarioDoencaCronica(dadosAtribuicao, transaction) {
     }
 }
 
+//Revisar código
+async function cadastrarDoencasCronicasRefat(dados, transaction, idUsuario) {
+
+    let doencasCronicas = dados['doencas_cronicas'];
+
+    if (!Array.isArray(doencasCronicas)) return;
+
+    // Evita processar a mesma doença duas vezes
+    // dentro da própria requisição
+    let doencasProcessadas = new Set();
+
+    for (const doenca of doencasCronicas) {
+
+        if (!doenca.nome_doenca || !doenca.nome_doenca.trim()) {
+            throw new Error("NOME DA DOENÇA CRÔNICA INVÁLIDO");
+        }
+
+        let nomeNormalizado = doenca.nome_doenca
+            .trim()
+            .toLowerCase();
+
+        if (doencasProcessadas.has(nomeNormalizado)) {
+            continue;
+        }
+
+        doencasProcessadas.add(nomeNormalizado);
+
+        // Obtém o ID existente ou cadastra uma nova doença
+        let idDoenca = await obterOuCadastrarDoenca(
+            doenca,
+            transaction
+        );
+
+        // Prepara o relacionamento entre usuário e doença
+        let dadosAtribuicao = {
+            id_usuarios: idUsuario,
+            id_doenca_cronica: idDoenca
+        };
+
+        // Vincula a doença ao usuário
+        await atribuirUsuarioDoencaCronica(
+            dadosAtribuicao,
+            transaction
+        );
+    }
+}
+
+
 //Realizar a lógica posteriormente
 async function verificarExistênciaDoenca(doenca) {
     try {
@@ -385,7 +433,37 @@ async function verificarExistênciaDoenca(doenca) {
         throw error
     }
 }
+//Revisar código
+async function verificarExistenciaDoenca(nomeDoenca, transaction) {
+    try {
+        let busca = await doencasCronicasService
+            .buscarDoencaCronicaPorNomeService(
+                nomeDoenca,
+                transaction
+            );
 
+        if (busca.status) {
+            return busca.response.doencas_cronicas[0].id;
+        }
+
+        // Doença não encontrada
+        if (busca.status_code === 404) {
+            return null;
+        }
+
+        // Qualquer outro erro precisa interromper a transaction
+        let error = new Error(
+            "NÃO FOI POSSÍVEL VERIFICAR A EXISTÊNCIA DA DOENÇA CRÔNICA"
+        );
+
+        error.resposta = busca;
+        throw error;
+
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
 async function inserirContatosEmergencia(dados, transaction, idUsuario) {
     let contatos_emergencia = dados['contatos_emergencias']
     let dadosAtribuicao
@@ -464,6 +542,7 @@ async function atribuirRoleAoUsuario(transaction, idUsuario, rolesUsuario) {
         }
     }
 }
+
 
 
 module.exports = {
