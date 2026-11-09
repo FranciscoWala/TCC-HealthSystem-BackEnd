@@ -499,6 +499,37 @@ async function verificarExistenciaDoenca(nomeDoenca, transaction) {
         throw error;
     }
 }
+//Revisar código
+async function verificarExistenciaDoenca(nomeDoenca, transaction) {
+    try {
+        let busca = await doencasCronicasService
+            .buscarDoencaCronicaPorNomeService(
+                nomeDoenca,
+                transaction
+            );
+
+        if (busca.status) {
+            return busca.response.doencas_cronicas[0].id;
+        }
+
+        // Doença não encontrada
+        if (busca.status_code === 404) {
+            return null;
+        }
+
+        // Qualquer outro erro precisa interromper a transaction
+        let error = new Error(
+            "NÃO FOI POSSÍVEL VERIFICAR A EXISTÊNCIA DA DOENÇA CRÔNICA"
+        );
+
+        error.resposta = busca;
+        throw error;
+
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
 async function inserirContatosEmergencia(dados, transaction, idUsuario) {
     let contatos_emergencia = dados['contatos_emergencias']
     let dadosAtribuicao
