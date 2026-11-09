@@ -1,4 +1,3 @@
-
 /************************************************
     Objetivo: Arquivo responsável pela ROTA
     data: 27/10/2026

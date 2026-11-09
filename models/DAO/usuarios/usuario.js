@@ -12,11 +12,12 @@ const insertUsuario = async function (usuario, transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'INSERT',
             usuario.nome,
+            usuario.foto ?? null,
             usuario.email,
             usuario.senha,
             usuario.cpf,
@@ -37,11 +38,12 @@ const updateUsuario = async function (usuario, transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'UPDATE',
             usuario.nome,
+            usuario.foto ?? null,
             usuario.email,
             usuario.senha,
             usuario.cpf,
@@ -62,10 +64,11 @@ const selectAllUsuarios = async function (transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'SELECT_ALL',
+            null,
             null,
             null,
             null,
@@ -87,10 +90,11 @@ const selectByIdUsuario = async function (id, transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'SELECT_BY_ID',
+            null,
             null,
             null,
             null,
@@ -112,10 +116,11 @@ const selectDadosUsuarios = async function (transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'SELECT_DADOS_USUARIOS',
+            null,
             null,
             null,
             null,
@@ -133,14 +138,15 @@ const selectDadosUsuarios = async function (transaction = null) {
     }
 }
 
-const selectUsuarioByEmail = async function(email, transaction = null) {
+const selectUsuarioByEmail = async function (email, transaction = null) {
     try {
         let connection = transaction || knexConection
-        
-        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?)`
+
+        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'SELECT_BY_EMAIL',
+            null,
             null,
             email.email,
             null,
@@ -164,10 +170,11 @@ const deleteUsuario = async function (id, transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'DELETE',
+            null,
             null,
             null,
             null,

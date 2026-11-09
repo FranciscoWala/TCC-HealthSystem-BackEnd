@@ -13,11 +13,40 @@ const usuarioDAO = require('../../models/DAO/usuarios/usuario.js')
 
 // IMPORT DO SCHEMA DE VALIDAÇÃO
 const usuarioSchema = require('../../schemas/usuarioSchema.js')
+const usuarioCadastroGoogleSchema = require('../../schemas/usuarioCadastroGoogleSchema.js')
 const validarDados = require('../../utils/validar_dados/validarDados.js')
 
 const validarDadosUsuario = function (dados) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     return validarDados.validarDados(usuarioSchema, dados, customMessages)
+}
+
+const validarDadosCadastroGoogle = function (dados) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+    return validarDados.validarDados(usuarioCadastroGoogleSchema, dados, customMessages)
+}
+
+const inserirUsuarioGoogleService = async function (dados, transaction = null) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+    try {
+        let validacao = validarDadosCadastroGoogle(dados)
+        if (validacao)
+            return validacao
+
+        let result = await usuarioDAO.insertUsuario(dados, transaction)
+        if (result) {
+            dados.id = result
+            customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
+            customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_CREATED_ITEM.status_code
+            customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_CREATED_ITEM.message
+            customMessages.DEFAULT_MESSAGE.response = dados
+
+            return customMessages.DEFAULT_MESSAGE
+        } else
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
+    } catch (error) {
+        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
+    }
 }
 
 const inserirUsuarioService = async function (dados, transaction = null) {
@@ -182,6 +211,7 @@ const listarDadosUsuariosService = async function (transaction = null) {
 }
 
 module.exports = {
+    inserirUsuarioGoogleService,
     inserirUsuarioService,
     atualizarUsuarioService,
     listarUsuarioService,

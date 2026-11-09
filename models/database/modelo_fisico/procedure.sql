@@ -727,6 +727,7 @@ DELIMITER $$
 create procedure procUsuario(
     IN operacao varchar(30),
     IN nome_param varchar(45),
+    IN foto_param varchar(500),
     IN email_param varchar(255),
     IN senha_param varchar(512),
     IN cpf_param varchar(20),
@@ -737,12 +738,14 @@ BEGIN
     if operacao = 'INSERT' then
         insert into tbl_usuarios (
             nome,
+            foto,
             email,
             senha,
             cpf,
             data_nascimento
         ) values (
             nome_param,
+            foto_param,
             email_param,
             senha_param,
             cpf_param,
@@ -753,6 +756,7 @@ BEGIN
     elseif operacao = 'UPDATE' then
         update tbl_usuarios
         set nome = nome_param,
+			foto = foto_param,
             email = email_param,
             senha = senha_param,
             cpf = cpf_param,
@@ -764,9 +768,11 @@ BEGIN
         select
             id,
             nome,
+            foto,
             email,
             cpf,
-            data_nascimento
+            data_nascimento,
+            ativo
         from tbl_usuarios
         order by id desc;
 
@@ -774,9 +780,11 @@ BEGIN
         select
             id,
             nome,
+            foto,
             email,
             cpf,
-            data_nascimento
+            data_nascimento,
+            ativo
         from tbl_usuarios
         where id = id_param;
 

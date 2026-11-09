@@ -87,6 +87,9 @@ app.use('/v1/healthSystem/medtime/excluir_medicamento', cors(), excluirMedicamen
 const editarMedicamentoUsuarioRouter = require('./routes/editar_medicamento_usuario.router.js')
 app.use('/v1/healthSystem/medtime/editar_medicamento', cors(), editarMedicamentoUsuarioRouter)
 
+const routerUsuarioGoogle = require('./routes/usuario_google.router.js')
+app.use('/v1/healthSystem/medtime/usuario/google', routerUsuarioGoogle)
+
 // FAZER O START DA API
 app.listen(8080, function() {
     console.log('API aguardando novas requisições...')

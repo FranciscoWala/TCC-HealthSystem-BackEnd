@@ -25,7 +25,8 @@ const validarTokenGoogle = async function (token) {
         return {
             google_id: payload.sub,
             nome: payload.name,
-            email: payload.email
+            email: payload.email,
+            foto: payload.picture ?? null
         }
 
     } catch (error) {
