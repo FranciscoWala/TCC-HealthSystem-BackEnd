@@ -14,8 +14,11 @@ const bodyParserJSON = bodyParser.json()
 const router = express.Router()
 
 const usuarioController = require('../controllers/usuario/usuario.js')
+const autenticarLogin = require('../middleware/autenticarLogin.js')
 
 //                          ENDPOINTS USUARIO
+router.post('/login', bodyParserJSON, autenticarLogin.autenticarLogin)
+
 router.post('/', bodyParserJSON, async function (request, response) {
     let dados = request.body
     let contentType = request.headers['content-type']
