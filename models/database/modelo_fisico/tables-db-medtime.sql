@@ -7,10 +7,30 @@ use db_medtime;
 create table tbl_usuarios (
 	id 				int not null auto_increment primary key,
     nome 			varchar(45) not null,
-    email 			varchar(255) not null,
-    senha 			varchar(512) not null,
+    email 			varchar(255) not null unique,
+    senha 			varchar(512) null,
     cpf 			varchar(20),
-    data_nascimento date not null
+    data_nascimento date not null,
+    ativo			boolean not null default true
+);
+
+# Tabela Usuario Google
+create table tbl_usuario_google (
+    id              int not null auto_increment primary key,
+    google_id       varchar(255) not null,
+    id_usuario      int not null,
+
+    constraint UK_USUARIOGOOGLE_GOOGLEID
+    unique (google_id),
+
+    constraint UK_USUARIOGOOGLE_USUARIO
+    unique (id_usuario),
+
+    # Relação entre Usuario Google e Usuarios
+    constraint FK_USUARIOGOOGLE_USUARIOS
+    foreign key (id_usuario)
+    references tbl_usuarios(id)
+    on delete cascade
 );
 
 # Tabela Role

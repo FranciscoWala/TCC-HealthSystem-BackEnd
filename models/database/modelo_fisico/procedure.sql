@@ -1323,7 +1323,8 @@ BEGIN
 			tbl_usuarios.id as id_usuario,
 			tbl_usuarios.nome as nome_usuario,
 			tbl_medicamentos.id as id_medicamento,
-			tbl_medicamentos.nome as nome_medicamento
+			tbl_medicamentos.nome as nome_medicamento,
+            tbl_tipo_dosagem.tipo_dosagem
 		from tbl_programacao_medicamento
 		inner join tbl_tipo_intervalo
 			on tbl_tipo_intervalo.id = tbl_programacao_medicamento.id_tipo_intervalo
@@ -1333,6 +1334,8 @@ BEGIN
 			on tbl_usuarios.id = tbl_receita_medica.id_usuario
 		inner join tbl_medicamentos
 			on tbl_medicamentos.id = tbl_receita_medica.id_medicamento
+		inner join tbl_tipo_dosagem
+			on tbl_tipo_dosagem.id = tbl_medicamentos.id_tipo_dosagem
 		where tbl_usuarios.id = id_param
 		order by tbl_programacao_medicamento.data_hora_inicio desc;
 
