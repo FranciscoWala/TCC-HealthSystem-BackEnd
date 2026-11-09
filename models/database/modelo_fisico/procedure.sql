@@ -1423,3 +1423,49 @@ BEGIN
     end if;
 END $$
 DELIMITER $$
+
+-- ======== USUARIO GOOGLE ========
+DELIMITER $$
+create procedure procUsuarioGoogle(
+    IN operacao varchar(30),
+    IN google_id_param varchar(255),
+    IN id_usuario_param int,
+    IN id_param int
+)
+BEGIN
+    if operacao = 'INSERT' then
+        insert into tbl_usuario_google (
+            google_id,
+            id_usuario
+        ) values (
+            google_id_param,
+            id_usuario_param
+        );
+
+        select last_insert_id() as id;
+
+    elseif operacao = 'SELECT_BY_GOOGLE_ID' then
+        select
+            tbl_usuario_google.id,
+            tbl_usuario_google.google_id,
+            tbl_usuario_google.id_usuario
+        from tbl_usuario_google
+        where tbl_usuario_google.google_id = google_id_param;
+
+    elseif operacao = 'SELECT_BY_ID_USUARIO' then
+        select
+            tbl_usuario_google.id,
+            tbl_usuario_google.google_id,
+            tbl_usuario_google.id_usuario
+        from tbl_usuario_google
+        where tbl_usuario_google.id_usuario = id_usuario_param;
+
+    elseif operacao = 'DELETE' then
+        delete from tbl_usuario_google
+        where id = id_param;
+
+        select row_count() as affectedRows;
+
+    end if;
+END $$
+DELIMITER $$
