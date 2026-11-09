@@ -108,9 +108,11 @@ const gerarAgendaMedicamento = async function (idUsuario, data, fuso) {
                         let inicioOutra = new Date(outraProgramacao.data_hora_inicio)
 
                         return Number(outraProgramacao.id_receita_medica) == Number(programacao.id_receita_medica) &&
-                            Number(outraProgramacao.id_programacao_medicamento) != Number(programacao.id_programacao_medicamento) && 
-                            inicioOutra.getTime() == dataFim.getTime() && luxon.DateTime.fromJSDate(inicioOutra).setZone(fuso).toISODate() == data
+                            Number(outraProgramacao.id_programacao_medicamento) != Number(programacao.id_programacao_medicamento) &&
+                            inicioOutra.getTime() > dataInicio.getTime() &&
+                            luxon.DateTime.fromJSDate(inicioOutra).setZone(fuso).toISODate() == data
                     })
+
 
                     // Gerar os horários da programação
                     while (horario < fimDia && (!dataFim || horario < dataFim)) {
