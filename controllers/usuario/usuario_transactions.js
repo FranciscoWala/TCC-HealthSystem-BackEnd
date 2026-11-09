@@ -15,6 +15,7 @@ const validarDados = require('../../utils/validar_dados/validarDados.js')
 //IMPORT DAS SERVICES
 const usuarioService = require('../../services/usuarios/service_usuario.js')
 const doencasCronicasService = require('../../services/doencas_cronicas/service_doencas_cronicas.js')
+const doencaCronicaUsuarioService = require('../../services/doenca_cronica_usuario/service_doenca_cronica_usuario.js')
 const contatoEmergenciaService = require('../../services/contatos_de_emergencia/service_contatos_emergencia.js')
 const roleService = require('../../services/role/service_role.js')
 const usuarioRoleService = require('../../services/usuario_role/service_usuario_role.js')
@@ -58,8 +59,8 @@ async function cadastrarUsuarioTransaction(dados, contentType) {
 
                 let idUsuario = await realizarCadastroUsuario(dados, transaction)
 
-                await cadastrarDoencasCronicas(dados, transaction)
-                await inserirContatosEmergencia(dados, transaction)                
+                await cadastrarDoencasCronicas(dados, transaction, idUsuario)
+                await inserirContatosEmergencia(dados, transaction)
                 await atribuirRoleAoUsuario(transaction, idUsuario, dados['usuario_role'])
 
             })
@@ -128,7 +129,7 @@ async function desativarUsuarioTransaction(idUsuario) {
             return buscaUsuario
 
         //Necessário fazer uma revisão nesta transaction. 
-        // Talvez seja necessário colocar estes métodos internos dentro de funções que lançem erro para rollback 
+        // Talvez seja necessário colocar estes métodos internos dentro de funções que lançem erro para rollback  [**JÁ REALIZADO**]
         let result = await knexConection.transaction(async (transaction) => {
             await desativarUsuario(idUsuario, transaction) // Desativa o registro do usuário na tbl_usuarios
             await desativarRoleUsuario(idUsuario, transaction) // Desativa as Roles ativas do usuário
@@ -150,10 +151,10 @@ async function desativarRoleUsuario(idUsuario, transaction) {
     try {
         let desativarUsuarioRole = await usuarioRoleService.desativarUsuarioRoleService(idUsuario, transaction)
 
-        if(!desativarUsuarioRole.status){
+        if (!desativarUsuarioRole.status) {
             let error = new Error("NÃO FOI POSSÍVEL DESATIVAR ROLE DO USUÁRIO")
-                error.resposta = desativarUsuarioRole
-                throw error
+            error.resposta = desativarUsuarioRole
+            throw error
         }
     } catch (error) {
         console.log(error)
@@ -162,11 +163,11 @@ async function desativarRoleUsuario(idUsuario, transaction) {
 }
 
 async function desativarUsuario(idUsuario, transaction) {
-     let customMessages = JSON.parse(JSON.stringify(configMessages))
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
         let desativarUsuario = await usuarioService.desativarUsuarioService(idUsuario, transaction)
 
-        if(!desativarUsuario.status){
+        if (!desativarUsuario.status) {
             let error = new Error("NÃO FOI POSSÍVEL DESATIVAR O USUÁRIO")
             error.resposta = desativarUsuario
             throw error
@@ -328,9 +329,10 @@ async function realizarCadastroUsuario(dados, transaction) {
  *              2. Se não existir, somente cadastra no banco
  *      2. Vincular as doencças ao usuário na tbl_doencas_usuario (considere criar uma função exclusiva para)
  */
-async function cadastrarDoencasCronicas(dados, transaction) {
+async function cadastrarDoencasCronicas(dados, transaction, idUsuario) {
 
-    let doencasCronicas = dados["doencas_cronicas"]
+    let doencasCronicas = dados['doencas_cronicas']
+    let dadosAtribuicao
 
     if (Array.isArray(doencasCronicas)) {
 
@@ -340,19 +342,42 @@ async function cadastrarDoencasCronicas(dados, transaction) {
                     doenca_cronica, transaction
                 )
 
+            dadosAtribuicao = {
+                id_usuarios: idUsuario,
+                id_doenca_cronica: inserirDoencasCronicas.response.id
+            }
+            
             if (!inserirDoencasCronicas.status) {
                 let error = new Error("NÃO FOI POSSÍVEL ATRIBUIR DOENÇA_CRONICA AO USUÁRIO")
                 error.resposta = inserirDoencasCronicas
                 throw error
             }
+
+            await atribuirUsuarioDoencaCronica(dadosAtribuicao, transaction)
         }
     }
 }
 
-//Realizar a lógica posteriormente
-async function verificarExistênciaDoenca(doenca){
+async function atribuirUsuarioDoencaCronica(dadosAtribuicao, transaction) {
     try {
+        let result = await doencaCronicaUsuarioService.inserirDoencaCronicaUsuarioService(dadosAtribuicao, transaction)
         
+        if (!result.status) {
+            let error = new Error("NÃO FOI POSSÍVEL ATRIBUIR DOENÇA_CRONICA AO USUÁRIO")
+            error.resposta = result
+            throw error
+        }
+
+    } catch (error) {
+        console.log("ERROR IN ATRIBUIR DOENCA CRONICA: " + error);
+        throw error
+    }
+}
+
+//Realizar a lógica posteriormente
+async function verificarExistênciaDoenca(doenca) {
+    try {
+
 
     } catch (error) {
         console.log(error)
@@ -362,7 +387,7 @@ async function verificarExistênciaDoenca(doenca){
 
 async function inserirContatosEmergencia(dados, transaction) {
     let contatos_emergencia = dados['contatos_emergencias']
-    
+
 
     if (Array.isArray(contatos_emergencia)) {
 
@@ -389,7 +414,7 @@ async function buscarRole(rolesUsuario) {
         for (const roleID of rolesUsuario) {
             result = await roleService.buscarRoleService(roleID)
 
-            if(!result.status)
+            if (!result.status)
                 return false
         }
     }
@@ -399,7 +424,7 @@ async function atribuirRoleAoUsuario(transaction, idUsuario, rolesUsuario) {
     await buscarRole(rolesUsuario)
 
     if (Array.isArray(rolesUsuario)) {
-        for (const role of rolesUsuario) {            
+        for (const role of rolesUsuario) {
             let dadosRelacao = {
                 ativo: 1,
                 data_ativacao: new Date(),

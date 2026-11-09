@@ -17,10 +17,13 @@ async function insertDoencaCronicaUsuario(doencaCronicaUsuario, transaction = nu
 
         let result = await connection.raw(sql, [
             'INSERT',
-            doencaCronicaUsuario.id_doencas_cronicas,
+            doencaCronicaUsuario.id_doenca_cronica,
             doencaCronicaUsuario.id_usuarios,
             null
         ])
+
+        
+                
 
         if (result && result[0][0][0].id)
             return result[0][0][0].id
