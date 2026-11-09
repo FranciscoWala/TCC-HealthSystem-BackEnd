@@ -17,6 +17,7 @@ const usuarioService = require('../../services/usuarios/service_usuario.js')
 const doencasCronicasService = require('../../services/doencas_cronicas/service_doencas_cronicas.js')
 const doencaCronicaUsuarioService = require('../../services/doenca_cronica_usuario/service_doenca_cronica_usuario.js')
 const contatoEmergenciaService = require('../../services/contatos_de_emergencia/service_contatos_emergencia.js')
+const usuarioContatoEmergenciaService = require('../../services/contato_emergencia_usuarios/service_contato_emergencia_usuarios.js')
 const roleService = require('../../services/role/service_role.js')
 const usuarioRoleService = require('../../services/usuario_role/service_usuario_role.js')
 
@@ -60,7 +61,7 @@ async function cadastrarUsuarioTransaction(dados, contentType) {
                 let idUsuario = await realizarCadastroUsuario(dados, transaction)
 
                 await cadastrarDoencasCronicas(dados, transaction, idUsuario)
-                await inserirContatosEmergencia(dados, transaction)
+                await inserirContatosEmergencia(dados, transaction, idUsuario)
                 await atribuirRoleAoUsuario(transaction, idUsuario, dados['usuario_role'])
 
             })
@@ -385,9 +386,9 @@ async function verificarExistênciaDoenca(doenca) {
     }
 }
 
-async function inserirContatosEmergencia(dados, transaction) {
+async function inserirContatosEmergencia(dados, transaction, idUsuario) {
     let contatos_emergencia = dados['contatos_emergencias']
-
+    let dadosAtribuicao
 
     if (Array.isArray(contatos_emergencia)) {
 
@@ -397,13 +398,33 @@ async function inserirContatosEmergencia(dados, transaction) {
                     contato, transaction
                 )
 
+            dadosAtribuicao = {
+                id_usuarios: idUsuario,
+                id_contato_de_emergencia: inserirContato.response.id
+            }
 
             if (!inserirContato.status) {
                 let error = new Error("NÃO FOI POSSÍVEL INSERIR O CONTATO DE EMERGÊNCIA")
                 error.resposta = inserirContato
                 throw error
             }
+
+            await atribuirContatoDeEmergencia(dadosAtribuicao, transaction)
         }
+    }
+}
+
+async function atribuirContatoDeEmergencia(dadosAtribuicao, transaction) {
+    try {
+        let result = await usuarioContatoEmergenciaService.inserirContatoEmergenciaUsuarioService(dadosAtribuicao, transaction)
+        
+        if (!result.status) {
+            let error = new Error("NÃO FOI POSSÍVEL ATRIBUIR CONTATO DE EMERGENCIA AO USUÁRIO")
+            error.resposta = result
+            throw error
+        }
+    } catch (error) {
+        throw error
     }
 }
 
