@@ -113,10 +113,31 @@ const deleteDoencaCronica = async function (id, transaction = null) {
     }
 }
 
+const selectByNomeDoencasCronicas = async function (nome, transaction = null) {
+    try {
+        let connection = transaction || knexConection;
+
+        let result = await connection('tbl_doencas_cronicas')
+            .select('id', 'nome_doenca')
+            .whereRaw(
+                'LOWER(TRIM(nome_doenca)) = LOWER(TRIM(?))',
+                [nome]
+            )
+            .first();
+
+        return result || null;
+
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+}
+
 module.exports = {
     insertDoencaCronica,
     updateDoencaCronica,
     selectAllDoencasCronicas,
     selectByIdDoencasCronicas,
-    deleteDoencaCronica
+    deleteDoencaCronica,
+    selectByNomeDoencasCronicas
 }

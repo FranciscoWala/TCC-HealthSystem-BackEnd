@@ -84,7 +84,9 @@ const atualizarUsuarioService = async function (dados, id, transaction = null) {
             return validacao
 
         dados.id = Number(id)
-        let result = await usuarioDAO.updateUsuario(dados, transaction)
+        console.log(dados);
+        
+        let result = await usuarioDAO.updateUsuario(dados,transaction)
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
@@ -210,6 +212,52 @@ const listarDadosUsuariosService = async function (transaction = null) {
     }
 }
 
+const buscarRolesAtivasUsuarioService = async (idUsuario, transaction = null) => {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+
+    try {
+        let result = await usuarioDAO.buscarRolesAtivasDoUsuario(idUsuario, transaction)
+
+        if(result){
+            if(result.length > 0){
+                customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
+                customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
+                customMessages.DEFAULT_MESSAGE.response.count = result.length
+                customMessages.DEFAULT_MESSAGE.response.roles = result
+
+                return customMessages.DEFAULT_MESSAGE
+            }else{
+                return customMessages.ERROR_NOT_FOUND
+            }
+        }else{
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
+        }
+    } catch (error) {
+        console.log(error)
+        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
+    }
+}
+
+async function desativarUsuarioService(idUsuario, transaction = null) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+    try {
+        let buscaUsuario = await buscarUsuarioService(idUsuario, transaction)
+        if(!buscaUsuario.status)
+            return buscaUsuario
+
+        let result = await usuarioDAO.desactivateUsuario(idUsuario, transaction)
+
+        if(result)
+            return customMessages.SUCCESS_DELETE_ITEM
+        else
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
+
+    } catch (error) {
+        console.log("ERROR IN USUARIO SERVICE: " + error)
+        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
+    }
+}
+
 module.exports = {
     inserirUsuarioGoogleService,
     inserirUsuarioService,
@@ -218,5 +266,7 @@ module.exports = {
     buscarUsuarioService,
     excluirUsuarioService,
     buscarUsuarioPorEmailService,
-    listarDadosUsuariosService
+    listarDadosUsuariosService,
+    buscarRolesAtivasUsuarioService,
+    desativarUsuarioService
 }

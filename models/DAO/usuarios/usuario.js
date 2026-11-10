@@ -56,6 +56,8 @@ const updateUsuario = async function (usuario, transaction = null) {
         else
             return false
     } catch (error) {
+        console.log(error);
+        
         return false
     }
 }
@@ -192,6 +194,47 @@ const deleteUsuario = async function (id, transaction = null) {
     }
 }
 
+const buscarRolesAtivasDoUsuario = async (idUsuario, transaction = null) => {
+    try {
+        let connection = transaction || knexConection
+
+        let sql = `select * from tbl_usuarios_role where id_usuarios=${idUsuario} and ativo=1;`
+        
+        let result = await knexConection.raw(sql)
+
+        if(result)
+            return result[0]
+        else 
+            return false
+
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
+const desactivateUsuario = async function (id, transaction = null) {
+    try {
+        let connection = transaction || knexConection
+
+        let sql = `
+            update tbl_usuarios
+                set ativo = false
+            where id = ${id};
+        `
+
+        let result = await connection.raw(sql)
+
+        if(result)
+            return true
+        else
+            return false
+    } catch (error) {
+        console.log("ERROR IN USUARIO MODEL" + error);
+        return false
+    }
+}
+
 module.exports = {
     insertUsuario,
     updateUsuario,
@@ -199,5 +242,7 @@ module.exports = {
     selectByIdUsuario,
     selectDadosUsuarios,
     selectUsuarioByEmail,
-    deleteUsuario
+    deleteUsuario,
+    buscarRolesAtivasDoUsuario,
+    desactivateUsuario
 }
