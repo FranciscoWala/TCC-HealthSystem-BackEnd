@@ -1068,13 +1068,13 @@ BEGIN
 
     elseif operacao = 'UPDATE' then
         update tbl_receita_medica
-        set id_usuario = id_usuario_param,
-            id_medicamento = id_medicamento_param,
+        set id_medicamento = id_medicamento_param,
             dosagem = dosagem_param,
             id_unidade_medida = id_unidade_medida_param,
             id_estoque = id_estoque_param,
             descricao = descricao_param
-        where id = id_param;
+        where id = id_param
+            and id_usuario = id_usuario_param;;
 
         select row_count() as affectedRows;
 
@@ -1115,7 +1115,8 @@ BEGIN
             on tbl_tipo_dosagem.id = tbl_medicamentos.id_tipo_dosagem
         left join tbl_unidade_medida as tbl_unidade_medida_dose
             on tbl_unidade_medida_dose.id = tbl_receita_medica.id_unidade_medida
-        order by tbl_receita_medica.id desc;
+        where tbl_receita_medica.id_usuario = id_usuario_param
+        order by tbl_receita_medica.id desc
 
     elseif operacao = 'SELECT_BY_ID' then
         select
@@ -1155,11 +1156,13 @@ BEGIN
             on tbl_tipo_dosagem.id = tbl_medicamentos.id_tipo_dosagem
         left join tbl_unidade_medida as tbl_unidade_medida_dose
             on tbl_unidade_medida_dose.id = tbl_receita_medica.id_unidade_medida
-        where tbl_receita_medica.id = id_param;
+        where tbl_receita_medica.id = id_param
+            and tbl_receita_medica.id_usuario = id_usuario_param;
 
     elseif operacao = 'DELETE' then
         delete from tbl_receita_medica
-        where id = id_param;
+        where id = id_param
+            and id_usuario = id_usuario_param;
 
         select row_count() as affectedRows;
 

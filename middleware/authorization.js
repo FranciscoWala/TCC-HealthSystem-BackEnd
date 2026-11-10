@@ -55,6 +55,10 @@ function verificarRelacao(){
     }
 }
 
+async function verificarAcessoPaciente() {
+    
+}
+
 async function possuiRelacionamento(idPaciente, idCuidador) {
     try {
 
