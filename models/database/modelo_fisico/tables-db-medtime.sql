@@ -7,10 +7,11 @@ use db_medtime;
 create table tbl_usuarios (
 	id 				int not null auto_increment primary key,
     nome 			varchar(45) not null,
-    email 			varchar(255) not null,
-    senha 			varchar(512) not null,
+    email 			varchar(255) not null unique,
+    senha 			varchar(512) null,
     cpf 			varchar(20),
-    data_nascimento date not null
+    data_nascimento date not null,
+    ativo			boolean not null default true
 );
 
 # Tabela Role

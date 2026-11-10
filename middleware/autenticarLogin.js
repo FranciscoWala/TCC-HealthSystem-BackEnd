@@ -8,13 +8,8 @@ async function autenticarLogin(request, response) {
     try {
         const { email, senha } = request.body
 
+        
 
-        if (!buscaUsuario || buscaUsuario.length === 0)
-            return response
-                .status(401)
-                .json(
-                    { message: "EMAIL OU SENHA INVÁLIDOS" }
-                )
         if (!email || !senha) {
             return response.status(400).json({ message: "É necessário fornecer e-mail e senha" })
         }

@@ -132,10 +132,25 @@ const excluirUsuarioRoleService = async function (id, transaction = null) {
     }
 }
 
+const desativarUsuarioRoleService = async function (idUsuario, transaction = null) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+    try {
+        let result = await usuarioRoleDAO.desactivateUsuarioRole(idUsuario, transaction)
+
+        if(result)
+            return customMessages.SUCCESS_DELETE_ITEM
+        else
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
+    } catch (error) {
+        console.log("ERROR SERVICE USUARIO_ROLE: " + error)
+        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
+    }
+}
 module.exports = {
     inserirUsuarioRoleService,
     atualizarUsuarioRoleService,
     listarUsuarioRoleService,
     buscarUsuarioRoleService,
-    excluirUsuarioRoleService
+    excluirUsuarioRoleService,
+    desativarUsuarioRoleService
 }

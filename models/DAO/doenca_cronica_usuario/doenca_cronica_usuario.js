@@ -17,10 +17,13 @@ async function insertDoencaCronicaUsuario(doencaCronicaUsuario, transaction = nu
 
         let result = await connection.raw(sql, [
             'INSERT',
-            doencaCronicaUsuario.id_doencas_cronicas,
+            doencaCronicaUsuario.id_doenca_cronica,
             doencaCronicaUsuario.id_usuarios,
             null
         ])
+
+        
+                
 
         if (result && result[0][0][0].id)
             return result[0][0][0].id
@@ -130,10 +133,32 @@ async function deleteDoencaCronicaUsuarioByID(id, transaction = null) {
     }
 }
 
+const selectByNomeDoencasCronicas = async function (nome, transaction = null) {
+    try {
+        let connection = transaction || knexConection;
+
+        let result = await connection('tbl_doencas_cronicas')
+            .select('id', 'nome_doenca')
+            .whereRaw(
+                'LOWER(TRIM(nome_doenca)) = LOWER(TRIM(?))',
+                [nome]
+            )
+            .first();
+
+        return result || null;
+
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+}
+
+
 module.exports = {
     insertDoencaCronicaUsuario,
     updateDoencaCronicaUsuario,
     selectDoencaCronicaUsuario,
     selectDoencaCronicaUsuarioByID,
-    deleteDoencaCronicaUsuarioByID
+    deleteDoencaCronicaUsuarioByID,
+    selectByNomeDoencasCronicas
 }

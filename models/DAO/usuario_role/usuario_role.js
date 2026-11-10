@@ -7,6 +7,7 @@
  * Versão: 1.0
 ********************************************************************************************/
 
+const { default: knex } = require('knex')
 const knexConection = require('../../global_knex/global_knex.js')
 
 async function insertUsuarioRole(usuarioRole, transaction = null) {
@@ -141,10 +142,37 @@ async function deleteUsuarioRoleByID(id, transaction = null) {
     }
 }
 
+async function desactivateUsuarioRole(idUsuario, transaction = null) {
+    try {
+        let connection = transaction || knexConection
+
+       let sql = `
+            UPDATE tbl_usuarios_role
+            SET
+                ativo = false,
+                data_desativacao = NOW()
+            WHERE id_usuarios = ?
+              AND ativo = true
+        `;
+
+        let result = await connection.raw(sql, idUsuario)
+
+
+        if(result)
+            return true
+        else
+            return false
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
 module.exports = {
     insertUsuarioRole,
     updateUsuarioRole,
     selectUsuarioRole,
     selectUsuarioRoleByID,
-    deleteUsuarioRoleByID
+    deleteUsuarioRoleByID,
+    desactivateUsuarioRole
 }
