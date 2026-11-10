@@ -54,6 +54,8 @@ const updateUsuario = async function (usuario, transaction = null) {
         else
             return false
     } catch (error) {
+        console.log(error);
+        
         return false
     }
 }

@@ -14,8 +14,7 @@ const usuarioRoleSchema = Joi.object({
             .required(),
 
     data_ativacao: Joi.date()
-                    .iso()
-                    .required(),
+                    .iso(),
                     
     data_desativacao: Joi.date()
                         .iso()

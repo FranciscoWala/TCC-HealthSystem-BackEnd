@@ -98,7 +98,7 @@ async function atualizarUsuarioTransaction(dados, contentType, idUsuario) {
                 return buscaUsuario
 
             let result = await knexConection.transaction(async (transaction) => {
-                await atualizarCadastroUsuario(dados, transaction)
+                await atualizarCadastroUsuario(dados, transaction, idUsuario)
                 await atualizarDoencasCronicas(dados, transaction)
                 await atualizarContatosEmergencia(dados, transaction)
                 await gerenciarAtualizacaoRoles(transaction, idUsuario, dados)
@@ -227,20 +227,21 @@ async function gerenciarAtualizacaoRoles(transaction, idUsuario, dados) {
     }
 }
 
-async function atualizarCadastroUsuario(dados, transaction) {
+async function atualizarCadastroUsuario(dados, transaction, idUsuario) {
     let dadosPessoais = {
         nome: dados.nome,
         email: dados.email,
         senha: dados.senha,
+        cpf: dados.cpf,
         data_nascimento: dados["data_nascimento"]
     }
 
     let atualizarUsuario = await usuarioService.atualizarUsuarioService(
-        dadosPessoais, transaction
+        dadosPessoais, idUsuario, transaction
     )
 
     if (!atualizarUsuario.status) {
-        let error = new Error("NÃO FOI POSSÍVEL REALIZAR O CADASTRO DO USUÁRIO")
+        let error = new Error("NÃO FOI POSSÍVEL ATUALIZAR O CADASTRO DO USUÁRIO")
         error.resposta = atualizarUsuario
         throw error
     } else {
