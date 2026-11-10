@@ -11,6 +11,7 @@ create table tbl_usuarios (
     email 			varchar(255) not null unique,
     senha 			varchar(512) null,
     cpf 			varchar(20),
+    telefone 		varchar(20) null,
     data_nascimento date not null,
     ativo			boolean not null default true
 );

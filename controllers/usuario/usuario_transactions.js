@@ -101,7 +101,8 @@ async function atualizarUsuarioTransaction(dados, contentType, idUsuario) {
                 await atualizarCadastroUsuario(dados, transaction, idUsuario)
                 await atualizarDoencasCronicas(dados, transaction)
                 await atualizarContatosEmergencia(dados, transaction)
-                await gerenciarAtualizacaoRoles(transaction, idUsuario, dados)
+                if (dados["usuario_role"] !== undefined)
+                    await gerenciarAtualizacaoRoles(transaction, idUsuario, dados)
             })
 
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
@@ -181,58 +182,57 @@ async function desativarUsuario(idUsuario, transaction) {
 }
 
 //Funções auxiliares para atualizar o usuário 
-async function gerenciarAtualizacaoRoles(transaction, idUsuario, dados) {
-    let novasRoles = dados["usuario_role"] || []
-    let rolesAntigas = []
 
-    let buscaRolesAntigas = await usuarioService.buscarRolesAtivasUsuarioService(idUsuario)
+async function gerenciarAtualizacaoRoles(transaction, idUsuario, dados) {
+    let novaRole = dados["usuario_role"]
+
+    if (!novaRole || !Number.isInteger(Number(novaRole.id_role)))
+        throw new Error("ROLE INVÁLIDA")
+
+    let buscaRolesAntigas = await usuarioService.buscarRolesAtivasUsuarioService(idUsuario, transaction)
+
+    let roleAntiga = null
 
     if (buscaRolesAntigas.status) {
-        rolesAntigas = buscaRolesAntigas.response.roles;
-    } else if (buscaRolesAntigas.status_code === 404) {
-        throw new Error("NÃO FOI POSSÍVEL BUSCAR AS ROLES ATUAIS DO USUÁRIO");
+        if (buscaRolesAntigas.response.roles.length != 1)
+            throw new Error("USUÁRIO POSSUI MAIS DE UMA ROLE ATIVA")
+
+        roleAntiga = buscaRolesAntigas.response.roles[0]
+    } else if (buscaRolesAntigas.status_code != 404) {
+        throw new Error("NÃO FOI POSSÍVEL BUSCAR A ROLE ATUAL DO USUÁRIO")
     }
 
+    if (roleAntiga && roleAntiga.id_role == novaRole.id_role)
+        return
 
-    let rolesParaDesativar = rolesAntigas.filter(
-        role => !novasRoles.includes(role.id_role)
-    )
-
-    let idsAntigos = rolesAntigas.map(role => role.id_role)
-    let rolesInserir = novasRoles.filter(
-        roleID => !idsAntigos.includes(roleID)
-    )
-
-    if (rolesParaDesativar.length > 0) {
-        for (const role of rolesParaDesativar) {
-            let dadosDesativacao = {
-                ativo: 0,
-                data_desativacao: new Date(),
-                id_usuarios: idUsuario,
-                id_role: role.id_role
-            }
-
-            let inativar = await usuarioRoleService.atualizarUsuarioRoleService(dadosDesativacao, role.id, transaction)
-
-            if (!inativar.status) {
-                let error = new Error(`NÃO FOI POSSÍVEL INATIVAR A ROLE ${role.id_role}`);
-                error.resposta = inativar;
-                throw error;
-            }
+    if (roleAntiga) {
+        let dadosDesativacao = {
+            ativo: 0,
+            data_desativacao: new Date(),
+            id_usuarios: idUsuario,
+            id_role: roleAntiga.id_role
         }
 
-        if (rolesInserir.length > 0) {
-            await atribuirRoleAoUsuario(transaction, idUsuario, rolesInserir, usuarioRoleService.inserirUsuarioRoleService)
+        let inativar = await usuarioRoleService.atualizarUsuarioRoleService(dadosDesativacao, roleAntiga.id, transaction)
+
+        if (!inativar.status) {
+            let error = new Error(`NÃO FOI POSSÍVEL INATIVAR A ROLE ${roleAntiga.id_role}`)
+            error.resposta = inativar
+            throw error
         }
     }
+
+    await atribuirRoleAoUsuario(transaction, idUsuario, novaRole)
 }
 
 async function atualizarCadastroUsuario(dados, transaction, idUsuario) {
     let dadosPessoais = {
         nome: dados.nome,
+        foto: dados.foto ?? null,
         email: dados.email,
         senha: dados.senha,
-        cpf: dados.cpf,
+        cpf: dados.cpf ?? null,
+        telefone: dados.telefone ?? null,
         data_nascimento: dados["data_nascimento"]
     }
 
@@ -302,9 +302,11 @@ async function atualizarContatosEmergencia(dados, transaction) {
 async function realizarCadastroUsuario(dados, transaction) {
     let dadosPessoais = {
         nome: dados.nome,
+        foto: dados.foto ?? null,
         email: dados.email,
         senha: dados.senha,
-        cpf: dados.cpf,
+        cpf: dados.cpf ?? null,
+        telefone: dados.telefone ?? null,
         data_nascimento: dados["data_nascimento"]
     }
 
@@ -348,7 +350,7 @@ async function cadastrarDoencasCronicas(dados, transaction, idUsuario) {
                 id_usuarios: idUsuario,
                 id_doenca_cronica: inserirDoencasCronicas.response.id
             }
-            
+
             if (!inserirDoencasCronicas.status) {
                 let error = new Error("NÃO FOI POSSÍVEL ATRIBUIR DOENÇA_CRONICA AO USUÁRIO")
                 error.resposta = inserirDoencasCronicas
@@ -363,7 +365,7 @@ async function cadastrarDoencasCronicas(dados, transaction, idUsuario) {
 async function atribuirUsuarioDoencaCronica(dadosAtribuicao, transaction) {
     try {
         let result = await doencaCronicaUsuarioService.inserirDoencaCronicaUsuarioService(dadosAtribuicao, transaction)
-        
+
         if (!result.status) {
             let error = new Error("NÃO FOI POSSÍVEL ATRIBUIR DOENÇA_CRONICA AO USUÁRIO")
             error.resposta = result
@@ -562,7 +564,7 @@ async function inserirContatosEmergencia(dados, transaction, idUsuario) {
 async function atribuirContatoDeEmergencia(dadosAtribuicao, transaction) {
     try {
         let result = await usuarioContatoEmergenciaService.inserirContatoEmergenciaUsuarioService(dadosAtribuicao, transaction)
-        
+
         if (!result.status) {
             let error = new Error("NÃO FOI POSSÍVEL ATRIBUIR CONTATO DE EMERGENCIA AO USUÁRIO")
             error.resposta = result
@@ -573,44 +575,39 @@ async function atribuirContatoDeEmergencia(dadosAtribuicao, transaction) {
     }
 }
 
-async function buscarRole(rolesUsuario) {
-    let result
+async function buscarRole(roleUsuario) {
+    let result = await roleService.buscarRoleService(roleUsuario['id_role'])
 
-    if (Array.isArray(rolesUsuario)) {
-        for (const roleID of rolesUsuario) {
-            result = await roleService.buscarRoleService(roleID)
+    if (!result.status)
+        return false
 
-            if (!result.status)
-                return false
-        }
-    }
+    return true
 }
 
-async function atribuirRoleAoUsuario(transaction, idUsuario, rolesUsuario) {
-    await buscarRole(rolesUsuario)
+async function atribuirRoleAoUsuario(transaction, idUsuario, roleUsuario) {
+    let buscar = await buscarRole(roleUsuario)
 
-    if (Array.isArray(rolesUsuario)) {
-        for (const role of rolesUsuario) {
-            let dadosRelacao = {
-                ativo: 1,
-                data_ativacao: new Date(),
-                data_desativacao: null,
-                id_usuarios: Number(idUsuario),
-                id_role: Number(role['id_role'])
-            }
+    if (!buscar) {
+        let error = new Error("ROLE NÃO ENCONTRADA")
+        throw error
+    }
 
-            let atribuir = await usuarioRoleService.inserirUsuarioRoleService(dadosRelacao, transaction);
+    let dadosRelacao = {
+        ativo: 1,
+        data_ativacao: new Date(),
+        data_desativacao: null,
+        id_usuarios: Number(idUsuario),
+        id_role: Number(roleUsuario['id_role'])
+    }
 
-            if (!atribuir.status) {
-                let error = new Error(`NÃO FOI POSSÍVEL ATRIBUIR A ROLE ${role['id_role']} AO USUÁRIO`);
-                error.resposta = atribuir;
-                throw error;
-            }
-        }
+    let atribuir = await usuarioRoleService.inserirUsuarioRoleService(dadosRelacao, transaction);
+
+    if (!atribuir.status) {
+        let error = new Error(`NÃO FOI POSSÍVEL ATRIBUIR A ROLE ${roleUsuario['id_role']} AO USUÁRIO`);
+        error.resposta = atribuir;
+        throw error;
     }
 }
-
-
 
 module.exports = {
     cadastrarUsuarioTransaction,

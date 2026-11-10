@@ -31,6 +31,11 @@ const usuarioSchema = JOI.object({
         .max(20)
         .allow(null),
 
+    telefone: Joi.string()
+                .max(20)
+                .allow(null, '')
+                .optional(),
+
     data_nascimento: JOI.date()
         .iso()
         .required()

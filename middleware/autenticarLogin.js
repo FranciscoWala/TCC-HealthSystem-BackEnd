@@ -1,5 +1,6 @@
 const usuarioDAO = require("../models/DAO/usuarios/usuario.js")
 const authenticate = require("./authenticate.js")
+const usuarioService = require('../services/usuarios/service_usuario.js')
 
 async function autenticarLogin(request, response) {
     try {
@@ -23,6 +24,11 @@ async function autenticarLogin(request, response) {
                 message: "EMAIL OU SENHA INVÁLIDOS"
             })
 
+        if (usuario[0].ativo != 1)
+            return response.status(403).json({
+                message: "USUÁRIO INATIVO"
+            })
+
         // Validação de senha temporariamente pendente
         // const validarSenha = await bcrypt.compare(senha, usuario[0].senha)
 
@@ -31,9 +37,21 @@ async function autenticarLogin(request, response) {
         //         message: "EMAIL OU SENHA INVÁLIDOS"
         //     })
 
+        let buscarRoles = await usuarioService.buscarRolesAtivasUsuarioService(usuario[0].id)
+
+        if (!buscarRoles.status)
+            return response.status(buscarRoles.status_code).json(buscarRoles)
+
+        let roles = buscarRoles.response.roles
+
+        if (roles.length != 1)
+            return response.status(403).json({
+                message: "USUÁRIO DEVE POSSUIR APENAS UMA ROLE ATIVA"
+            })
+
         let payload = {
             id: usuario[0].id,
-            // role: usuario[0].role
+            role: roles[0].id_role
         }
 
         let jwt = await authenticate.createJWT(payload)
@@ -48,7 +66,7 @@ async function autenticarLogin(request, response) {
     } catch (error) {
         console.log(error)
         return response.status(500).json({
-            message: "INTERNAL SERVER ERROR" 
+            message: "INTERNAL SERVER ERROR"
         })
     }
 }

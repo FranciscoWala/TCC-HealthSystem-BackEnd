@@ -12,7 +12,7 @@ const insertUsuario = async function (usuario, transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'INSERT',
@@ -20,7 +20,8 @@ const insertUsuario = async function (usuario, transaction = null) {
             usuario.foto ?? null,
             usuario.email,
             usuario.senha,
-            usuario.cpf,
+            usuario.cpf ?? null,
+            usuario.telefone ?? null,
             usuario.data_nascimento,
             null
         ])
@@ -38,7 +39,7 @@ const updateUsuario = async function (usuario, transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'UPDATE',
@@ -46,7 +47,8 @@ const updateUsuario = async function (usuario, transaction = null) {
             usuario.foto ?? null,
             usuario.email,
             usuario.senha,
-            usuario.cpf,
+            usuario.cpf ?? null,
+            usuario.telefone ?? null,
             usuario.data_nascimento,
             usuario.id
         ])
@@ -57,7 +59,7 @@ const updateUsuario = async function (usuario, transaction = null) {
             return false
     } catch (error) {
         console.log(error);
-        
+
         return false
     }
 }
@@ -66,10 +68,11 @@ const selectAllUsuarios = async function (transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'SELECT_ALL',
+            null,
             null,
             null,
             null,
@@ -92,10 +95,11 @@ const selectByIdUsuario = async function (id, transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'SELECT_BY_ID',
+            null,
             null,
             null,
             null,
@@ -118,10 +122,11 @@ const selectDadosUsuarios = async function (transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'SELECT_DADOS_USUARIOS',
+            null,
             null,
             null,
             null,
@@ -154,6 +159,7 @@ const selectUsuarioByEmail = async function (email, transaction = null) {
             null,
             null,
             null,
+            null,
             null
         ])
 
@@ -182,6 +188,7 @@ const deleteUsuario = async function (id, transaction = null) {
             null,
             null,
             null,
+            null,
             id
         ])
 
@@ -198,13 +205,13 @@ const buscarRolesAtivasDoUsuario = async (idUsuario, transaction = null) => {
     try {
         let connection = transaction || knexConection
 
-        let sql = `select * from tbl_usuarios_role where id_usuarios=${idUsuario} and ativo=1;`
-        
-        let result = await knexConection.raw(sql)
+        let sql = `select * from tbl_usuarios_role where id_usuarios = ? and ativo = 1;`
 
-        if(result)
+        let result = await connection.raw(sql, [idUsuario])
+
+        if (result)
             return result[0]
-        else 
+        else
             return false
 
     } catch (error) {
@@ -225,7 +232,7 @@ const desactivateUsuario = async function (id, transaction = null) {
 
         let result = await connection.raw(sql)
 
-        if(result)
+        if (result)
             return true
         else
             return false

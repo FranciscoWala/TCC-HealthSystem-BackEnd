@@ -1,5 +1,5 @@
-const rolePermissoesDAO = require('../model/DAO/role_permissoes/role_permissoes.js')
-const receitaMedicaDAO = require('../model/DAO/vinculo_paciente/vinculo_paciente.js')
+const rolePermissoesDAO = require('../models/DAO/role_permissoes/role_permissoes.js')
+const receitaMedicaDAO = require('../models/DAO/vinculo_paciente/vinculo_paciente.js')
 
 function verficarPermissao(permissao) {
 

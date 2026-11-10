@@ -731,6 +731,7 @@ create procedure procUsuario(
     IN email_param varchar(255),
     IN senha_param varchar(512),
     IN cpf_param varchar(20),
+    IN telefone_param varchar(20),
     IN data_nascimento_param date,
     IN id_param int
 )
@@ -742,6 +743,7 @@ BEGIN
             email,
             senha,
             cpf,
+            telefone,
             data_nascimento
         ) values (
             nome_param,
@@ -749,6 +751,7 @@ BEGIN
             email_param,
             senha_param,
             cpf_param,
+            telefone_param,
             data_nascimento_param
         );
         select last_insert_id() as id;
@@ -760,6 +763,7 @@ BEGIN
             email = email_param,
             senha = senha_param,
             cpf = cpf_param,
+            telefone = telefone_param,
             data_nascimento = data_nascimento_param
         where id = id_param;
         select row_count() as affectedRows;
@@ -771,6 +775,7 @@ BEGIN
             foto,
             email,
             cpf,
+            telefone,
             data_nascimento,
             ativo
         from tbl_usuarios
@@ -783,6 +788,7 @@ BEGIN
             foto,
             email,
             cpf,
+            telefone,
             data_nascimento,
             ativo
         from tbl_usuarios
