@@ -44,6 +44,15 @@ const listarRolePermissoes = async function () {
     }
 }
 
+const buscarPermissoesUsuario = async function (idRole) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+    try {
+        return await rolePermissoesService.buscarPermissoesUsuarioService(idRole)
+    } catch (error) {
+        return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
+    }
+}
+
 const buscarRolePermissoes = async function (id) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
@@ -66,6 +75,7 @@ module.exports = {
     inserirNovaRolePermissoes,
     atualizarRolePermissoes,
     listarRolePermissoes,
+    buscarPermissoesUsuario,
     buscarRolePermissoes,
     excluirRolePermissoes
 }

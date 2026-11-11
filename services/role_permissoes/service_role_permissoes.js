@@ -91,6 +91,31 @@ const listarRolePermissoesService = async function (transaction = null) {
     }
 }
 
+const buscarPermissoesUsuarioService = async function (idRole) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+    try {
+        let validacaoId = validarDados.validarIDs(idRole, customMessages)
+        if (validacaoId)
+            return validacaoId
+
+        let result = await rolePermissoesDAO.selectPermissoesByRole(idRole)
+
+        if (result) {
+            let permissoes = result.permissoes.split(',').map(permissao => permissao.trim())
+
+            customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
+            customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
+            customMessages.DEFAULT_MESSAGE.response.id_role = Number(idRole)
+            customMessages.DEFAULT_MESSAGE.response.permissoes = permissoes
+
+            return customMessages.DEFAULT_MESSAGE
+        } else
+            return customMessages.ERROR_NOT_FOUND
+    } catch (error) {
+        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
+    }
+}
+
 const buscarRolePermissoesService = async function (id, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
@@ -136,6 +161,7 @@ module.exports = {
     inserirRolePermissoesService,
     atualizarRolePermissoesService,
     listarRolePermissoesService,
+    buscarPermissoesUsuarioService,
     buscarRolePermissoesService,
     excluirRolePermissoesService
 }

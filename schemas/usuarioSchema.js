@@ -31,7 +31,7 @@ const usuarioSchema = JOI.object({
         .max(20)
         .allow(null),
 
-    telefone: Joi.string()
+    telefone: JOI.string()
                 .max(20)
                 .allow(null, '')
                 .optional(),

@@ -149,7 +149,7 @@ const selectUsuarioByEmail = async function (email, transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'SELECT_BY_EMAIL',

@@ -14,6 +14,7 @@ const bodyParserJSON = bodyParser.json()
 const router = express.Router()
 
 const controllerRolePermissoes = require('../controllers/role_permissoes/controller_role_permissoes.js')
+const verificarToken = require('../middleware/auth.js')
 
 //                          ENDPOINTS ROLE PERMISSOES
 router.post('/', bodyParserJSON, async function (request, response) {
@@ -28,6 +29,15 @@ router.post('/', bodyParserJSON, async function (request, response) {
 
 router.get('/', async function (request, response) {
     let result = await controllerRolePermissoes.listarRolePermissoes()
+
+    response.status(result.status_code)
+    response.json(result)
+})
+
+router.get('/permitido', verificarToken.verificarToken, async function (request, response) {
+    let idRole = request.user.role
+
+    let result = await controllerRolePermissoes.buscarPermissoesUsuario(idRole)
 
     response.status(result.status_code)
     response.json(result)
