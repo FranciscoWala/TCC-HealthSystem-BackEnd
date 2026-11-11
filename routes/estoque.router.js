@@ -42,6 +42,15 @@ router.get('/:id', async function (request, response) {
     response.json(result)
 })
 
+router.get('/usuario/:idUsuario', async function (request, response) {
+    let idUsuario = request.params.idUsuario
+
+    let result = await estoqueController.listarEstoquePorUsuario(idUsuario)
+
+    response.status(result.status_code)
+    response.json(result)
+})
+
 router.put('/:id', bodyParserJSON, async function (request, response) {
     let id = request.params.id
     let dados = request.body

@@ -35,10 +35,10 @@ const atualizarReceitaMedica = async function (receitaMedica, id, contentType) {
     }
 }
 
-const listarReceitaMedica = async function () {
+const listarReceitaMedica = async function (idUsuario) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        return await receitaMedicaService.listarReceitaMedicaService()
+        return await receitaMedicaService.listarReceitaMedicaService(idUsuario)
     } catch (error) {
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
     }

@@ -554,6 +554,33 @@ BEGIN
         from tbl_estoque
         where tbl_estoque.id_usuarios = id_usuarios_param
             and tbl_estoque.id_medicamentos = id_medicamentos_param;
+
+    elseif operacao = 'SELECT_BY_ID_USUARIO' then
+        select
+            tbl_estoque.id as id_estoque,
+            tbl_estoque.quantidade_em_estoque,
+            tbl_usuarios.id as id_usuarios,
+            tbl_usuarios.nome as nome_usuario,
+            tbl_medicamentos.id as id_medicamento,
+            tbl_medicamentos.nome as nome_medicamento,
+            tbl_medicamentos.imagem,
+            tbl_medicamentos.concentracao,
+            tbl_unidade_medida.id as id_unidade_medida_embalagem,
+            tbl_unidade_medida.unidade_medida,
+            tbl_unidade_medida.sigla,
+            tbl_tipo_dosagem.id as id_tipo_dosagem,
+            tbl_tipo_dosagem.tipo_dosagem
+        from tbl_estoque
+        left join tbl_usuarios
+            on tbl_usuarios.id = tbl_estoque.id_usuarios
+        left join tbl_medicamentos
+            on tbl_medicamentos.id = tbl_estoque.id_medicamentos
+        left join tbl_unidade_medida
+            on tbl_unidade_medida.id = tbl_medicamentos.id_unidade_medida_embalagem
+        left join tbl_tipo_dosagem
+            on tbl_tipo_dosagem.id = tbl_medicamentos.id_tipo_dosagem
+        where tbl_estoque.id_usuarios = id_usuarios_param
+        order by tbl_estoque.id desc;
         
 	elseif operacao = 'DELETE' then
 		delete from tbl_estoque where id = id_param;
@@ -1129,6 +1156,7 @@ BEGIN
             on tbl_tipo_dosagem.id = tbl_medicamentos.id_tipo_dosagem
         left join tbl_unidade_medida as tbl_unidade_medida_dose
             on tbl_unidade_medida_dose.id = tbl_receita_medica.id_unidade_medida
+        where tbl_receita_medica.id_usuario = id_usuario_param
         order by tbl_receita_medica.id desc;
 
     elseif operacao = 'SELECT_BY_ID' then
