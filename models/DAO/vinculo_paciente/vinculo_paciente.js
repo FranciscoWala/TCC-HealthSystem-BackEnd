@@ -125,9 +125,9 @@ const deleteVinculoPaciente = async function (id, transaction = null) {
 
 const selectVinculoPacienteByIDPacienteAndIDCuidador = async function (idPaciente, idCuidador) {
     try {
-        let sql = `select * from tbl_vinculo_paciente where id_paciente=${idPaciente} and id_cuidador=${idCuidador};`
+        let sql = `select * from tbl_vinculo_paciente where id_paciente = ? and id_cuidador = ?;`
 
-        let result = await knexConection.raw(sql)
+        let result = await knexConection.raw(sql, [idPaciente, idCuidador])
 
         if (result)
             return result[0]

@@ -26,31 +26,31 @@ function verficarPermissao(permissao) {
     }
 }
 
-function verificarRelacao(){
-    
-    return async function(request, response, next){      
+function verificarRelacao() {
 
+    return async function (request, response, next) {
         try {
-            const {idPaciente} = request.params
+            const idPaciente = request.params.idUsuario ?? request.params.id_usuario
             const idCuidador = request.user.id
 
+            if (String(idPaciente) === String(idCuidador))
+                return next()
 
             const possuiRelacao = await possuiRelacionamento(idPaciente, idCuidador)
-            
 
-            if (!possuiRelacao && idPaciente != idCuidador) {
-                return response.status(404).json(
-                    {
-                        message: "INFORMAÇÕES NÃO ENCONTRADAS"
-                    }
-                )
+            if (!possuiRelacao) {
+                return response.status(404).json({
+                    message: "INFORMAÇÕES NÃO ENCONTRADAS"
+                })
             }
 
             return next()
 
         } catch (error) {
-            console.log(error);
-            return response.status(500).json({ message: "Erro interno no servidor" })
+            console.log(error)
+            return response.status(500).json({
+                message: "Erro interno no servidor"
+            })
         }
     }
 }

@@ -16,7 +16,26 @@ const router = express.Router()
 const controllerHistoricoMedicamento = require('../controllers/historico_medicamento/controller_historico_medicamento.js')
 const controllerConfirmarIngestaoMedicamento = require('../controllers/confirmar_ingestao_medicamento/controller_confirmar_ingestao_medicamento.js')
 
+const verificarToken = require('../middleware/auth.js')
+const authorization = require('../middleware/authorization.js')
+
 //                          ENDPOINTS CONTATOS DE EMERGENCIA
+router.patch('/confirmar_ingestao/:id', verificarToken.verificarToken,
+    authorization.verficarPermissao('CONFIRMAR_INGESTAO'),
+    bodyParserJSON,
+    async function (request, response) {
+
+        let idReceitaMedica = request.params.id
+        let idUsuario = request.user.id
+        let horarioProgramado = request.body.horario_programado
+
+        let result = await controllerConfirmarIngestaoMedicamento.confirmarIngestaoMedicamento(idReceitaMedica, idUsuario, horarioProgramado)
+
+        response.status(result.status_code)
+        response.json(result)
+    }
+)
+
 router.post('/', bodyParserJSON, async function (request, response) {
     let dados = request.body
     let contentType = request.headers['content-type']
@@ -49,18 +68,6 @@ router.put('/:id', bodyParserJSON, async function (request, response) {
     let contentType = request.headers['content-type']
 
     let result = await controllerHistoricoMedicamento.atualizarHistoricoMedicamento(dados, id, contentType)
-
-    response.status(result.status_code)
-    response.json(result)
-})
-
-router.patch('/confirmar_ingestao/:id', bodyParserJSON, async function (request, response) {
-    let idReceitaMedica = request.params.id
-    // let idUsuario = request.user.id
-    let idUsuario = request.body.id_usuario
-    let horarioProgramado = request.body.horario_programado
-
-    let result = await controllerConfirmarIngestaoMedicamento.confirmarIngestaoMedicamento(idReceitaMedica, idUsuario, horarioProgramado)
 
     response.status(result.status_code)
     response.json(result)

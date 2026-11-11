@@ -26,9 +26,9 @@ router.post('/', bodyParserJSON, async function (request, response) {
     response.json(result)
 })
 
-router.get('/', bodyParserJSON, async function (request, response) {
+router.get('/:id_usuario', bodyParserJSON, async function (request, response) {
     //    let idUsuario = request.user.id
-    let idUsuario = request.body.id_usuario
+    let idUsuario = request.params.id_usuario
     let result = await controllerMedicamento.listarMedicamento(idUsuario)
 
     response.status(result.status_code)
