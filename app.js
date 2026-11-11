@@ -51,9 +51,6 @@ app.use('/v1/healthSystem/medtime/tipo_dosagem', cors(), tipoDosagemRouter)
 const unidadeMedidaRouter = require('./routes/unidade_medida.router.js')
 app.use('/v1/healthSystem/medtime/unidade_medida', cors(), unidadeMedidaRouter)
 
-const medicamentoRouter = require('./routes/medicamento.router.js')
-app.use('/v1/healthSystem/medtime/medicamento', cors(), medicamentoRouter)
-
 const historicoMedicamentoRouter = require('./routes/historico_medicamento.router.js')
 app.use('/v1/healthSystem/medtime/historico_medicamento', cors(), historicoMedicamentoRouter)
 
@@ -72,14 +69,8 @@ app.use('/v1/healthSystem/medtime/vinculo_paciente', cors(), vinculoPacienteRout
 const agendaMedicamentoRouter = require('./routes/agenda_medicamentos.router.js')
 app.use('/v1/healthSystem/medtime/agenda_medicamento', cors(), agendaMedicamentoRouter)
 
-const programacaoMedicamentoRouter = require('./routes/programacao_medicamento.router.js')
-app.use('/v1/healthSystem/medtime/programacao_medicamento', cors(), programacaoMedicamentoRouter)
-
 const cadastroMedicamentoUsuarioRouter = require('./routes/cadastro_medicamento_usuario.router.js')
 app.use('/v1/healthSystem/medtime/cadastro_medicamento', cors(), cadastroMedicamentoUsuarioRouter)
-
-const alterarProgramacaoMedicamentoRouter = require('./routes/alterar_programacao_medicamento.router.js')
-app.use('/v1/healthSystem/medtime/alterar_programacao', cors(), alterarProgramacaoMedicamentoRouter)
 
 const excluirMedicamentoUsuarioRouter = require('./routes/excluir_medicamento_usuario.router.js')
 app.use('/v1/healthSystem/medtime/excluir_medicamento', cors(), excluirMedicamentoUsuarioRouter)

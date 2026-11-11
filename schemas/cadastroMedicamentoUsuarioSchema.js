@@ -43,11 +43,6 @@ const cadastroMedicamentoUsuarioSchema = JOI.object({
 
     // Dados da receita médica
     receita_medica: JOI.object({
-        id_usuario: JOI.number()
-                    .integer()
-                    .min(1)
-                    .required(),
-
         dosagem: JOI.number()
                     .greater(0)
                     .max(999.99)

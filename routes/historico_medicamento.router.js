@@ -1,4 +1,4 @@
-/************************************************ 
+/************************************************
     Objetivo: Arquivo responsável pela ROTA
     data: 15/10/2026
     Autor: Kayque Brenno Ferreira Almeida
@@ -19,12 +19,12 @@ const controllerConfirmarIngestaoMedicamento = require('../controllers/confirmar
 const verificarToken = require('../middleware/auth.js')
 const authorization = require('../middleware/authorization.js')
 
-//                          ENDPOINTS CONTATOS DE EMERGENCIA
+//                          ENDPOINTS HISTORICO MEDICAMENTO
 router.patch('/confirmar_ingestao/:id', verificarToken.verificarToken,
     authorization.verficarPermissao('CONFIRMAR_INGESTAO'),
     bodyParserJSON,
     async function (request, response) {
-
+        
         let idReceitaMedica = request.params.id
         let idUsuario = request.user.id
         let horarioProgramado = request.body.horario_programado
@@ -36,59 +36,18 @@ router.patch('/confirmar_ingestao/:id', verificarToken.verificarToken,
     }
 )
 
-router.post('/', bodyParserJSON, async function (request, response) {
-    let dados = request.body
-    let contentType = request.headers['content-type']
+router.get('/usuario/:idUsuario', verificarToken.verificarToken,
+    authorization.verficarPermissao('VISUALIZAR_HISTORICO'),
+    authorization.verificarRelacao(),
+    async function (request, response) {
 
-    let result = await controllerHistoricoMedicamento.inserirNovoHistoricoMedicamento(dados, contentType)
+        let idUsuario = request.params.idUsuario
 
-    response.status(result.status_code)
-    response.json(result)
-})
+        let result = await controllerHistoricoMedicamento.listarHistoricoPorPaciente(idUsuario)
 
-router.get('/', async function (request, response) {
-    let result = await controllerHistoricoMedicamento.listarHistoricoMedicamento()
-
-    response.status(result.status_code)
-    response.json(result)
-})
-
-router.get('/:id', async function (request, response) {
-    let id = request.params.id
-
-    let result = await controllerHistoricoMedicamento.buscarHistoricoMedicamento(id)
-
-    response.status(result.status_code)
-    response.json(result)
-})
-
-router.put('/:id', bodyParserJSON, async function (request, response) {
-    let id = request.params.id
-    let dados = request.body
-    let contentType = request.headers['content-type']
-
-    let result = await controllerHistoricoMedicamento.atualizarHistoricoMedicamento(dados, id, contentType)
-
-    response.status(result.status_code)
-    response.json(result)
-})
-
-router.get('/usuario/:id', async function (request, response) {
-    let idPaciente = request.params.id
-
-    let result = await controllerHistoricoMedicamento.listarHistoricoPorPaciente(idPaciente)
-
-    response.status(result.status_code)
-    response.json(result)
-})
-
-router.delete('/:id', async function (request, response) {
-    let id = request.params.id
-
-    let result = await controllerHistoricoMedicamento.excluirHistoricoMedicamento(id)
-
-    response.status(result.status_code)
-    response.json(result)
-})
+        response.status(result.status_code)
+        response.json(result)
+    }
+)
 
 module.exports = router

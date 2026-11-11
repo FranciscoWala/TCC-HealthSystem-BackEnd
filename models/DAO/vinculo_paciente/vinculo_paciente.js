@@ -136,7 +136,7 @@ const selectVinculoPacienteByIDPacienteAndIDCuidador = async function (idPacient
 
     } catch (error) {
         console.log(error)
-        return false
+        throw error
     }
 }
 

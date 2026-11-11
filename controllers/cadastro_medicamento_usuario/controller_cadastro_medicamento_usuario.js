@@ -31,7 +31,7 @@ const validarDadosCadastroMedicamentoUsuario = function (dados) {
     return validarDados.validarDados(cadastroMedicamentoUsuarioSchema, dados, customMessages)
 }
 
-const cadastrarMedicamentoUsuario = async function (dados, contentType) {
+const cadastrarMedicamentoUsuario = async function (idUsuario, dados, contentType) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
@@ -57,7 +57,7 @@ const cadastrarMedicamentoUsuario = async function (dados, contentType) {
 
                     let buscarMedicamento = await medicamentoService.buscarMedicamentoService(
                         dados.id_medicamento,
-                        dados.receita_medica.id_usuario,
+                        idUsuario,
                         transaction
                     )
 
@@ -85,7 +85,7 @@ const cadastrarMedicamentoUsuario = async function (dados, contentType) {
                         concentracao: dados.medicamento.concentracao,
                         id_unidade_medida_embalagem: dados.medicamento.id_unidade_medida_embalagem,
                         id_tipo_dosagem: dados.medicamento.id_tipo_dosagem,
-                        id_usuario: dados.receita_medica.id_usuario
+                        id_usuario: idUsuario
                     }
 
                     let cadastrarMedicamento = await medicamentoService.inserirMedicamentoService(
@@ -104,7 +104,7 @@ const cadastrarMedicamentoUsuario = async function (dados, contentType) {
 
                 let estoque = {
                     quantidade_em_estoque: dados.estoque.quantidade_em_estoque,
-                    id_usuarios: dados.receita_medica.id_usuario,
+                    id_usuarios: idUsuario,
                     id_medicamentos: idMedicamento
                 }
 
@@ -122,7 +122,7 @@ const cadastrarMedicamentoUsuario = async function (dados, contentType) {
                 let idEstoque = cadastrarEstoque.response.id
 
                 let receitaMedica = {
-                    id_usuario: dados.receita_medica.id_usuario,
+                    id_usuario: idUsuario,
                     id_medicamento: idMedicamento,
                     dosagem: dados.receita_medica.dosagem,
                     id_unidade_medida: dados.receita_medica.id_unidade_medida,
@@ -163,7 +163,7 @@ const cadastrarMedicamentoUsuario = async function (dados, contentType) {
                 }
 
                 let resposta = {
-                    id_usuario: dados.receita_medica.id_usuario,
+                    id_usuario: idUsuario,
                     id_medicamento: idMedicamento,
                     id_estoque: idEstoque,
                     id_receita_medica: idReceitaMedica,
