@@ -1,62 +1,58 @@
 /************************************************ 
     Objetivo: Arquivo responsável pela ROTA
-    data: 25/10/2026
+    data: 16/10/2026
     Autor: Kayque Brenno Ferreira Almeida
     Versão: 1.0
 *************************************************/
 
 const express = require('express')
-const bodyParser = require('body-parser')
-
-// Permitindo a utilização do JSON nas requisições
-const bodyParserJSON = bodyParser.json()
 
 const router = express.Router()
 
 const vinculoPacienteController = require('../controllers/vinculo_paciente/controller_vinculo_paciente.js')
+const verificarToken = require('../middleware/auth.js')
 
-//                          ENDPOINTS VINCULO PACIENTE
-router.post('/', bodyParserJSON, async function (request, response) {
-    let dados = request.body
-    let contentType = request.headers['content-type']
+// ========== BUSCAR MEU CUIDADOR ==========
+router.get('/meu_cuidador', verificarToken.verificarToken, async function (request, response) {
+    let idPaciente = request.user.id
+    let roleUsuario = request.user.role
 
-    let result = await vinculoPacienteController.inserirNovoVinculoPaciente(dados, contentType)
-
-    response.status(result.status_code)
-    response.json(result)
-})
-
-router.get('/', async function (request, response) {
-    let result = await vinculoPacienteController.listarVinculoPaciente()
+    let result = await vinculoPacienteController.buscarMeuCuidador(idPaciente, roleUsuario)
 
     response.status(result.status_code)
     response.json(result)
 })
 
-router.get('/:id', async function (request, response) {
-    let id = request.params.id
+// ========== BUSCAR MEUS PACIENTES ==========
+router.get('/meus_pacientes', verificarToken.verificarToken, async function (request, response) {
+    let idCuidador = request.user.id
+    let roleUsuario = request.user.role
 
-    let result = await vinculoPacienteController.buscarVinculoPaciente(id)
-
-    response.status(result.status_code)
-    response.json(result)
-})
-
-router.put('/:id', bodyParserJSON, async function (request, response) {
-    let id = request.params.id
-    let dados = request.body
-    let contentType = request.headers['content-type']
-
-    let result = await vinculoPacienteController.atualizarVinculoPaciente(dados, id, contentType)
+    let result = await vinculoPacienteController.buscarMeusPacientes(idCuidador, roleUsuario)
 
     response.status(result.status_code)
     response.json(result)
 })
 
-router.delete('/:id', async function (request, response) {
-    let id = request.params.id
+// ========== BUSCAR VÍNCULO DO PACIENTE ==========
+router.get('/paciente/:idPaciente', verificarToken.verificarToken, async function (request, response) {
+    let idPaciente = request.params.idPaciente
+    let idUsuario = request.user.id
+    let roleUsuario = request.user.role
 
-    let result = await vinculoPacienteController.excluirVinculoPaciente(id)
+    let result = await vinculoPacienteController.buscarVinculoPorPaciente(idPaciente, idUsuario, roleUsuario)
+
+    response.status(result.status_code)
+    response.json(result)
+})
+
+// ========== ENCERRAR VÍNCULO DO PACIENTE ==========
+router.delete('/paciente/:idPaciente', verificarToken.verificarToken, async function (request, response) {
+    let idPaciente = request.params.idPaciente
+    let idUsuario = request.user.id
+    let roleUsuario = request.user.role
+
+    let result = await vinculoPacienteController.encerrarVinculoPaciente(idPaciente, idUsuario, roleUsuario)
 
     response.status(result.status_code)
     response.json(result)

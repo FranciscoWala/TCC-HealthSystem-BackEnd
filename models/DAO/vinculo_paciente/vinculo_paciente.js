@@ -16,7 +16,7 @@ const insertVinculoPaciente = async function (vinculoPaciente, transaction = nul
 
         let result = await connection.raw(sql, [
             'INSERT',
-            vinculoPaciente.data_vinculo,
+            null,
             vinculoPaciente.id_paciente,
             vinculoPaciente.id_cuidador,
             null
@@ -114,11 +114,12 @@ const deleteVinculoPaciente = async function (id, transaction = null) {
             id
         ])
 
-        if (result)
+        if (result && result[0][0][0].affectedRows > 0)
             return true
         else
             return false
     } catch (error) {
+        console.log(error)
         return false
     }
 }
@@ -140,6 +141,55 @@ const selectVinculoPacienteByIDPacienteAndIDCuidador = async function (idPacient
     }
 }
 
+const selectByIdPacienteVinculoPaciente = async function (idPaciente, transaction = null) {
+    try {
+        let connection = transaction || knexConection
+
+        let sql = `call procVinculoPaciente(?, ?, ?, ?, ?)`
+
+        let result = await connection.raw(sql, [
+            'SELECT_BY_ID_PACIENTE',
+            null,
+            idPaciente,
+            null,
+            null
+        ])
+
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
+        else
+            return false
+
+    } catch (error) {
+        return false
+    }
+}
+
+const selectByIdCuidadorVinculoPaciente = async function (idCuidador, transaction = null) {
+    try {
+        let connection = transaction || knexConection
+
+        let sql = `call procVinculoPaciente(?, ?, ?, ?, ?)`
+
+        let result = await connection.raw(sql, [
+            'SELECT_BY_ID_CUIDADOR',
+            null,
+            null,
+            idCuidador,
+            null
+        ])
+
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
+        else
+            return false
+
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
 module.exports = {
     insertVinculoPaciente,
     updateVinculoPaciente,
@@ -147,5 +197,7 @@ module.exports = {
     selectByIdVinculoPaciente,
     deleteVinculoPaciente,
 
-    selectVinculoPacienteByIDPacienteAndIDCuidador
+    selectVinculoPacienteByIDPacienteAndIDCuidador,
+    selectByIdPacienteVinculoPaciente,
+    selectByIdCuidadorVinculoPaciente
 }

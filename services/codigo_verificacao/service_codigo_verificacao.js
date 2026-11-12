@@ -31,6 +31,8 @@ const inserirCodigoVerificacaoService = async function (dados, transaction = nul
 
         if (result == 'CODIGO_DUPLICADO') {
             customMessages.ERROR_BAD_REQUEST.message = 'CÓDIGO DUPLICADO'
+            customMessages.ERROR_BAD_REQUEST.error_code = 'CODIGO_DUPLICADO'
+
             return customMessages.ERROR_BAD_REQUEST
         }
 
@@ -148,10 +150,37 @@ const buscarCodigoPorHashTipoService = async function (codigoHash, tipo, transac
     }
 }
 
+const buscarCodigoPorHashTipoBloqueadoService = async function (codigoHash, tipo, transaction = null) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+
+    try {
+        if (!codigoHash || !tipo)
+            return customMessages.ERROR_BAD_REQUEST
+
+        let result = await codigoVerificacaoDAO.selectByHashTipoCodigoVerificacaoBloqueado(codigoHash, tipo, transaction)
+
+        if (result) {
+            if (result.length > 0) {
+                customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
+                customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
+                customMessages.DEFAULT_MESSAGE.response.codigos_verificacao = result
+
+                return customMessages.DEFAULT_MESSAGE
+            } else
+                return customMessages.ERROR_NOT_FOUND
+        } else
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
+
+    } catch (error) {
+        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
+    }
+}
+
 module.exports = {
     inserirCodigoVerificacaoService,
     atualizarCodigoVerificacaoService,
     buscarCodigoVerificacaoService,
     buscarCodigosUsuarioTipoService,
-    buscarCodigoPorHashTipoService
+    buscarCodigoPorHashTipoService,
+    buscarCodigoPorHashTipoBloqueadoService
 }

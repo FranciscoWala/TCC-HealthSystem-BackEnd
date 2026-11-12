@@ -1008,7 +1008,7 @@ BEGIN
             id_paciente,
             id_cuidador
         ) values (
-            data_vinculo_param,
+            now(),
             id_paciente_param,
             id_cuidador_param
         );
@@ -1064,6 +1064,19 @@ BEGIN
             on tbl_usuarios_cuidador.id = tbl_vinculo_paciente.id_cuidador
         where tbl_vinculo_paciente.id = id_param;
 
+    elseif operacao = 'SELECT_BY_ID_PACIENTE' then
+        select
+            tbl_vinculo_paciente.*
+        from tbl_vinculo_paciente
+        where tbl_vinculo_paciente.id_paciente = id_paciente_param;
+
+    elseif operacao = 'SELECT_BY_ID_CUIDADOR' then
+        select
+            tbl_vinculo_paciente.*
+        from tbl_vinculo_paciente
+        where tbl_vinculo_paciente.id_cuidador = id_cuidador_param
+        order by tbl_vinculo_paciente.data_vinculo desc;
+
     elseif operacao = 'DELETE' then
         delete from tbl_vinculo_paciente where id = id_param;
         select row_count() as affectedRows;
@@ -1078,7 +1091,7 @@ DELIMITER $$
 -- ============ CODIGO DE VERIFICACAO ============
 DELIMITER $$
 create procedure procCodigoVerificacao(
-    IN operacao varchar(30),
+    IN operacao varchar(40),
     IN codigo_hash_param varchar(255),
     IN tipo_param varchar(30),
     IN id_usuario_param int,
@@ -1146,6 +1159,16 @@ BEGIN
 			and tipo = tipo_param
 		order by id desc
 		limit 1;
+
+    elseif operacao = 'SELECT_BY_HASH_TIPO_BLOQUEADO' then
+        select
+            tbl_codigos_verificacao.*
+        from tbl_codigos_verificacao
+        where codigo_hash = codigo_hash_param
+            and tipo = tipo_param
+        order by id desc
+        limit 1
+        for update;
 
     elseif operacao = 'DELETE' then
         delete from tbl_codigos_verificacao

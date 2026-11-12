@@ -189,6 +189,35 @@ const deleteCodigoVerificacao = async function (id, transaction = null) {
         else
             return false
     } catch (error) {
+        console.log('ERRO AO BUSCAR CÓDIGO POR HASH:', error)
+        return false
+    }
+}
+
+const selectByHashTipoCodigoVerificacaoBloqueado = async function (codigoHash, tipo, transaction = null) {
+    try {
+        let connection = transaction || knexConection
+
+        let sql = `call procCodigoVerificacao(?, ?, ?, ?, ?, ?, ?, ?)`
+
+        let result = await connection.raw(sql, [
+            'SELECT_BY_HASH_TIPO_BLOQUEADO',
+            codigoHash,
+            tipo,
+            null,
+            null,
+            null,
+            null,
+            null
+        ])
+
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
+        else
+            return false
+
+    } catch (error) {
+        console.log('ERRO AO BUSCAR CÓDIGO POR HASH BLOQUEADO:', error)
         return false
     }
 }
@@ -200,5 +229,6 @@ module.exports = {
     selectByIdCodigoVerificacao,
     selectByUsuarioTipoCodigoVerificacao,
     selectByHashTipoCodigoVerificacao,
+    selectByHashTipoCodigoVerificacaoBloqueado,
     deleteCodigoVerificacao
 }

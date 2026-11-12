@@ -42,9 +42,6 @@ app.use('/v1/healthSystem/medtime/receita_medica', cors(), receitaMedicaRouter)
 const usuarioRouter = require('./routes/usuario.router.js')
 app.use('/v1/healthSystem/medtime/usuario', cors(), usuarioRouter)
 
-const vinculoPacienteRouter = require('./routes/vinculo_paciente.router.js')
-app.use('/v1/healthSystem/medtime/vinculo_paciente', cors(), vinculoPacienteRouter)
-
 const agendaMedicamentoRouter = require('./routes/agenda_medicamentos.router.js')
 app.use('/v1/healthSystem/medtime/agenda_medicamento', cors(), agendaMedicamentoRouter)
 
@@ -59,6 +56,12 @@ app.use('/v1/healthSystem/medtime/editar_medicamento', cors(), editarMedicamento
 
 const routerUsuarioGoogle = require('./routes/usuario_google.router.js')
 app.use('/v1/healthSystem/medtime/usuario/google', routerUsuarioGoogle)
+
+const codigoVinculoRouter = require('./routes/codigo_vinculo.router.js')
+app.use('/v1/healthSystem/medtime/codigo_vinculo', cors(), codigoVinculoRouter)
+
+const vinculoPacienteRouter = require('./routes/vinculo_paciente.router.js')
+app.use('/v1/healthSystem/medtime/vinculo_paciente', cors(), vinculoPacienteRouter)
 
 // FAZER O START DA API
 app.listen(8080, function() {
