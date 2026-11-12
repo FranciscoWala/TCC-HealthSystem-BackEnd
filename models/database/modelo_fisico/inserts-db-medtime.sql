@@ -4,9 +4,8 @@ use db_medtime;
 
 # Tabela Role
 insert into tbl_role (role) values
-('uso próprio'),
 ('cuidador'),
-('acompanhado');
+('paciente');
 
 # Tabela Tipo de dosagem
 insert into tbl_tipo_dosagem (tipo_dosagem) values
@@ -35,6 +34,7 @@ insert into tbl_tipo_intervalo (tipo_intervalo) values
 ('hora'),
 ('dia');
 
+# Tabela Permissões
 insert into tbl_permissoes (permissao) values
 ('VISUALIZAR_MEDICAMENTOS'),
 ('CADASTRAR_MEDICAMENTOS'),
@@ -51,29 +51,9 @@ insert into tbl_permissoes (permissao) values
 ('GERENCIAR_DOENCAS_CRONICAS'),
 ('EDITAR_PERFIL');
 
--- ROLE 1: USO PRÓPRIO
+-- ROLE 1: CUIDADOR
 insert into tbl_role_permissoes (id_role, id_permissoes)
 select 1, id
-from tbl_permissoes
-where permissao in (
-    'VISUALIZAR_MEDICAMENTOS',
-    'CADASTRAR_MEDICAMENTOS',
-    'EDITAR_MEDICAMENTOS',
-    'EXCLUIR_MEDICAMENTOS',
-    'CONFIRMAR_INGESTAO',
-    'VISUALIZAR_HISTORICO',
-    'VISUALIZAR_AGENDA',
-    'REPOR_ESTOQUE',
-    'VISUALIZAR_PULSEIRA',
-    'VISUALIZAR_LOCALIZACAO',
-    'GERENCIAR_CONTATOS_EMERGENCIA',
-    'GERENCIAR_DOENCAS_CRONICAS',
-    'EDITAR_PERFIL'
-);
-
--- ROLE 2: CUIDADOR
-insert into tbl_role_permissoes (id_role, id_permissoes)
-select 2, id
 from tbl_permissoes
 where permissao in (
     'VISUALIZAR_MEDICAMENTOS',
@@ -91,15 +71,19 @@ where permissao in (
     'EDITAR_PERFIL'
 );
 
--- ROLE 3: ACOMPANHADO
+-- ROLE 2: PACIENTE
 insert into tbl_role_permissoes (id_role, id_permissoes)
-select 3, id
+select 2, id
 from tbl_permissoes
 where permissao in (
     'VISUALIZAR_MEDICAMENTOS',
+    'CADASTRAR_MEDICAMENTOS',
+    'EDITAR_MEDICAMENTOS',
+    'EXCLUIR_MEDICAMENTOS',
     'CONFIRMAR_INGESTAO',
     'VISUALIZAR_HISTORICO',
     'VISUALIZAR_AGENDA',
+    'REPOR_ESTOQUE',
     'VISUALIZAR_PULSEIRA',
     'VISUALIZAR_LOCALIZACAO',
     'GERENCIAR_CONTATOS_EMERGENCIA',

@@ -1075,6 +1075,91 @@ BEGIN
 END $$
 DELIMITER $$
 
+-- ============ CODIGO DE VERIFICACAO ============
+DELIMITER $$
+create procedure procCodigoVerificacao(
+    IN operacao varchar(30),
+    IN codigo_hash_param varchar(255),
+    IN tipo_param varchar(30),
+    IN id_usuario_param int,
+    IN data_expiracao_param datetime,
+    IN utilizado_param boolean,
+    IN tentativas_param int,
+    IN id_param int
+)
+BEGIN
+    if operacao = 'INSERT' then
+        insert into tbl_codigos_verificacao (
+            codigo_hash,
+            tipo,
+            id_usuario,
+            data_expiracao,
+            utilizado,
+            tentativas
+        ) values (
+            codigo_hash_param,
+            tipo_param,
+            id_usuario_param,
+            data_expiracao_param,
+            false,
+            0
+        );
+
+        select last_insert_id() as id;
+
+    elseif operacao = 'UPDATE' then
+        update tbl_codigos_verificacao
+        set codigo_hash = codigo_hash_param,
+            tipo = tipo_param,
+            id_usuario = id_usuario_param,
+            data_expiracao = data_expiracao_param,
+            utilizado = utilizado_param,
+            tentativas = tentativas_param
+        where id = id_param;
+
+        select row_count() as affectedRows;
+
+    elseif operacao = 'SELECT_ALL' then
+        select
+            tbl_codigos_verificacao.*
+        from tbl_codigos_verificacao;
+
+    elseif operacao = 'SELECT_BY_ID' then
+        select
+            tbl_codigos_verificacao.*
+        from tbl_codigos_verificacao
+        where id = id_param;
+
+    elseif operacao = 'SELECT_BY_USUARIO_TIPO' then
+        select
+            tbl_codigos_verificacao.*
+        from tbl_codigos_verificacao
+        where id_usuario = id_usuario_param
+          and tipo = tipo_param
+        order by id desc;
+        
+	elseif operacao = 'SELECT_BY_HASH_TIPO' then
+		select
+			tbl_codigos_verificacao.*
+		from tbl_codigos_verificacao
+		where codigo_hash = codigo_hash_param
+			and tipo = tipo_param
+		order by id desc
+		limit 1;
+
+    elseif operacao = 'DELETE' then
+        delete from tbl_codigos_verificacao
+        where id = id_param;
+
+        select row_count() as affectedRows;
+        
+	else
+        signal sqlstate '45000'
+        set message_text = 'Operação inválida na procCodigoVerificacao';
+    end if;
+END $$
+DELIMITER $$
+
 -- ======== RECEITA MEDICA ========
 DELIMITER $$
 create procedure procReceitaMedica(

@@ -159,6 +159,23 @@ create table tbl_vinculo_paciente (
     on delete cascade
 );
 
+create table tbl_codigos_verificacao (
+    id 				int not null auto_increment primary key,
+    codigo_hash 	varchar(255) not null,
+    tipo 			varchar(30) not null,
+    id_usuario 		int not null,
+    data_expiracao 	datetime not null,
+    utilizado 		boolean not null default false,
+    tentativas 		int not null default 0,
+    
+    constraint UK_CODIGO_HASH_TIPO
+	unique (codigo_hash, tipo),
+
+    constraint FK_USUARIO_CODIGO_VERIFICACAO
+    foreign key (id_usuario)
+    references tbl_usuarios(id)
+);
+
 # Tabela Tipo de dosagem
 create table tbl_tipo_dosagem (
 	id 				int not null auto_increment primary key,

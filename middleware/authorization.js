@@ -43,7 +43,7 @@ function verificarRelacao() {
 
             if (Number(idPaciente) != Number(idUsuario)) {
 
-                if (Number(roleUsuario) != 2) {
+                if (Number(roleUsuario) != 1) {
                     return response.status(403).json({
                         message: "USUÁRIO NÃO AUTORIZADO"
                     })
