@@ -29,7 +29,7 @@ async function atualizarUsuario(usuario, id, contentType) {
 
     try {
         if (String(contentType).toUpperCase() == 'APPLICATION/JSON')
-            return await usuarioService.atualizarUsuarioService()
+            return await usuarioTransactions.atualizarUsuarioTransaction(usuario, contentType, id)
         else
             return customMessages.ERROR_CONTENT_TYPE
     } catch (error) {

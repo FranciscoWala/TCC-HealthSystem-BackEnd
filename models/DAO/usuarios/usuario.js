@@ -227,10 +227,10 @@ const desactivateUsuario = async function (id, transaction = null) {
         let sql = `
             update tbl_usuarios
                 set ativo = false
-            where id = ${id};
+            where id = ?;
         `
 
-        let result = await connection.raw(sql)
+        let result = await connection.raw(sql, [id])
 
         if (result)
             return true
