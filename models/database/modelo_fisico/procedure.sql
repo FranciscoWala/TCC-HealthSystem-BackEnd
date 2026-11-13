@@ -836,6 +836,13 @@ BEGIN
             and email_verificado = false;
 
         select row_count() as affectedRows;
+        
+	elseif operacao = 'UPDATE_SENHA' then
+		update tbl_usuarios
+		set senha = senha_param
+		where id = id_param;
+
+		select row_count() as affectedRows;
 
     elseif operacao = 'DELETE' then
         delete from tbl_usuarios where id = id_param;
@@ -1098,13 +1105,15 @@ BEGIN
 END $$
 DELIMITER $$
 
--- ============ CODIGO DE VERIFICACAO ============
+-- ======== CODIGO DE VERIFICACAO ========
 DELIMITER $$
+
 create procedure procCodigoVerificacao(
     IN operacao varchar(40),
     IN codigo_hash_param varchar(255),
     IN tipo_param varchar(30),
     IN id_usuario_param int,
+    IN email_param varchar(255),
     IN data_expiracao_param datetime,
     IN utilizado_param boolean,
     IN tentativas_param int,
@@ -1116,6 +1125,7 @@ BEGIN
             codigo_hash,
             tipo,
             id_usuario,
+            email,
             data_expiracao,
             utilizado,
             tentativas
@@ -1123,6 +1133,7 @@ BEGIN
             codigo_hash_param,
             tipo_param,
             id_usuario_param,
+            email_param,
             data_expiracao_param,
             false,
             0
@@ -1135,6 +1146,7 @@ BEGIN
         set codigo_hash = codigo_hash_param,
             tipo = tipo_param,
             id_usuario = id_usuario_param,
+            email = email_param,
             data_expiracao = data_expiracao_param,
             utilizado = utilizado_param,
             tentativas = tentativas_param
@@ -1158,17 +1170,17 @@ BEGIN
             tbl_codigos_verificacao.*
         from tbl_codigos_verificacao
         where id_usuario = id_usuario_param
-          and tipo = tipo_param
+            and tipo = tipo_param
         order by id desc;
-        
-	elseif operacao = 'SELECT_BY_HASH_TIPO' then
-		select
-			tbl_codigos_verificacao.*
-		from tbl_codigos_verificacao
-		where codigo_hash = codigo_hash_param
-			and tipo = tipo_param
-		order by id desc
-		limit 1;
+
+    elseif operacao = 'SELECT_BY_HASH_TIPO' then
+        select
+            tbl_codigos_verificacao.*
+        from tbl_codigos_verificacao
+        where codigo_hash = codigo_hash_param
+            and tipo = tipo_param
+        order by id desc
+        limit 1;
 
     elseif operacao = 'SELECT_BY_HASH_TIPO_BLOQUEADO' then
         select
@@ -1180,13 +1192,31 @@ BEGIN
         limit 1
         for update;
 
+    elseif operacao = 'SELECT_BY_EMAIL_TIPO' then
+        select
+            tbl_codigos_verificacao.*
+        from tbl_codigos_verificacao
+        where email = email_param
+            and tipo = tipo_param
+        order by id desc;
+
+    elseif operacao = 'SELECT_BY_EMAIL_TIPO_BLOQUEADO' then
+        select
+            tbl_codigos_verificacao.*
+        from tbl_codigos_verificacao
+        where email = email_param
+            and tipo = tipo_param
+        order by id desc
+        limit 1
+        for update;
+
     elseif operacao = 'DELETE' then
         delete from tbl_codigos_verificacao
         where id = id_param;
 
         select row_count() as affectedRows;
-        
-	else
+
+    else
         signal sqlstate '45000'
         set message_text = 'Operação inválida na procCodigoVerificacao';
     end if;

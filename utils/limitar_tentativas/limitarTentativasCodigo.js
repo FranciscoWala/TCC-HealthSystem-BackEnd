@@ -5,10 +5,10 @@
     Versão: 1.0
 ***************************************************************************/
 
-const { rateLimit } = require('express-rate-limit')
+const limitador = require('express-rate-limit')
 
 const limitarTentativasCodigo = function (limite = 5, minutos = 10) {
-    return rateLimit({
+    return limitador.rateLimit({
         windowMs: minutos * 60 * 1000,
         limit: limite,
         standardHeaders: 'draft-8',

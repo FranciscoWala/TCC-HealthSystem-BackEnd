@@ -176,11 +176,60 @@ const buscarCodigoPorHashTipoBloqueadoService = async function (codigoHash, tipo
     }
 }
 
+const buscarCodigosPorEmailTipoService = async function (email, tipo, transaction = null) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+
+    try {
+        if (!email || !tipo)
+            return customMessages.ERROR_BAD_REQUEST
+
+        let result = await codigoVerificacaoDAO.selectByEmailTipoCodigoVerificacao(email, tipo, transaction)
+
+        if (result) {
+            customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
+            customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
+            customMessages.DEFAULT_MESSAGE.response.codigos_verificacao = result
+
+            return customMessages.DEFAULT_MESSAGE
+        } else
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
+
+    } catch (error) {
+        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
+    }
+}
+
+const buscarCodigoPorEmailTipoBloqueadoService = async function (email, tipo, transaction = null) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+
+    try {
+        if (!email || !tipo)
+            return customMessages.ERROR_BAD_REQUEST
+
+        let result = await codigoVerificacaoDAO.selectByEmailTipoBloqueadoCodigoVerificacao(email, tipo, transaction)
+
+        if (result) {
+            customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
+            customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
+            customMessages.DEFAULT_MESSAGE.response.codigos_verificacao = result
+
+            return customMessages.DEFAULT_MESSAGE
+        } else
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
+
+    } catch (error) {
+        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
+    }
+}
+
 module.exports = {
     inserirCodigoVerificacaoService,
     atualizarCodigoVerificacaoService,
     buscarCodigoVerificacaoService,
     buscarCodigosUsuarioTipoService,
     buscarCodigoPorHashTipoService,
-    buscarCodigoPorHashTipoBloqueadoService
+    buscarCodigoPorHashTipoBloqueadoService,
+
+    buscarCodigosPorEmailTipoService,
+    buscarCodigoPorEmailTipoBloqueadoService
 }

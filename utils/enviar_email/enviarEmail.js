@@ -18,7 +18,7 @@ const enviarEmail = async function (destinatario, assunto, mensagem) {
         })
 
         let resultado = await transporter.sendMail({
-            from: process.env.EMAIL_USER,
+            from: `"MedTime" <${process.env.EMAIL_USER}>`,
             to: destinatario,
             subject: assunto,
             text: mensagem

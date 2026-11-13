@@ -8,29 +8,34 @@
 const JOI = require('joi')
 
 const codigoVerificacaoSchema = JOI.object({
-    codigo_hash: JOI.string()
-                    .max(255)
-                    .required(),
+        codigo_hash: JOI.string()
+                        .max(255)
+                        .required(),
 
-    tipo: JOI.string()
-            .max(30)
-            .required(),
-
-    id_usuario: JOI.number()
-                .integer()
-                .min(1)
+        tipo: JOI.string()
+                .max(30)
                 .required(),
 
-    data_expiracao: JOI.date()
-                    .required(),
-
-    utilizado: JOI.boolean()
-                .optional(),
-
-    tentativas: JOI.number()
+        id_usuario: JOI.number()
                 .integer()
-                .min(0)
-                .optional()
+                .min(1)
+                .allow(null),
+
+        email: JOI.string()
+                .max(255)
+                .email()
+                .allow(null),
+
+        data_expiracao: JOI.date()
+                        .required(),
+
+        utilizado: JOI.boolean()
+                        .optional(),
+
+        tentativas: JOI.number()
+                        .integer()
+                        .min(0)
+                        .optional()
 })
 
 module.exports = codigoVerificacaoSchema

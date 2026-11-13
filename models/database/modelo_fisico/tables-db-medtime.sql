@@ -165,10 +165,10 @@ create table tbl_codigos_verificacao (
     codigo_hash 	varchar(255) not null,
     tipo 			varchar(30) not null,
     id_usuario 		int null,
+    email 			varchar(255) null,
     data_expiracao 	datetime not null,
     utilizado 		boolean not null default false,
     tentativas 		int not null default 0,
-    email 			varchar(255) null,
     
     constraint UK_CODIGO_HASH_TIPO
 	unique (codigo_hash, tipo),
@@ -177,6 +177,7 @@ create table tbl_codigos_verificacao (
     foreign key (id_usuario)
     references tbl_usuarios(id)
 );
+
 
 # Tabela Tipo de dosagem
 create table tbl_tipo_dosagem (

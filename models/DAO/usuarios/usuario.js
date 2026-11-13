@@ -271,6 +271,35 @@ const verificarEmailUsuario = async function (id, transaction = null) {
     }
 }
 
+const updateSenhaUsuario = async function (id, senha, transaction = null) {
+    try {
+        let connection = transaction || knexConection
+
+        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?, ?)`
+
+        let result = await connection.raw(sql, [
+            'UPDATE_SENHA',
+            null,
+            null,
+            null,
+            senha,
+            null,
+            null,
+            null,
+            id
+        ])
+
+        if (result[0][0][0].affectedRows > 0)
+            return true
+        else
+            return false
+
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
 module.exports = {
     insertUsuario,
     updateUsuario,
@@ -281,5 +310,6 @@ module.exports = {
     deleteUsuario,
     buscarRolesAtivasDoUsuario,
     desactivateUsuario,
-    verificarEmailUsuario
+    verificarEmailUsuario,
+    updateSenhaUsuario
 }

@@ -12,13 +12,14 @@ const insertCodigoVerificacao = async function (codigoVerificacao, transaction =
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procCodigoVerificacao(?, ?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procCodigoVerificacao(?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'INSERT',
             codigoVerificacao.codigo_hash,
             codigoVerificacao.tipo,
-            codigoVerificacao.id_usuario,
+            codigoVerificacao.id_usuario ?? null,
+            codigoVerificacao.email ?? null,
             codigoVerificacao.data_expiracao,
             null,
             null,
@@ -41,13 +42,14 @@ const updateCodigoVerificacao = async function (codigoVerificacao, transaction =
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procCodigoVerificacao(?, ?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procCodigoVerificacao(?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'UPDATE',
             codigoVerificacao.codigo_hash,
             codigoVerificacao.tipo,
-            codigoVerificacao.id_usuario,
+            codigoVerificacao.id_usuario ?? null,
+            codigoVerificacao.email ?? null,
             codigoVerificacao.data_expiracao,
             codigoVerificacao.utilizado,
             codigoVerificacao.tentativas,
@@ -67,10 +69,11 @@ const selectAllCodigosVerificacao = async function (transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procCodigoVerificacao(?, ?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procCodigoVerificacao(?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'SELECT_ALL',
+            null,
             null,
             null,
             null,
@@ -93,10 +96,11 @@ const selectByIdCodigoVerificacao = async function (id, transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procCodigoVerificacao(?, ?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procCodigoVerificacao(?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'SELECT_BY_ID',
+            null,
             null,
             null,
             null,
@@ -119,13 +123,14 @@ const selectByUsuarioTipoCodigoVerificacao = async function (idUsuario, tipo, tr
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procCodigoVerificacao(?, ?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procCodigoVerificacao(?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'SELECT_BY_USUARIO_TIPO',
             null,
             tipo,
             idUsuario,
+            null,
             null,
             null,
             null,
@@ -145,12 +150,13 @@ const selectByHashTipoCodigoVerificacao = async function (codigoHash, tipo, tran
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procCodigoVerificacao(?, ?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procCodigoVerificacao(?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'SELECT_BY_HASH_TIPO',
             codigoHash,
             tipo,
+            null,
             null,
             null,
             null,
@@ -171,10 +177,11 @@ const deleteCodigoVerificacao = async function (id, transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procCodigoVerificacao(?, ?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procCodigoVerificacao(?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'DELETE',
+            null,
             null,
             null,
             null,
@@ -189,7 +196,7 @@ const deleteCodigoVerificacao = async function (id, transaction = null) {
         else
             return false
     } catch (error) {
-        console.log('ERRO AO BUSCAR CÓDIGO POR HASH:', error)
+        console.log('ERRO AO EXCLUIR CÓDIGO DE VERIFICAÇÃO:', error)
         return false
     }
 }
@@ -198,12 +205,13 @@ const selectByHashTipoCodigoVerificacaoBloqueado = async function (codigoHash, t
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procCodigoVerificacao(?, ?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procCodigoVerificacao(?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'SELECT_BY_HASH_TIPO_BLOQUEADO',
             codigoHash,
             tipo,
+            null,
             null,
             null,
             null,
@@ -222,6 +230,64 @@ const selectByHashTipoCodigoVerificacaoBloqueado = async function (codigoHash, t
     }
 }
 
+const selectByEmailTipoCodigoVerificacao = async function (email, tipo, transaction = null) {
+    try {
+        let connection = transaction || knexConection
+
+        let sql = `call procCodigoVerificacao(?, ?, ?, ?, ?, ?, ?, ?, ?)`
+
+        let result = await connection.raw(sql, [
+            'SELECT_BY_EMAIL_TIPO',
+            null,
+            tipo,
+            null,
+            email,
+            null,
+            null,
+            null,
+            null
+        ])
+
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
+        else
+            return false
+
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
+const selectByEmailTipoBloqueadoCodigoVerificacao = async function (email, tipo, transaction = null) {
+    try {
+        let connection = transaction || knexConection
+
+        let sql = `call procCodigoVerificacao(?, ?, ?, ?, ?, ?, ?, ?, ?)`
+
+        let result = await connection.raw(sql, [
+            'SELECT_BY_EMAIL_TIPO_BLOQUEADO',
+            null,
+            tipo,
+            null,
+            email,
+            null,
+            null,
+            null,
+            null
+        ])
+
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
+        else
+            return false
+
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
 module.exports = {
     insertCodigoVerificacao,
     updateCodigoVerificacao,
@@ -230,5 +296,9 @@ module.exports = {
     selectByUsuarioTipoCodigoVerificacao,
     selectByHashTipoCodigoVerificacao,
     selectByHashTipoCodigoVerificacaoBloqueado,
-    deleteCodigoVerificacao
+    deleteCodigoVerificacao,
+
+    // Selects de codigo email
+    selectByEmailTipoCodigoVerificacao,
+    selectByEmailTipoBloqueadoCodigoVerificacao
 }

@@ -16,11 +16,12 @@ const router = express.Router()
 const usuarioController = require('../controllers/usuario/usuario.js')
 const autenticarLogin = require('../middleware/autenticarLogin.js')
 const verificarToken = require('../middleware/auth.js')
+const limitarTentativasCadastro = require('../utils/limitar_tentativas/limitarTentativasCadastro.js')
 
 //                          ENDPOINTS USUARIO
 router.post('/login', bodyParserJSON, autenticarLogin.autenticarLogin)
 
-router.post('/', bodyParserJSON, async function (request, response) {
+router.post('/', limitarTentativasCadastro, bodyParserJSON, async function (request, response) {
     let dados = request.body
     let contentType = request.headers['content-type']
 

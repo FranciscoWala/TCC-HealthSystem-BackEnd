@@ -282,6 +282,33 @@ const verificarEmailUsuarioService = async function (id, transaction = null) {
     }
 }
 
+const atualizarSenhaUsuarioService = async function (id, senha, transaction = null) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+
+    try {
+        let validacaoId = validarDados.validarIDs(id, customMessages)
+
+        if (validacaoId)
+            return validacaoId
+
+        if (typeof senha != 'string' || senha.length < 8 || senha.length > 72)
+            return customMessages.ERROR_BAD_REQUEST
+
+        let result = await usuarioDAO.updateSenhaUsuario(id, senha, transaction)
+
+        if (result) {
+            customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
+            customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
+
+            return customMessages.DEFAULT_MESSAGE
+        } else
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
+
+    } catch (error) {
+        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
+    }
+}
+
 module.exports = {
     inserirUsuarioGoogleService,
     inserirUsuarioService,
@@ -293,5 +320,6 @@ module.exports = {
     listarDadosUsuariosService,
     buscarRolesAtivasUsuarioService,
     desativarUsuarioService,
-    verificarEmailUsuarioService
+    verificarEmailUsuarioService,
+    atualizarSenhaUsuarioService
 }

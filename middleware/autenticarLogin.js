@@ -2,6 +2,8 @@ const usuarioDAO = require("../models/DAO/usuarios/usuario.js")
 const authenticate = require("./authenticate.js")
 const usuarioService = require('../services/usuarios/service_usuario.js')
 
+const bcrypt = require('bcrypt')
+
 async function autenticarLogin(request, response) {
     try {
         const { email, senha } = request.body
@@ -18,8 +20,9 @@ async function autenticarLogin(request, response) {
                 message: "EMAIL OU SENHA INVÁLIDOS"
             })
 
-        // Validação temporária de senha para testes
-        if (senha !== usuario[0].senha)
+        let validarSenha = await bcrypt.compare(senha, usuario[0].senha)
+
+        if (!validarSenha)
             return response.status(401).json({
                 message: "EMAIL OU SENHA INVÁLIDOS"
             })
@@ -28,14 +31,6 @@ async function autenticarLogin(request, response) {
             return response.status(403).json({
                 message: "USUÁRIO INATIVO"
             })
-
-        // Validação de senha temporariamente pendente
-        // const validarSenha = await bcrypt.compare(senha, usuario[0].senha)
-
-        // if (!validarSenha)
-        //     return response.status(401).json({
-        //         message: "EMAIL OU SENHA INVÁLIDOS"
-        //     })
 
         let buscarRoles = await usuarioService.buscarRolesAtivasUsuarioService(usuario[0].id)
 

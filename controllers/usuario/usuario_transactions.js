@@ -21,6 +21,9 @@ const usuarioContatoEmergenciaService = require('../../services/contato_emergenc
 const roleService = require('../../services/role/service_role.js')
 const usuarioRoleService = require('../../services/usuario_role/service_usuario_role.js')
 const vinculoPacienteService = require('../../services/vinculo_paciente/service_vinculo_paciente.js')
+const verificacaoEmailController = require('../codigo_verificacao/controller_verificacao_email.js')
+
+const bcrypt = require('bcrypt')
 
 // IMPORT DA CONFIGURAÇÃO GLOBAL DO KNEX
 const knexConection = require('../../models/global_knex/global_knex.js')
@@ -44,27 +47,49 @@ const knexConection = require('../../models/global_knex/global_knex.js')
         2. Atribuir doença crônica ao usuário na intermediária
 */
 
-//Solução temporária (necessário refatorar o schema do usuário para adicionar novos atributos)
-function validarDadosUsuario(dados) {
-    return false
-}
-
-
-
 async function cadastrarUsuarioTransaction(dados, contentType) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
         if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
 
-            let result = await knexConection.transaction(async (transaction) => {
+            if (!dados || typeof dados.email != 'string' ||
+                typeof dados.codigo != 'string' || !/^\d{6}$/.test(dados.codigo))
+                return customMessages.ERROR_BAD_REQUEST
+
+            dados.email = dados.email.trim().toLowerCase()
+
+            let validarTentativa = await verificacaoEmailController.validarCodigoVerificacaoEmail(dados.email, dados.codigo)
+
+            if (!validarTentativa.status)
+                return validarTentativa
+
+            let result = await knexConection.transaction(async function (transaction) {
+                let validarCodigo = await verificacaoEmailController.validarCodigoVerificacaoEmail(dados.email, dados.codigo, transaction, true)
+
+                if (!validarCodigo.status) {
+                    let error = new Error('NÃO FOI POSSÍVEL VALIDAR O CÓDIGO')
+                    error.resposta = validarCodigo
+                    throw error
+                }
 
                 let idUsuario = await realizarCadastroUsuario(dados, transaction)
+
+                let verificarEmail = await usuarioService.verificarEmailUsuarioService(idUsuario, transaction)
+
+                if (!verificarEmail.status) {
+                    let error = new Error('NÃO FOI POSSÍVEL VERIFICAR O E-MAIL')
+                    error.resposta = verificarEmail
+                    throw error
+                }
 
                 await cadastrarDoencasCronicasRefat(dados, transaction, idUsuario)
                 await inserirContatosEmergencia(dados, transaction, idUsuario)
                 await atribuirRoleAoUsuario(transaction, idUsuario, dados['usuario_role'])
 
+                return {
+                    id_usuario: idUsuario
+                }
             })
 
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
@@ -76,11 +101,12 @@ async function cadastrarUsuarioTransaction(dados, contentType) {
         } else {
             return customMessages.ERROR_CONTENT_TYPE
         }
-
-
     } catch (error) {
-        console.log(error);
-        return false
+        if (error.resposta)
+            return error.resposta
+
+        console.log(error)
+        return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
     }
 }
 
@@ -380,19 +406,19 @@ async function atualizarContatosEmergencia(dados, transaction) {
 
 //Funções auxiliares do cadastro do usuário
 async function realizarCadastroUsuario(dados, transaction) {
+    let senhaHash = await bcrypt.hash(dados.senha, 12)
+
     let dadosPessoais = {
         nome: dados.nome,
         foto: dados.foto ?? null,
         email: dados.email,
-        senha: dados.senha,
+        senha: senhaHash,
         cpf: dados.cpf ?? null,
         telefone: dados.telefone ?? null,
         data_nascimento: dados["data_nascimento"]
     }
 
-    let cadastrarUsuario = await usuarioService.inserirUsuarioService(
-        dadosPessoais, transaction
-    )
+    let cadastrarUsuario = await usuarioService.inserirUsuarioService(dadosPessoais, transaction)
 
     if (!cadastrarUsuario.status) {
         let error = new Error("NÃO FOI POSSÍVEL REALIZAR O CADASTRO DO USUÁRIO")
