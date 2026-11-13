@@ -84,17 +84,11 @@ const gerarCodigoVerificacaoEmail = async function (email) {
         })
 
         if (result) {
-            let mensagem = `Seu código de verificação do MedTime é: ${codigo}. Ele expira em 10 minutos.`
-
-            let emailEnviado = await enviarEmail.enviarEmail(email, 'Código de verificação - MedTime', mensagem)
+            let emailEnviado = await enviarEmail.enviarEmail(email, 'Verificação de e-mail - MedTime', codigo, 'verificacaoEmail')
 
             if (!emailEnviado) {
                 await knexConection.transaction(async function (transaction) {
-                    let codigoSalvo = await codigoVerificacaoService.buscarCodigoPorHashTipoBloqueadoService(
-                        codigoHash,
-                        'VERIFICACAO_EMAIL',
-                        transaction
-                    )
+                    let codigoSalvo = await codigoVerificacaoService.buscarCodigoPorHashTipoBloqueadoService(codigoHash, 'VERIFICACAO_EMAIL', transaction)
 
                     if (!codigoSalvo.status)
                         throw new Error('ERRO AO BUSCAR CÓDIGO')

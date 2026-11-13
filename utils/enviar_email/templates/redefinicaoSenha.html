@@ -1,0 +1,142 @@
+<!-- /**********************************************************************************
+    Objetivo: HTML responsável pelo layout de geração do código de redefinir senha
+    Data: 13/11/2026
+    Autor: Kayque Brenno Ferreira Almeida
+    Versão: 1.0
+***********************************************************************************/ -->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redefinição de senha - MedTime</title>
+</head>
+
+<body style="margin: 0; padding: 0; background-color: #e6ebff; font-family: Arial, sans-serif;">
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+        style="background-color: #e6ebff; padding: 30px 12px;">
+        <tr>
+            <td align="center">
+
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+                    style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden;">
+
+                    <!-- Banner MedTime -->
+                    <tr>
+                        <td align="center" bgcolor="#063C5D" style="background-color: #063C5D; padding: 40px 20px;">
+
+                            <table role="presentation" cellpadding="0" cellspacing="0" width="100%"
+                                style="border-collapse: collapse;">
+
+                                <tr>
+                                    <td align="center">
+
+                                        <h1 style="margin: 0; font-family: Arial, sans-serif; 
+                                                    font-size: 46px; font-weight: bold;
+                                                    line-height: 1.2; letter-spacing: -2px;">
+
+                                            <span style="color: #FFFFFF;">Med</span><span
+                                                style="color: #19D5D1;">Time</span>
+
+                                        </h1>
+
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td align="center" style="padding-top: 8px;">
+
+                                        <p style="margin: 0; font-family: Arial, sans-serif;
+                                                    font-size: 15px; color: #FFFFFF;
+                                                    letter-spacing: 0.5px;">
+
+                                            Acompanhamento Sem Falhas
+
+                                        </p>
+
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td align="center" style="padding-top: 22px;">
+
+                                        <table role="presentation" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td width="80" height="3" bgcolor="#19D5D1" style="background-color: #19D5D1;
+                                                    height: 3px; font-size: 0; line-height: 3px;">
+                                                    &nbsp;
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                    </td>
+                                </tr>
+
+                            </table>
+
+                        </td>
+                    </tr>
+
+                    <!-- Conteúdo -->
+                    <tr>
+                        <td align="center" style="padding: 35px 30px;">
+
+                            <h1 style="color: #073b60; font-size: 25px; margin: 0 0 16px;">
+                                Redefinição de senha
+                            </h1>
+
+                            <p style="color: #52617a; font-size: 16px; line-height: 25px;">
+                                Recebemos uma solicitação para redefinir a senha da sua conta MedTime.
+                                Utilize o código abaixo para continuar.
+                            </p>
+
+                            <!-- Código de verificação -->
+                            <table role="presentation" cellpadding="0" cellspacing="0"
+                                style="margin: 25px auto; background-color: #e6ebff; border-radius: 10px;">
+                                <tr>
+                                    <td align="center" style="padding: 20px 35px;">
+                                        <span
+                                            style="font-size: 34px; font-weight: bold; letter-spacing: 6px; color: #073b60;">
+                                            {{codigo}}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="font-size: 14px; color: #52617a;">
+                                Este código é válido por <strong>10 minutos</strong>.
+                            </p>
+
+                            <p style="font-size: 13px; color: #8290a8; line-height: 20px;">
+                                Se você não solicitou a redefinição de senha,
+                                ignore este e-mail. Sua senha permanecerá a mesma.
+                            </p>
+
+                            <p style="font-size: 13px; color: #8290a8; line-height: 20px;">
+                                Por segurança, nunca compartilhe este código com outras pessoas.
+                            </p>
+
+                        </td>
+                    </tr>
+
+                    <!-- Rodapé -->
+                    <tr>
+                        <td align="center" style="padding: 20px; background-color: #f4f7ff;">
+                            <p style="margin: 0; color: #8290a8; font-size: 12px;">
+                                © MedTime — Acompanhamento Sem Falhas
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+
+</html>

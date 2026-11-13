@@ -9,7 +9,7 @@ const limitador = require('express-rate-limit')
 
 const limitarSolicitacoesEmail = limitador.rateLimit({
     windowMs: 10 * 60 * 1000,
-    limit: 3,
+    limit: 5,
     standardHeaders: 'draft-7',
     legacyHeaders: false,
     message: {

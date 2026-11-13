@@ -87,9 +87,7 @@ const gerarCodigoRedefinicaoSenha = async function (email) {
                 throw new Error('ERRO AO INSERIR CÓDIGO')
         })
 
-        let mensagem = `Seu código para redefinir a senha do MedTime é: ${codigo}. Ele expira em 10 minutos.`
-
-        let emailEnviado = await enviarEmail.enviarEmail(email, 'Redefinição de senha - MedTime', mensagem)
+        let emailEnviado = await enviarEmail.enviarEmail(email, 'Redefinição de senha - MedTime', codigo, 'redefinicaoSenha')
 
         if (!emailEnviado) {
             await knexConection.transaction(async function (transaction) {
