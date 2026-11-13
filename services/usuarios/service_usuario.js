@@ -258,6 +258,30 @@ async function desativarUsuarioService(idUsuario, transaction = null) {
     }
 }
 
+const verificarEmailUsuarioService = async function (id, transaction = null) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+
+    try {
+        let validacaoId = validarDados.validarIDs(id, customMessages)
+
+        if (validacaoId)
+            return validacaoId
+
+        let result = await usuarioDAO.verificarEmailUsuario(id, transaction)
+
+        if (result) {
+            customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
+            customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
+
+            return customMessages.DEFAULT_MESSAGE
+        } else
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
+
+    } catch (error) {
+        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
+    }
+}
+
 module.exports = {
     inserirUsuarioGoogleService,
     inserirUsuarioService,
@@ -268,5 +292,6 @@ module.exports = {
     buscarUsuarioPorEmailService,
     listarDadosUsuariosService,
     buscarRolesAtivasUsuarioService,
-    desativarUsuarioService
+    desativarUsuarioService,
+    verificarEmailUsuarioService
 }

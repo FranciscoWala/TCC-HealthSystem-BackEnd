@@ -5,15 +5,16 @@ use db_medtime;
 # ========== TABELAS ==========
 # Tabela Usuários
 create table tbl_usuarios (
-	id 				int not null auto_increment primary key,
-    nome 			varchar(45) not null,
-    foto 			varchar(500) null,
-    email 			varchar(255) not null unique,
-    senha 			varchar(512) null,
-    cpf 			varchar(20),
-    telefone 		varchar(20) null,
-    data_nascimento date not null,
-    ativo			boolean not null default true
+	id 					int not null auto_increment primary key,
+    nome 				varchar(45) not null,
+    foto 				varchar(500) null,
+    email 				varchar(255) not null unique,
+    senha 				varchar(512) null,
+    cpf 				varchar(20),
+    telefone 			varchar(20) null,
+    data_nascimento 	date not null,
+    ativo				boolean not null default true,
+    email_verificado 	boolean not null default false
 );
 
 # Tabela Usuario Google
@@ -163,10 +164,11 @@ create table tbl_codigos_verificacao (
     id 				int not null auto_increment primary key,
     codigo_hash 	varchar(255) not null,
     tipo 			varchar(30) not null,
-    id_usuario 		int not null,
+    id_usuario 		int null,
     data_expiracao 	datetime not null,
     utilizado 		boolean not null default false,
     tentativas 		int not null default 0,
+    email 			varchar(255) null,
     
     constraint UK_CODIGO_HASH_TIPO
 	unique (codigo_hash, tipo),

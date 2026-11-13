@@ -242,6 +242,35 @@ const desactivateUsuario = async function (id, transaction = null) {
     }
 }
 
+const verificarEmailUsuario = async function (id, transaction = null) {
+    try {
+        let connection = transaction || knexConection
+
+        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?, ?)`
+
+        let result = await connection.raw(sql, [
+            'VERIFICAR_EMAIL',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            id
+        ])
+
+        if (result[0][0][0].affectedRows > 0)
+            return true
+        else
+            return false
+
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
 module.exports = {
     insertUsuario,
     updateUsuario,
@@ -251,5 +280,6 @@ module.exports = {
     selectUsuarioByEmail,
     deleteUsuario,
     buscarRolesAtivasDoUsuario,
-    desactivateUsuario
+    desactivateUsuario,
+    verificarEmailUsuario
 }

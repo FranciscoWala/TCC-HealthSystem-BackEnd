@@ -786,7 +786,7 @@ BEGIN
     elseif operacao = 'UPDATE' then
         update tbl_usuarios
         set nome = nome_param,
-			foto = foto_param,
+            foto = foto_param,
             email = email_param,
             senha = senha_param,
             cpf = cpf_param,
@@ -804,7 +804,8 @@ BEGIN
             cpf,
             telefone,
             data_nascimento,
-            ativo
+            ativo,
+            email_verificado
         from tbl_usuarios
         order by id desc;
 
@@ -817,15 +818,24 @@ BEGIN
             cpf,
             telefone,
             data_nascimento,
-            ativo
+            ativo,
+            email_verificado
         from tbl_usuarios
         where id = id_param;
 
     elseif operacao = 'SELECT_BY_EMAIL' then
         select * from tbl_usuarios where email = email_param;
-        
-	elseif operacao = 'SELECT_DADOS_USUARIOS' then
+
+    elseif operacao = 'SELECT_DADOS_USUARIOS' then
         select * from vw_dados_usuarios;
+
+    elseif operacao = 'VERIFICAR_EMAIL' then
+        update tbl_usuarios
+        set email_verificado = true
+        where id = id_param
+            and email_verificado = false;
+
+        select row_count() as affectedRows;
 
     elseif operacao = 'DELETE' then
         delete from tbl_usuarios where id = id_param;
