@@ -11,6 +11,7 @@ const router = express.Router()
 
 const vinculoPacienteController = require('../controllers/vinculo_paciente/controller_vinculo_paciente.js')
 const verificarToken = require('../middleware/auth.js')
+const authorization = require('../middleware/authorization.js')
 
 // ========== BUSCAR MEU CUIDADOR ==========
 router.get('/meu_cuidador', verificarToken.verificarToken, async function (request, response) {
@@ -24,7 +25,9 @@ router.get('/meu_cuidador', verificarToken.verificarToken, async function (reque
 })
 
 // ========== BUSCAR MEUS PACIENTES ==========
-router.get('/meus_pacientes', verificarToken.verificarToken, async function (request, response) {
+router.get('/meus_pacientes', verificarToken.verificarToken,
+    authorization.verficarPermissao('GERENCIAR_PACIENTES'), async function (request, response) {
+        
     let idCuidador = request.user.id
     let roleUsuario = request.user.role
 

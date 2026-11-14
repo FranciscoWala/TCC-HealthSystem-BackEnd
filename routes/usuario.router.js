@@ -16,6 +16,7 @@ const router = express.Router()
 const usuarioController = require('../controllers/usuario/usuario.js')
 const autenticarLogin = require('../middleware/autenticarLogin.js')
 const verificarToken = require('../middleware/auth.js')
+const authorization = require('../middleware/authorization.js')
 const limitarTentativasCadastro = require('../utils/limitar_tentativas/limitarTentativasCadastro.js')
 
 //                          ENDPOINTS USUARIO
@@ -31,8 +32,10 @@ router.post('/', limitarTentativasCadastro, bodyParserJSON, async function (requ
     response.json(result)
 })
 
-router.put('/:id', verificarToken.verificarToken, bodyParserJSON,
+router.put('/:id', verificarToken.verificarToken,
+    authorization.verficarPermissao('EDITAR_PERFIL'),bodyParserJSON,
     async function (request, response) {
+        
         let id = request.params.id
         let dados = request.body
         let contentType = request.headers['content-type']

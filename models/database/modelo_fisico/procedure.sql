@@ -1089,8 +1089,16 @@ BEGIN
 
     elseif operacao = 'SELECT_BY_ID_CUIDADOR' then
         select
-            tbl_vinculo_paciente.*
+            tbl_vinculo_paciente.*,
+            tbl_usuarios.nome,
+            tbl_usuarios.foto,
+            tbl_usuarios.email,
+            tbl_usuarios.cpf,
+            tbl_usuarios.telefone,
+            tbl_usuarios.data_nascimento
         from tbl_vinculo_paciente
+            inner join tbl_usuarios
+                on tbl_usuarios.id = tbl_vinculo_paciente.id_paciente
         where tbl_vinculo_paciente.id_cuidador = id_cuidador_param
         order by tbl_vinculo_paciente.data_vinculo desc;
 

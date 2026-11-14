@@ -13,10 +13,13 @@ const bodyParserJSON = bodyParser.json()
 
 const codigoVinculoController = require('../controllers/codigo_verificacao/controller_codigo_vinculo.js')
 const verificarToken = require('../middleware/auth.js')
+const authorization = require('../middleware/authorization.js')
 const limitarTentativas = require('../utils/limitar_tentativas/limitarTentativasCodigo.js')
 
 // ========== GERAR CÓDIGO DE VÍNCULO ==========
-router.post('/gerar', verificarToken.verificarToken, async function (request, response) {
+router.post('/gerar', verificarToken.verificarToken,
+    authorization.verficarPermissao('GERENCIAR_PACIENTES'), async function (request, response) {
+    
     let idUsuario = request.user.id
 
     let result = await codigoVinculoController.gerarCodigoVinculo(idUsuario)
