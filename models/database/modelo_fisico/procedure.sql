@@ -1095,7 +1095,47 @@ BEGIN
             tbl_usuarios.email,
             tbl_usuarios.cpf,
             tbl_usuarios.telefone,
-            tbl_usuarios.data_nascimento
+            tbl_usuarios.data_nascimento,
+            tbl_usuarios.ativo,
+            tbl_usuarios.email_verificado,
+
+            (
+                select coalesce(
+                    json_arrayagg(
+                        json_object(
+                            'id', tbl_contato_de_emergencia.id,
+                            'nome', tbl_contato_de_emergencia.nome,
+                            'telefone', tbl_contato_de_emergencia.telefone
+                        )
+                    ),
+                    json_array()
+                )
+                from tbl_contato_emergencia_usuarios
+                    inner join tbl_contato_de_emergencia
+                        on tbl_contato_de_emergencia.id =
+                        tbl_contato_emergencia_usuarios.id_contato_de_emergencia
+                where tbl_contato_emergencia_usuarios.id_usuarios =
+                    tbl_usuarios.id
+            ) as contatos_emergencia,
+
+            (
+                select coalesce(
+                    json_arrayagg(
+                        json_object(
+                            'id', tbl_doencas_cronicas.id,
+                            'nome_doenca', tbl_doencas_cronicas.nome_doenca
+                        )
+                    ),
+                    json_array()
+                )
+                from tbl_doenca_cronica_usuario
+                    inner join tbl_doencas_cronicas
+                        on tbl_doencas_cronicas.id =
+                        tbl_doenca_cronica_usuario.id_doencas_cronicas
+                where tbl_doenca_cronica_usuario.id_usuarios =
+                    tbl_usuarios.id
+            ) as doencas_cronicas
+
         from tbl_vinculo_paciente
             inner join tbl_usuarios
                 on tbl_usuarios.id = tbl_vinculo_paciente.id_paciente
