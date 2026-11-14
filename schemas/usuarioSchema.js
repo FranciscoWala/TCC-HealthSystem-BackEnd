@@ -5,27 +5,38 @@
  * Versão: 1.0
 **************************************************************************************/
 
-const Joi = require('joi')
+const JOI = require('joi')
 
-const usuarioSchema = Joi.object({
-    nome: Joi.string()
+const usuarioSchema = JOI.object({
+    nome: JOI.string()
         .max(80)
         .required(),
 
-    email: Joi.string()
+    foto: JOI.string()
+        .uri({ scheme: ['http', 'https'] })
+        .max(500)
+        .allow(null)
+        .optional(),
+
+    email: JOI.string()
         .max(255)
         .email()
         .required(),
 
-    senha: Joi.string()
+    senha: JOI.string()
         .max(70)
         .required(),
 
-    cpf: Joi.string()
-            .max(20)
-            .allow(null),
+    cpf: JOI.string()
+        .max(20)
+        .allow(null),
 
-    data_nascimento: Joi.date()
+    telefone: JOI.string()
+                .max(20)
+                .allow(null, '')
+                .optional(),
+
+    data_nascimento: JOI.date()
         .iso()
         .required()
 })

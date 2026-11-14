@@ -100,6 +100,28 @@ const selectByIdEstoque = async function (id, transaction = null) {
     }
 }
 
+const selectByIdUsuarioEstoque = async function (idUsuario) {
+    try {
+        let sql = `call procEstoque(?, ?, ?, ?, ?)`
+
+        let result = await knexConection.raw(sql, [
+            'SELECT_BY_ID_USUARIO',
+            null,
+            idUsuario,
+            null,
+            null
+        ])
+
+        if (Array.isArray(result[0][0]))
+            return result[0][0]
+        else
+            return false
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
 const descontarEstoque = async function (id, quantidade, transaction = null) {
     try {
         let connection = transaction || knexConection
@@ -176,5 +198,6 @@ module.exports = {
     selectByIdEstoque,
     descontarEstoque,
     selectEstoqueByUsuarioMedicamento,
+    selectByIdUsuarioEstoque,
     deleteEstoque
 }

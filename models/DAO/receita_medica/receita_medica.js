@@ -63,7 +63,7 @@ async function updateReceitaMedica(receitaMedica, transaction = null) {
     }
 }
 
-async function getReceitaMedica(transaction = null) {
+async function getReceitaMedica(idUsuario, transaction = null) {
     try {
         let connection = transaction || knexConection
 
@@ -71,7 +71,7 @@ async function getReceitaMedica(transaction = null) {
 
         let result = await connection.raw(sql, [
             'SELECT_ALL',
-            null,
+            idUsuario,
             null,
             null,
             null,

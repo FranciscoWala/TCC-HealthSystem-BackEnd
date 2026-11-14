@@ -104,6 +104,7 @@ const gerarAgendaMedicamento = async function (idUsuario, data, fuso) {
                     }
 
                     // Verificar se a programação foi substituída no dia consultado
+
                     let substituidaHoje = dataFim && listaProgramacoes.some(function (outraProgramacao) {
                         let inicioOutra = new Date(outraProgramacao.data_hora_inicio)
 
@@ -138,6 +139,7 @@ const gerarAgendaMedicamento = async function (idUsuario, data, fuso) {
                                     id_medicamento: programacao.id_medicamento,
                                     nome_medicamento: programacao.nome_medicamento,
                                     dosagem: programacao.dosagem,
+                                    tipo_dosagem: programacao.tipo_dosagem,
                                     horario_programado: horarioFormatado,
                                     confirmado: false,
                                     status: status

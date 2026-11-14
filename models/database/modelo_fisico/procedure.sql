@@ -554,6 +554,33 @@ BEGIN
         from tbl_estoque
         where tbl_estoque.id_usuarios = id_usuarios_param
             and tbl_estoque.id_medicamentos = id_medicamentos_param;
+
+    elseif operacao = 'SELECT_BY_ID_USUARIO' then
+        select
+            tbl_estoque.id as id_estoque,
+            tbl_estoque.quantidade_em_estoque,
+            tbl_usuarios.id as id_usuarios,
+            tbl_usuarios.nome as nome_usuario,
+            tbl_medicamentos.id as id_medicamento,
+            tbl_medicamentos.nome as nome_medicamento,
+            tbl_medicamentos.imagem,
+            tbl_medicamentos.concentracao,
+            tbl_unidade_medida.id as id_unidade_medida_embalagem,
+            tbl_unidade_medida.unidade_medida,
+            tbl_unidade_medida.sigla,
+            tbl_tipo_dosagem.id as id_tipo_dosagem,
+            tbl_tipo_dosagem.tipo_dosagem
+        from tbl_estoque
+        left join tbl_usuarios
+            on tbl_usuarios.id = tbl_estoque.id_usuarios
+        left join tbl_medicamentos
+            on tbl_medicamentos.id = tbl_estoque.id_medicamentos
+        left join tbl_unidade_medida
+            on tbl_unidade_medida.id = tbl_medicamentos.id_unidade_medida_embalagem
+        left join tbl_tipo_dosagem
+            on tbl_tipo_dosagem.id = tbl_medicamentos.id_tipo_dosagem
+        where tbl_estoque.id_usuarios = id_usuarios_param
+        order by tbl_estoque.id desc;
         
 	elseif operacao = 'DELETE' then
 		delete from tbl_estoque where id = id_param;
@@ -727,9 +754,11 @@ DELIMITER $$
 create procedure procUsuario(
     IN operacao varchar(30),
     IN nome_param varchar(45),
+    IN foto_param varchar(500),
     IN email_param varchar(255),
     IN senha_param varchar(512),
     IN cpf_param varchar(20),
+    IN telefone_param varchar(20),
     IN data_nascimento_param date,
     IN id_param int
 )
@@ -737,15 +766,19 @@ BEGIN
     if operacao = 'INSERT' then
         insert into tbl_usuarios (
             nome,
+            foto,
             email,
             senha,
             cpf,
+            telefone,
             data_nascimento
         ) values (
             nome_param,
+            foto_param,
             email_param,
             senha_param,
             cpf_param,
+            telefone_param,
             data_nascimento_param
         );
         select last_insert_id() as id;
@@ -753,9 +786,11 @@ BEGIN
     elseif operacao = 'UPDATE' then
         update tbl_usuarios
         set nome = nome_param,
+            foto = foto_param,
             email = email_param,
             senha = senha_param,
             cpf = cpf_param,
+            telefone = telefone_param,
             data_nascimento = data_nascimento_param
         where id = id_param;
         select row_count() as affectedRows;
@@ -764,9 +799,13 @@ BEGIN
         select
             id,
             nome,
+            foto,
             email,
             cpf,
-            data_nascimento
+            telefone,
+            data_nascimento,
+            ativo,
+            email_verificado
         from tbl_usuarios
         order by id desc;
 
@@ -774,17 +813,36 @@ BEGIN
         select
             id,
             nome,
+            foto,
             email,
             cpf,
-            data_nascimento
+            telefone,
+            data_nascimento,
+            ativo,
+            email_verificado
         from tbl_usuarios
         where id = id_param;
 
     elseif operacao = 'SELECT_BY_EMAIL' then
         select * from tbl_usuarios where email = email_param;
-        
-	elseif operacao = 'SELECT_DADOS_USUARIOS' then
+
+    elseif operacao = 'SELECT_DADOS_USUARIOS' then
         select * from vw_dados_usuarios;
+
+    elseif operacao = 'VERIFICAR_EMAIL' then
+        update tbl_usuarios
+        set email_verificado = true
+        where id = id_param
+            and email_verificado = false;
+
+        select row_count() as affectedRows;
+        
+	elseif operacao = 'UPDATE_SENHA' then
+		update tbl_usuarios
+		set senha = senha_param
+		where id = id_param;
+
+		select row_count() as affectedRows;
 
     elseif operacao = 'DELETE' then
         delete from tbl_usuarios where id = id_param;
@@ -967,7 +1025,7 @@ BEGIN
             id_paciente,
             id_cuidador
         ) values (
-            data_vinculo_param,
+            now(),
             id_paciente_param,
             id_cuidador_param
         );
@@ -1023,6 +1081,27 @@ BEGIN
             on tbl_usuarios_cuidador.id = tbl_vinculo_paciente.id_cuidador
         where tbl_vinculo_paciente.id = id_param;
 
+    elseif operacao = 'SELECT_BY_ID_PACIENTE' then
+        select
+            tbl_vinculo_paciente.*
+        from tbl_vinculo_paciente
+        where tbl_vinculo_paciente.id_paciente = id_paciente_param;
+
+    elseif operacao = 'SELECT_BY_ID_CUIDADOR' then
+        select
+            tbl_vinculo_paciente.*,
+            tbl_usuarios.nome,
+            tbl_usuarios.foto,
+            tbl_usuarios.email,
+            tbl_usuarios.cpf,
+            tbl_usuarios.telefone,
+            tbl_usuarios.data_nascimento
+        from tbl_vinculo_paciente
+            inner join tbl_usuarios
+                on tbl_usuarios.id = tbl_vinculo_paciente.id_paciente
+        where tbl_vinculo_paciente.id_cuidador = id_cuidador_param
+        order by tbl_vinculo_paciente.data_vinculo desc;
+
     elseif operacao = 'DELETE' then
         delete from tbl_vinculo_paciente where id = id_param;
         select row_count() as affectedRows;
@@ -1030,6 +1109,124 @@ BEGIN
     else
         signal sqlstate '45000'
         set message_text = 'Operação inválida na procVinculoPaciente';
+    end if;
+END $$
+DELIMITER $$
+
+-- ======== CODIGO DE VERIFICACAO ========
+DELIMITER $$
+
+create procedure procCodigoVerificacao(
+    IN operacao varchar(40),
+    IN codigo_hash_param varchar(255),
+    IN tipo_param varchar(30),
+    IN id_usuario_param int,
+    IN email_param varchar(255),
+    IN data_expiracao_param datetime,
+    IN utilizado_param boolean,
+    IN tentativas_param int,
+    IN id_param int
+)
+BEGIN
+    if operacao = 'INSERT' then
+        insert into tbl_codigos_verificacao (
+            codigo_hash,
+            tipo,
+            id_usuario,
+            email,
+            data_expiracao,
+            utilizado,
+            tentativas
+        ) values (
+            codigo_hash_param,
+            tipo_param,
+            id_usuario_param,
+            email_param,
+            data_expiracao_param,
+            false,
+            0
+        );
+
+        select last_insert_id() as id;
+
+    elseif operacao = 'UPDATE' then
+        update tbl_codigos_verificacao
+        set codigo_hash = codigo_hash_param,
+            tipo = tipo_param,
+            id_usuario = id_usuario_param,
+            email = email_param,
+            data_expiracao = data_expiracao_param,
+            utilizado = utilizado_param,
+            tentativas = tentativas_param
+        where id = id_param;
+
+        select row_count() as affectedRows;
+
+    elseif operacao = 'SELECT_ALL' then
+        select
+            tbl_codigos_verificacao.*
+        from tbl_codigos_verificacao;
+
+    elseif operacao = 'SELECT_BY_ID' then
+        select
+            tbl_codigos_verificacao.*
+        from tbl_codigos_verificacao
+        where id = id_param;
+
+    elseif operacao = 'SELECT_BY_USUARIO_TIPO' then
+        select
+            tbl_codigos_verificacao.*
+        from tbl_codigos_verificacao
+        where id_usuario = id_usuario_param
+            and tipo = tipo_param
+        order by id desc;
+
+    elseif operacao = 'SELECT_BY_HASH_TIPO' then
+        select
+            tbl_codigos_verificacao.*
+        from tbl_codigos_verificacao
+        where codigo_hash = codigo_hash_param
+            and tipo = tipo_param
+        order by id desc
+        limit 1;
+
+    elseif operacao = 'SELECT_BY_HASH_TIPO_BLOQUEADO' then
+        select
+            tbl_codigos_verificacao.*
+        from tbl_codigos_verificacao
+        where codigo_hash = codigo_hash_param
+            and tipo = tipo_param
+        order by id desc
+        limit 1
+        for update;
+
+    elseif operacao = 'SELECT_BY_EMAIL_TIPO' then
+        select
+            tbl_codigos_verificacao.*
+        from tbl_codigos_verificacao
+        where email = email_param
+            and tipo = tipo_param
+        order by id desc;
+
+    elseif operacao = 'SELECT_BY_EMAIL_TIPO_BLOQUEADO' then
+        select
+            tbl_codigos_verificacao.*
+        from tbl_codigos_verificacao
+        where email = email_param
+            and tipo = tipo_param
+        order by id desc
+        limit 1
+        for update;
+
+    elseif operacao = 'DELETE' then
+        delete from tbl_codigos_verificacao
+        where id = id_param;
+
+        select row_count() as affectedRows;
+
+    else
+        signal sqlstate '45000'
+        set message_text = 'Operação inválida na procCodigoVerificacao';
     end if;
 END $$
 DELIMITER $$
@@ -1115,6 +1312,7 @@ BEGIN
             on tbl_tipo_dosagem.id = tbl_medicamentos.id_tipo_dosagem
         left join tbl_unidade_medida as tbl_unidade_medida_dose
             on tbl_unidade_medida_dose.id = tbl_receita_medica.id_unidade_medida
+        where tbl_receita_medica.id_usuario = id_usuario_param
         order by tbl_receita_medica.id desc;
 
     elseif operacao = 'SELECT_BY_ID' then
@@ -1323,7 +1521,8 @@ BEGIN
 			tbl_usuarios.id as id_usuario,
 			tbl_usuarios.nome as nome_usuario,
 			tbl_medicamentos.id as id_medicamento,
-			tbl_medicamentos.nome as nome_medicamento
+			tbl_medicamentos.nome as nome_medicamento,
+            tbl_tipo_dosagem.tipo_dosagem
 		from tbl_programacao_medicamento
 		inner join tbl_tipo_intervalo
 			on tbl_tipo_intervalo.id = tbl_programacao_medicamento.id_tipo_intervalo
@@ -1333,6 +1532,8 @@ BEGIN
 			on tbl_usuarios.id = tbl_receita_medica.id_usuario
 		inner join tbl_medicamentos
 			on tbl_medicamentos.id = tbl_receita_medica.id_medicamento
+		inner join tbl_tipo_dosagem
+			on tbl_tipo_dosagem.id = tbl_medicamentos.id_tipo_dosagem
 		where tbl_usuarios.id = id_param
 		order by tbl_programacao_medicamento.data_hora_inicio desc;
 
@@ -1417,6 +1618,52 @@ BEGIN
     else
         signal sqlstate '45000'
         set message_text = 'Operação inválida na procDoencaCronicaUsuario';
+    end if;
+END $$
+DELIMITER $$
+
+-- ======== USUARIO GOOGLE ========
+DELIMITER $$
+create procedure procUsuarioGoogle(
+    IN operacao varchar(30),
+    IN google_id_param varchar(255),
+    IN id_usuario_param int,
+    IN id_param int
+)
+BEGIN
+    if operacao = 'INSERT' then
+        insert into tbl_usuario_google (
+            google_id,
+            id_usuario
+        ) values (
+            google_id_param,
+            id_usuario_param
+        );
+
+        select last_insert_id() as id;
+
+    elseif operacao = 'SELECT_BY_GOOGLE_ID' then
+        select
+            tbl_usuario_google.id,
+            tbl_usuario_google.google_id,
+            tbl_usuario_google.id_usuario
+        from tbl_usuario_google
+        where tbl_usuario_google.google_id = google_id_param;
+
+    elseif operacao = 'SELECT_BY_ID_USUARIO' then
+        select
+            tbl_usuario_google.id,
+            tbl_usuario_google.google_id,
+            tbl_usuario_google.id_usuario
+        from tbl_usuario_google
+        where tbl_usuario_google.id_usuario = id_usuario_param;
+
+    elseif operacao = 'DELETE' then
+        delete from tbl_usuario_google
+        where id = id_param;
+
+        select row_count() as affectedRows;
+
     end if;
 END $$
 DELIMITER $$

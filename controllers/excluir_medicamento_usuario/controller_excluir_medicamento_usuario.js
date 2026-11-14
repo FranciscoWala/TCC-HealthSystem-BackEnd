@@ -42,7 +42,7 @@ const excluirMedicamentoUsuario = async function (idReceitaMedica, idUsuario) {
             let idEstoque = receitaMedica.id_estoque
             let medicamentoParticular = receitaMedica.id_usuario_medicamento
 
-            if (medicamentoParticular != null && receitaMedica.id_usuario_medicamento != idUsuario) {
+            if (medicamentoParticular != null && medicamentoParticular != idUsuario) {
                 customMessages.ERROR_BAD_REQUEST.field = ['ID_MEDICAMENTO']
 
                 let error = new Error('O medicamento não pertence ao usuário.')

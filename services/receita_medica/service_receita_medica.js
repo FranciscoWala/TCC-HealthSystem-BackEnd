@@ -70,10 +70,10 @@ const atualizarReceitaMedicaService = async function (dados, id, transaction = n
     }
 }
 
-const listarReceitaMedicaService = async function (transaction = null) {
+const listarReceitaMedicaService = async function (idUsuario, transaction = null) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
-        let result = await receitaMedicaDAO.getReceitaMedica(transaction)
+        let result = await receitaMedicaDAO.getReceitaMedica(idUsuario, transaction)
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status

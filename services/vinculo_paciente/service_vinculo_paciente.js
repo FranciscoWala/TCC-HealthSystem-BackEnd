@@ -132,10 +132,68 @@ const excluirVinculoPacienteService = async function (id, transaction = null) {
     }
 }
 
+const buscarVinculoPorIdPacienteService = async function (idPaciente, transaction = null) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+
+    try {
+        let validacaoId = validarDados.validarIDs(idPaciente, customMessages)
+        if (validacaoId)
+            return validacaoId
+
+        let result = await vinculoPacienteDAO.selectByIdPacienteVinculoPaciente(idPaciente, transaction)
+
+        if (result) {
+            if (result.length > 0) {
+                customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
+                customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
+                customMessages.DEFAULT_MESSAGE.response.vinculo_paciente = result
+
+                return customMessages.DEFAULT_MESSAGE
+            } else
+                return customMessages.ERROR_NOT_FOUND
+        } else
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
+
+    } catch (error) {
+        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
+    }
+}
+
+const buscarVinculosPorIdCuidadorService = async function (idCuidador, transaction = null) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+
+    try {
+        let validacaoId = validarDados.validarIDs(idCuidador, customMessages)
+
+        if (validacaoId)
+            return validacaoId
+
+        let result = await vinculoPacienteDAO.selectByIdCuidadorVinculoPaciente(idCuidador, transaction)
+
+        if (result) {
+            if (result.length > 0) {
+                customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
+                customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
+                customMessages.DEFAULT_MESSAGE.response.count = result.length
+                customMessages.DEFAULT_MESSAGE.response.vinculo_paciente = result
+
+                return customMessages.DEFAULT_MESSAGE
+            } else
+                return customMessages.ERROR_NOT_FOUND
+        } else
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL
+
+    } catch (error) {
+        return customMessages.ERROR_INTERNAL_SERVER_SERVICE
+    }
+}
+
 module.exports = {
     inserirVinculoPacienteService,
     atualizarVinculoPacienteService,
     listarVinculoPacienteService,
     buscarVinculoPacienteService,
-    excluirVinculoPacienteService
+    excluirVinculoPacienteService,
+    buscarVinculoPorIdPacienteService,
+    buscarVinculosPorIdCuidadorService
 }

@@ -22,9 +22,6 @@ async function insertDoencaCronicaUsuario(doencaCronicaUsuario, transaction = nu
             null
         ])
 
-        
-                
-
         if (result && result[0][0][0].id)
             return result[0][0][0].id
         else
@@ -36,7 +33,6 @@ async function insertDoencaCronicaUsuario(doencaCronicaUsuario, transaction = nu
 }
 
 async function updateDoencaCronicaUsuario(doencaCronicaUsuario, transaction = null) {
-
     try {
         let connection = transaction || knexConection
 
@@ -44,7 +40,7 @@ async function updateDoencaCronicaUsuario(doencaCronicaUsuario, transaction = nu
 
         let result = await connection.raw(sql, [
             'UPDATE',
-            doencaCronicaUsuario.id_doencas_cronicas,
+            doencaCronicaUsuario.id_doencas_cronica,
             doencaCronicaUsuario.id_usuarios,
             doencaCronicaUsuario.id
         ])
@@ -60,7 +56,6 @@ async function updateDoencaCronicaUsuario(doencaCronicaUsuario, transaction = nu
 }
 
 async function selectDoencaCronicaUsuario(transaction = null) {
-
     try {
         let connection = transaction || knexConection
 
@@ -84,7 +79,6 @@ async function selectDoencaCronicaUsuario(transaction = null) {
 }
 
 async function selectDoencaCronicaUsuarioByID(id, transaction = null) {
-
     try {
         let connection = transaction || knexConection
 
@@ -110,7 +104,6 @@ async function selectDoencaCronicaUsuarioByID(id, transaction = null) {
 }
 
 async function deleteDoencaCronicaUsuarioByID(id, transaction = null) {
-
     try {
         let connection = transaction || knexConection
 

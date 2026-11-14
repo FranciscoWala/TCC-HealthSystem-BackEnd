@@ -12,14 +12,16 @@ const insertUsuario = async function (usuario, transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'INSERT',
             usuario.nome,
+            usuario.foto ?? null,
             usuario.email,
             usuario.senha,
-            usuario.cpf,
+            usuario.cpf ?? null,
+            usuario.telefone ?? null,
             usuario.data_nascimento,
             null
         ])
@@ -37,14 +39,16 @@ const updateUsuario = async function (usuario, transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'UPDATE',
             usuario.nome,
+            usuario.foto ?? null,
             usuario.email,
             usuario.senha,
-            usuario.cpf,
+            usuario.cpf ?? null,
+            usuario.telefone ?? null,
             usuario.data_nascimento,
             usuario.id
         ])
@@ -55,7 +59,7 @@ const updateUsuario = async function (usuario, transaction = null) {
             return false
     } catch (error) {
         console.log(error);
-        
+
         return false
     }
 }
@@ -64,10 +68,12 @@ const selectAllUsuarios = async function (transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'SELECT_ALL',
+            null,
+            null,
             null,
             null,
             null,
@@ -89,10 +95,12 @@ const selectByIdUsuario = async function (id, transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'SELECT_BY_ID',
+            null,
+            null,
             null,
             null,
             null,
@@ -114,10 +122,12 @@ const selectDadosUsuarios = async function (transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'SELECT_DADOS_USUARIOS',
+            null,
+            null,
             null,
             null,
             null,
@@ -135,16 +145,18 @@ const selectDadosUsuarios = async function (transaction = null) {
     }
 }
 
-const selectUsuarioByEmail = async function(email, transaction = null) {
+const selectUsuarioByEmail = async function (email, transaction = null) {
     try {
         let connection = transaction || knexConection
-        
-        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?)`
+
+        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'SELECT_BY_EMAIL',
             null,
+            null,
             email.email,
+            null,
             null,
             null,
             null,
@@ -166,10 +178,12 @@ const deleteUsuario = async function (id, transaction = null) {
     try {
         let connection = transaction || knexConection
 
-        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?)`
+        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?)`
 
         let result = await connection.raw(sql, [
             'DELETE',
+            null,
+            null,
             null,
             null,
             null,
@@ -191,13 +205,13 @@ const buscarRolesAtivasDoUsuario = async (idUsuario, transaction = null) => {
     try {
         let connection = transaction || knexConection
 
-        let sql = `select * from tbl_usuarios_role where id_usuarios=${idUsuario} and ativo=1;`
-        
-        let result = await knexConection.raw(sql)
+        let sql = `select * from tbl_usuarios_role where id_usuarios = ? and ativo = 1;`
 
-        if(result)
+        let result = await connection.raw(sql, [idUsuario])
+
+        if (result)
             return result[0]
-        else 
+        else
             return false
 
     } catch (error) {
@@ -213,17 +227,75 @@ const desactivateUsuario = async function (id, transaction = null) {
         let sql = `
             update tbl_usuarios
                 set ativo = false
-            where id = ${id};
+            where id = ?;
         `
 
-        let result = await connection.raw(sql)
+        let result = await connection.raw(sql, [id])
 
-        if(result)
+        if (result)
             return true
         else
             return false
     } catch (error) {
         console.log("ERROR IN USUARIO MODEL" + error);
+        return false
+    }
+}
+
+const verificarEmailUsuario = async function (id, transaction = null) {
+    try {
+        let connection = transaction || knexConection
+
+        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?, ?)`
+
+        let result = await connection.raw(sql, [
+            'VERIFICAR_EMAIL',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            id
+        ])
+
+        if (result[0][0][0].affectedRows > 0)
+            return true
+        else
+            return false
+
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
+const updateSenhaUsuario = async function (id, senha, transaction = null) {
+    try {
+        let connection = transaction || knexConection
+
+        let sql = `call procUsuario(?, ?, ?, ?, ?, ?, ?, ?, ?)`
+
+        let result = await connection.raw(sql, [
+            'UPDATE_SENHA',
+            null,
+            null,
+            null,
+            senha,
+            null,
+            null,
+            null,
+            id
+        ])
+
+        if (result[0][0][0].affectedRows > 0)
+            return true
+        else
+            return false
+
+    } catch (error) {
+        console.log(error)
         return false
     }
 }
@@ -237,5 +309,7 @@ module.exports = {
     selectUsuarioByEmail,
     deleteUsuario,
     buscarRolesAtivasDoUsuario,
-    desactivateUsuario
+    desactivateUsuario,
+    verificarEmailUsuario,
+    updateSenhaUsuario
 }

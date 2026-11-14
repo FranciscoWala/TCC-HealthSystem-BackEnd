@@ -14,9 +14,15 @@ const bodyParserJSON = bodyParser.json()
 const router = express.Router()
 
 const usuarioController = require('../controllers/usuario/usuario.js')
+const autenticarLogin = require('../middleware/autenticarLogin.js')
+const verificarToken = require('../middleware/auth.js')
+const authorization = require('../middleware/authorization.js')
+const limitarTentativasCadastro = require('../utils/limitar_tentativas/limitarTentativasCadastro.js')
 
 //                          ENDPOINTS USUARIO
-router.post('/', bodyParserJSON, async function (request, response) {
+router.post('/login', bodyParserJSON, autenticarLogin.autenticarLogin)
+
+router.post('/', limitarTentativasCadastro, bodyParserJSON, async function (request, response) {
     let dados = request.body
     let contentType = request.headers['content-type']
 
@@ -26,47 +32,24 @@ router.post('/', bodyParserJSON, async function (request, response) {
     response.json(result)
 })
 
-router.get('/', async function (request, response) {
-    let result = await usuarioController.listarUsuario()
+router.put('/:id', verificarToken.verificarToken,
+    authorization.verficarPermissao('EDITAR_PERFIL'),bodyParserJSON,
+    async function (request, response) {
+        
+        let id = request.params.id
+        let dados = request.body
+        let contentType = request.headers['content-type']
 
-    response.status(result.status_code)
-    response.json(result)
-})
+        if (Number(request.user.id) != Number(id))
+            return response.status(403).json({
+                message: 'USUÁRIO NÃO AUTORIZADO'
+            })
 
-router.get('/dados_usuario', async function (request, response) {
-    let result = await usuarioController.listarDadosUsuario()
+        let result = await usuarioController.atualizarUsuario(dados, id, contentType)
 
-    response.status(result.status_code)
-    response.json(result)
-})
-
-router.get('/:id', async function (request, response) {
-    let id = request.params.id
-
-    let result = await usuarioController.buscarUsuario(id)
-
-    response.status(result.status_code)
-    response.json(result)
-})
-
-router.put('/:id', bodyParserJSON, async function (request, response) {
-    let id = request.params.id
-    let dados = request.body
-    let contentType = request.headers['content-type']
-
-    let result = await usuarioController.atualizarUsuario(dados, id, contentType)
-
-    response.status(result.status_code)
-    response.json(result)
-})
-
-router.delete('/:id', async function (request, response) {
-    let id = request.params.id
-
-    let result = await usuarioController.excluirUsuario(id)
-
-    response.status(result.status_code)
-    response.json(result)
-})
+        response.status(result.status_code)
+        response.json(result)
+    }
+)
 
 module.exports = router

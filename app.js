@@ -21,26 +21,8 @@ app.use(cors(corsOptions))
 const roleRouter = require('./routes/role.router.js')
 app.use('/v1/healthSystem/medtime/role', cors(), roleRouter)
 
-const rolePermissoesRouter = require('./routes/role_permissoes.router.js')
-app.use('/v1/healthSystem/medtime/role_permissoes', cors(), rolePermissoesRouter)
-
-const permissoesRouter = require('./routes/permissoes.router.js')
-app.use('/v1/healthSystem/medtime/permissoes', cors(), permissoesRouter)
-
-const doencaCronicaRouter = require('./routes/doenca_cronica.router.js')
-app.use('/v1/healthSystem/medtime/doenca_cronica', cors(), doencaCronicaRouter)
-
-const doencaCronicaUsuarioRouter = require('./routes/doenca_cronica_usuario.router.js')
-app.use('/v1/healthSystem/medtime/doenca_cronica_usuario', cors(), doencaCronicaUsuarioRouter)
-
 const estoqueRouter = require('./routes/estoque.router.js')
 app.use('/v1/healthSystem/medtime/estoque', cors(), estoqueRouter)
-
-const contatoEmergenciaRouter = require('./routes/contato_emergencia.router.js')
-app.use('/v1/healthSystem/medtime/contato_emergencia', cors(), contatoEmergenciaRouter)
-
-const contatoEmergenciaUsuarioRouter = require('./routes/contato_emergencia_usuario.router.js')
-app.use('/v1/healthSystem/medtime/contato_emergencia_usuario', cors(), contatoEmergenciaUsuarioRouter)
 
 const tipoIntervaloRouter = require('./routes/tipo_intervalo.router.js')
 app.use('/v1/healthSystem/medtime/tipo_intervalo', cors(), tipoIntervaloRouter)
@@ -51,9 +33,6 @@ app.use('/v1/healthSystem/medtime/tipo_dosagem', cors(), tipoDosagemRouter)
 const unidadeMedidaRouter = require('./routes/unidade_medida.router.js')
 app.use('/v1/healthSystem/medtime/unidade_medida', cors(), unidadeMedidaRouter)
 
-const medicamentoRouter = require('./routes/medicamento.router.js')
-app.use('/v1/healthSystem/medtime/medicamento', cors(), medicamentoRouter)
-
 const historicoMedicamentoRouter = require('./routes/historico_medicamento.router.js')
 app.use('/v1/healthSystem/medtime/historico_medicamento', cors(), historicoMedicamentoRouter)
 
@@ -63,29 +42,29 @@ app.use('/v1/healthSystem/medtime/receita_medica', cors(), receitaMedicaRouter)
 const usuarioRouter = require('./routes/usuario.router.js')
 app.use('/v1/healthSystem/medtime/usuario', cors(), usuarioRouter)
 
-const usuarioRoleRouter = require('./routes/usuario_role.router.js')
-app.use('/v1/healthSystem/medtime/usuario_role', cors(), usuarioRoleRouter)
-
-const vinculoPacienteRouter = require('./routes/vinculo_paciente.router.js')
-app.use('/v1/healthSystem/medtime/vinculo_paciente', cors(), vinculoPacienteRouter)
-
 const agendaMedicamentoRouter = require('./routes/agenda_medicamentos.router.js')
 app.use('/v1/healthSystem/medtime/agenda_medicamento', cors(), agendaMedicamentoRouter)
 
-const programacaoMedicamentoRouter = require('./routes/programacao_medicamento.router.js')
-app.use('/v1/healthSystem/medtime/programacao_medicamento', cors(), programacaoMedicamentoRouter)
-
 const cadastroMedicamentoUsuarioRouter = require('./routes/cadastro_medicamento_usuario.router.js')
 app.use('/v1/healthSystem/medtime/cadastro_medicamento', cors(), cadastroMedicamentoUsuarioRouter)
-
-const alterarProgramacaoMedicamentoRouter = require('./routes/alterar_programacao_medicamento.router.js')
-app.use('/v1/healthSystem/medtime/alterar_programacao', cors(), alterarProgramacaoMedicamentoRouter)
 
 const excluirMedicamentoUsuarioRouter = require('./routes/excluir_medicamento_usuario.router.js')
 app.use('/v1/healthSystem/medtime/excluir_medicamento', cors(), excluirMedicamentoUsuarioRouter)
 
 const editarMedicamentoUsuarioRouter = require('./routes/editar_medicamento_usuario.router.js')
 app.use('/v1/healthSystem/medtime/editar_medicamento', cors(), editarMedicamentoUsuarioRouter)
+
+const routerUsuarioGoogle = require('./routes/usuario_google.router.js')
+app.use('/v1/healthSystem/medtime/usuario/google', routerUsuarioGoogle)
+
+const codigoVinculoRouter = require('./routes/codigo_vinculo.router.js')
+app.use('/v1/healthSystem/medtime/codigo_vinculo', cors(), codigoVinculoRouter)
+
+const vinculoPacienteRouter = require('./routes/vinculo_paciente.router.js')
+app.use('/v1/healthSystem/medtime/vinculo_paciente', cors(), vinculoPacienteRouter)
+
+const codigoVerificacaoRouter = require('./routes/codigo_verificacao_email.router.js')
+app.use('/v1/healthSystem/medtime/codigo_verificacao_email', cors(), codigoVerificacaoRouter)
 
 // FAZER O START DA API
 app.listen(8080, function() {

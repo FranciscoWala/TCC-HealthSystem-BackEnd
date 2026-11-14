@@ -28,8 +28,8 @@ const confirmarIngestaoMedicamento = async function (idReceitaMedica, idUsuario,
             let dadosReceita = receita.response.receita_medica[0]
 
             if (Number(dadosReceita.id_usuario) != Number(idUsuario)) {
-                customMessages.ERROR_BAD_REQUEST.field = ['ID_USUARIO']
-                return customMessages.ERROR_BAD_REQUEST
+                customMessages.ERROR_FORBIDDEN.field = ['ID_USUARIO']
+                return customMessages.ERROR_FORBIDDEN
             }
 
             let programacoes = await programacaoMedicamentoService.buscarProgramacaoPorIdReceitaService(idReceitaMedica, transaction)

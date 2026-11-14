@@ -44,6 +44,16 @@ const listarEstoque = async function () {
     }
 }
 
+const listarEstoquePorUsuario = async function (idUsuario) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+
+    try {
+        return await estoqueService.listarEstoquePorUsuarioService(idUsuario)
+    } catch (error) {
+        return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
+    }
+}
+
 const buscarEstoque = async function (id) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
     try {
@@ -66,6 +76,7 @@ module.exports = {
     inserirNovoEstoque,
     atualizarEstoque,
     listarEstoque,
+    listarEstoquePorUsuario,
     buscarEstoque,
     excluirEstoque
 }

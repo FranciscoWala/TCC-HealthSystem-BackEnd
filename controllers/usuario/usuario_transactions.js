@@ -20,6 +20,10 @@ const contatoEmergenciaService = require('../../services/contatos_de_emergencia/
 const usuarioContatoEmergenciaService = require('../../services/contato_emergencia_usuarios/service_contato_emergencia_usuarios.js')
 const roleService = require('../../services/role/service_role.js')
 const usuarioRoleService = require('../../services/usuario_role/service_usuario_role.js')
+const vinculoPacienteService = require('../../services/vinculo_paciente/service_vinculo_paciente.js')
+const verificacaoEmailController = require('../codigo_verificacao/controller_verificacao_email.js')
+
+const bcrypt = require('bcrypt')
 
 // IMPORT DA CONFIGURAÇÃO GLOBAL DO KNEX
 const knexConection = require('../../models/global_knex/global_knex.js')
@@ -43,27 +47,49 @@ const knexConection = require('../../models/global_knex/global_knex.js')
         2. Atribuir doença crônica ao usuário na intermediária
 */
 
-//Solução temporária (necessário refatorar o schema do usuário para adicionar novos atributos)
-function validarDadosUsuario(dados) {
-    return false
-}
-
-
-
 async function cadastrarUsuarioTransaction(dados, contentType) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
         if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
 
-            let result = await knexConection.transaction(async (transaction) => {
+            if (!dados || typeof dados.email != 'string' ||
+                typeof dados.codigo != 'string' || !/^\d{6}$/.test(dados.codigo))
+                return customMessages.ERROR_BAD_REQUEST
+
+            dados.email = dados.email.trim().toLowerCase()
+
+            let validarTentativa = await verificacaoEmailController.validarCodigoVerificacaoEmail(dados.email, dados.codigo)
+
+            if (!validarTentativa.status)
+                return validarTentativa
+
+            let result = await knexConection.transaction(async function (transaction) {
+                let validarCodigo = await verificacaoEmailController.validarCodigoVerificacaoEmail(dados.email, dados.codigo, transaction, true)
+
+                if (!validarCodigo.status) {
+                    let error = new Error('NÃO FOI POSSÍVEL VALIDAR O CÓDIGO')
+                    error.resposta = validarCodigo
+                    throw error
+                }
 
                 let idUsuario = await realizarCadastroUsuario(dados, transaction)
+
+                let verificarEmail = await usuarioService.verificarEmailUsuarioService(idUsuario, transaction)
+
+                if (!verificarEmail.status) {
+                    let error = new Error('NÃO FOI POSSÍVEL VERIFICAR O E-MAIL')
+                    error.resposta = verificarEmail
+                    throw error
+                }
 
                 await cadastrarDoencasCronicasRefat(dados, transaction, idUsuario)
                 await inserirContatosEmergencia(dados, transaction, idUsuario)
                 await atribuirRoleAoUsuario(transaction, idUsuario, dados['usuario_role'])
 
+                return {
+                    id_usuario: idUsuario
+                }
             })
 
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
@@ -75,11 +101,12 @@ async function cadastrarUsuarioTransaction(dados, contentType) {
         } else {
             return customMessages.ERROR_CONTENT_TYPE
         }
-
-
     } catch (error) {
-        console.log(error);
-        return false
+        if (error.resposta)
+            return error.resposta
+
+        console.log(error)
+        return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
     }
 }
 
@@ -88,25 +115,58 @@ async function atualizarUsuarioTransaction(dados, contentType, idUsuario) {
 
     try {
         if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
-            let validacao = await validarDadosUsuario(dados)
-            let buscaUsuario = await usuarioService.buscarUsuarioService(idUsuario)
 
-            if (validacao)
-                return validacao
+            let result = await knexConection.transaction(async function (transaction) {
 
-            if (!buscaUsuario.status)
-                return buscaUsuario
+                let buscarUsuario = await usuarioService.buscarUsuarioService(idUsuario, transaction)
 
-            let result = await knexConection.transaction(async (transaction) => {
-                await atualizarCadastroUsuario(dados, transaction, idUsuario)
-                await atualizarDoencasCronicas(dados, transaction)
-                await atualizarContatosEmergencia(dados, transaction)
-                await gerenciarAtualizacaoRoles(transaction, idUsuario, dados)
+                if (!buscarUsuario.status) {
+                    let error = new Error('Não foi possível encontrar o usuário.')
+                    error.resposta = buscarUsuario
+                    throw error
+                }
+
+                if (dados.usuario) {
+                    let usuarioAtual = buscarUsuario.response.usuario[0]
+
+                    let dadosUsuario = {
+                        nome: dados.usuario.nome ?? usuarioAtual.nome,
+                        foto: dados.usuario.foto ?? usuarioAtual.foto,
+                        email: dados.usuario.email ?? usuarioAtual.email,
+                        senha: dados.usuario.senha ?? usuarioAtual.senha,
+                        cpf: dados.usuario.cpf ?? usuarioAtual.cpf,
+                        telefone: dados.usuario.telefone ?? usuarioAtual.telefone,
+                        data_nascimento: dados.usuario.data_nascimento ?? usuarioAtual.data_nascimento
+                    }
+
+                    let atualizarUsuario = await usuarioService.atualizarUsuarioService(
+                        dadosUsuario, idUsuario, transaction
+                    )
+
+                    if (!atualizarUsuario.status) {
+                        let error = new Error('Não foi possível atualizar os dados do usuário.')
+                        error.resposta = atualizarUsuario
+                        throw error
+                    }
+                }
+
+                if (dados.usuario_role)
+                    await gerenciarAtualizacaoRoles(transaction, idUsuario, dados)
+
+                if (dados.contatos_emergencia)
+                    await gerenciarAtualizacaoContatos(transaction, idUsuario, dados.contatos_emergencia)
+
+                if (dados.doencas_cronicas)
+                    await gerenciarAtualizacaoDoencas(transaction, idUsuario, dados.doencas_cronicas)
+
+                return {
+                    id_usuario: Number(idUsuario)
+                }
             })
 
-            customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
-            customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_CREATED_ITEM.status_code
-            customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_CREATED_ITEM.message
+            customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
+            customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
+            customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_UPDATE_ITEM.message
             customMessages.DEFAULT_MESSAGE.response = result
 
             return customMessages.DEFAULT_MESSAGE
@@ -116,6 +176,9 @@ async function atualizarUsuarioTransaction(dados, contentType, idUsuario) {
         }
 
     } catch (error) {
+        if (error.resposta)
+            return error.resposta
+
         console.log(error)
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
     }
@@ -182,57 +245,100 @@ async function desativarUsuario(idUsuario, transaction) {
 
 //Funções auxiliares para atualizar o usuário 
 async function gerenciarAtualizacaoRoles(transaction, idUsuario, dados) {
-    let novasRoles = dados["usuario_role"] || []
-    let rolesAntigas = []
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
 
-    let buscaRolesAntigas = await usuarioService.buscarRolesAtivasUsuarioService(idUsuario)
+    let novaRole = dados.usuario_role
 
-    if (buscaRolesAntigas.status) {
-        rolesAntigas = buscaRolesAntigas.response.roles;
-    } else if (buscaRolesAntigas.status_code === 404) {
-        throw new Error("NÃO FOI POSSÍVEL BUSCAR AS ROLES ATUAIS DO USUÁRIO");
+    if (!novaRole || !Number.isInteger(Number(novaRole.id_role)) || Number(novaRole.id_role) < 1) {
+        customMessages.ERROR_BAD_REQUEST.field = ['ID_ROLE']
+
+        let error = new Error('Role inválida.')
+        error.resposta = customMessages.ERROR_BAD_REQUEST
+        throw error
     }
 
+    let buscarRole = await roleService.buscarRoleService(Number(novaRole.id_role))
 
-    let rolesParaDesativar = rolesAntigas.filter(
-        role => !novasRoles.includes(role.id_role)
-    )
+    if (!buscarRole.status) {
+        let error = new Error('Não foi possível encontrar a nova role.')
+        error.resposta = buscarRole
+        throw error
+    }
 
-    let idsAntigos = rolesAntigas.map(role => role.id_role)
-    let rolesInserir = novasRoles.filter(
-        roleID => !idsAntigos.includes(roleID)
-    )
+    let buscarRolesAntigas = await usuarioService.buscarRolesAtivasUsuarioService(idUsuario, transaction)
 
-    if (rolesParaDesativar.length > 0) {
-        for (const role of rolesParaDesativar) {
-            let dadosDesativacao = {
-                ativo: 0,
-                data_desativacao: new Date(),
-                id_usuarios: idUsuario,
-                id_role: role.id_role
-            }
+    let roleAntiga = null
 
-            let inativar = await usuarioRoleService.atualizarUsuarioRoleService(dadosDesativacao, role.id, transaction)
+    if (buscarRolesAntigas.status) {
 
-            if (!inativar.status) {
-                let error = new Error(`NÃO FOI POSSÍVEL INATIVAR A ROLE ${role.id_role}`);
-                error.resposta = inativar;
-                throw error;
-            }
+        if (buscarRolesAntigas.response.roles.length > 1) {
+            customMessages.ERROR_BAD_REQUEST.field = ['USUARIO_ROLE']
+
+            let error = new Error('O usuário possui mais de uma role ativa.')
+            error.resposta = customMessages.ERROR_BAD_REQUEST
+            throw error
         }
 
-        if (rolesInserir.length > 0) {
-            await atribuirRoleAoUsuario(transaction, idUsuario, rolesInserir, usuarioRoleService.inserirUsuarioRoleService)
+        roleAntiga = buscarRolesAntigas.response.roles[0] ?? null
+
+    } else if (buscarRolesAntigas.status_code != 404) {
+        let error = new Error('Não foi possível buscar a role atual do usuário.')
+        error.resposta = buscarRolesAntigas
+        throw error
+    }
+
+    if (roleAntiga && roleAntiga.id_role == novaRole.id_role)
+        return
+
+    let buscarVinculos = await vinculoPacienteService.listarVinculoPacienteService(transaction)
+
+    if (!buscarVinculos.status && buscarVinculos.status_code != 404) {
+        let error = new Error('Não foi possível buscar os vínculos do usuário.')
+        error.resposta = buscarVinculos
+        throw error
+    }
+
+    if (buscarVinculos.status) {
+        for (const vinculo of buscarVinculos.response.vinculo_paciente) {
+            if (vinculo.id_paciente == idUsuario || vinculo.id_cuidador == idUsuario) {
+                let error = new Error('Usuário possui vínculos com pacientes ou cuidadores.')
+                error.resposta = customMessages.ERROR_BAD_REQUEST
+                throw error
+            }
         }
     }
+
+    if (roleAntiga) {
+        let dadosDesativacao = {
+            ativo: 0,
+            data_ativacao: roleAntiga.data_ativacao,
+            data_desativacao: new Date(),
+            id_usuarios: Number(idUsuario),
+            id_role: roleAntiga.id_role
+        }
+
+
+        let inativar = await usuarioRoleService.atualizarUsuarioRoleService(dadosDesativacao, roleAntiga.id, transaction)
+
+
+        if (!inativar.status) {
+            let error = new Error('Não foi possível desativar a role antiga.')
+            error.resposta = inativar
+            throw error
+        }
+    }
+
+    await atribuirRoleAoUsuario(transaction, idUsuario, novaRole)
 }
 
 async function atualizarCadastroUsuario(dados, transaction, idUsuario) {
     let dadosPessoais = {
         nome: dados.nome,
+        foto: dados.foto ?? null,
         email: dados.email,
         senha: dados.senha,
-        cpf: dados.cpf,
+        cpf: dados.cpf ?? null,
+        telefone: dados.telefone ?? null,
         data_nascimento: dados["data_nascimento"]
     }
 
@@ -300,17 +406,19 @@ async function atualizarContatosEmergencia(dados, transaction) {
 
 //Funções auxiliares do cadastro do usuário
 async function realizarCadastroUsuario(dados, transaction) {
+    let senhaHash = await bcrypt.hash(dados.senha, 12)
+
     let dadosPessoais = {
         nome: dados.nome,
+        foto: dados.foto ?? null,
         email: dados.email,
-        senha: dados.senha,
-        cpf: dados.cpf,
+        senha: senhaHash,
+        cpf: dados.cpf ?? null,
+        telefone: dados.telefone ?? null,
         data_nascimento: dados["data_nascimento"]
     }
 
-    let cadastrarUsuario = await usuarioService.inserirUsuarioService(
-        dadosPessoais, transaction
-    )
+    let cadastrarUsuario = await usuarioService.inserirUsuarioService(dadosPessoais, transaction)
 
     if (!cadastrarUsuario.status) {
         let error = new Error("NÃO FOI POSSÍVEL REALIZAR O CADASTRO DO USUÁRIO")
@@ -348,7 +456,7 @@ async function cadastrarDoencasCronicas(dados, transaction, idUsuario) {
                 id_usuarios: idUsuario,
                 id_doenca_cronica: inserirDoencasCronicas.response.id
             }
-            
+
             if (!inserirDoencasCronicas.status) {
                 let error = new Error("NÃO FOI POSSÍVEL ATRIBUIR DOENÇA_CRONICA AO USUÁRIO")
                 error.resposta = inserirDoencasCronicas
@@ -363,7 +471,7 @@ async function cadastrarDoencasCronicas(dados, transaction, idUsuario) {
 async function atribuirUsuarioDoencaCronica(dadosAtribuicao, transaction) {
     try {
         let result = await doencaCronicaUsuarioService.inserirDoencaCronicaUsuarioService(dadosAtribuicao, transaction)
-        
+
         if (!result.status) {
             let error = new Error("NÃO FOI POSSÍVEL ATRIBUIR DOENÇA_CRONICA AO USUÁRIO")
             error.resposta = result
@@ -562,7 +670,7 @@ async function inserirContatosEmergencia(dados, transaction, idUsuario) {
 async function atribuirContatoDeEmergencia(dadosAtribuicao, transaction) {
     try {
         let result = await usuarioContatoEmergenciaService.inserirContatoEmergenciaUsuarioService(dadosAtribuicao, transaction)
-        
+
         if (!result.status) {
             let error = new Error("NÃO FOI POSSÍVEL ATRIBUIR CONTATO DE EMERGENCIA AO USUÁRIO")
             error.resposta = result
@@ -573,44 +681,242 @@ async function atribuirContatoDeEmergencia(dadosAtribuicao, transaction) {
     }
 }
 
-async function buscarRole(rolesUsuario) {
-    let result
+async function buscarRole(roleUsuario) {
+    let result = await roleService.buscarRoleService(roleUsuario['id_role'])
 
-    if (Array.isArray(rolesUsuario)) {
-        for (const roleID of rolesUsuario) {
-            result = await roleService.buscarRoleService(roleID)
+    if (!result.status)
+        return false
 
-            if (!result.status)
-                return false
-        }
+    return true
+}
+
+async function atribuirRoleAoUsuario(transaction, idUsuario, roleUsuario) {
+    let buscar = await buscarRole(roleUsuario)
+
+    if (!buscar) {
+        let error = new Error("ROLE NÃO ENCONTRADA")
+        throw error
+    }
+
+    let dadosRelacao = {
+        ativo: 1,
+        data_ativacao: new Date(),
+        data_desativacao: null,
+        id_usuarios: Number(idUsuario),
+        id_role: Number(roleUsuario['id_role'])
+    }
+
+    let atribuir = await usuarioRoleService.inserirUsuarioRoleService(dadosRelacao, transaction);
+
+    if (!atribuir.status) {
+        let error = new Error(`NÃO FOI POSSÍVEL ATRIBUIR A ROLE ${roleUsuario['id_role']} AO USUÁRIO`);
+        error.resposta = atribuir;
+        throw error;
     }
 }
 
-async function atribuirRoleAoUsuario(transaction, idUsuario, rolesUsuario) {
-    await buscarRole(rolesUsuario)
+async function gerenciarAtualizacaoContatos(transaction, idUsuario, contatos) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+    let contatosProcessados = []
 
-    if (Array.isArray(rolesUsuario)) {
-        for (const role of rolesUsuario) {
-            let dadosRelacao = {
-                ativo: 1,
-                data_ativacao: new Date(),
-                data_desativacao: null,
+    if (!Array.isArray(contatos)) {
+        let error = new Error('CONTATOS DE EMERGÊNCIA INVÁLIDOS')
+        error.resposta = customMessages.ERROR_BAD_REQUEST
+        throw error
+    }
+
+    for (const contato of contatos) {
+        if (!contato || typeof contato != 'object' || Array.isArray(contato)) {
+            let error = new Error('CONTATO DE EMERGÊNCIA INVÁLIDO')
+            error.resposta = customMessages.ERROR_BAD_REQUEST
+            throw error
+        }
+
+        if (contato.id != null) {
+            let validacao = validarDados.validarIDs(contato.id, customMessages)
+
+            if (validacao) {
+                let error = new Error('ID DO CONTATO INVÁLIDO')
+                error.resposta = validacao
+                throw error
+            }
+
+            let idContato = Number(contato.id)
+
+            if (contatosProcessados.includes(idContato)) {
+                let error = new Error('CONTATO REPETIDO')
+                error.resposta = customMessages.ERROR_BAD_REQUEST
+                throw error
+            }
+
+            contatosProcessados.push(idContato)
+
+            let buscarVinculos = await usuarioContatoEmergenciaService.listarContatoEmergenciaUsuarioService(transaction)
+
+            if (!buscarVinculos.status) {
+                let error = new Error('NÃO FOI POSSÍVEL BUSCAR OS VÍNCULOS DOS CONTATOS')
+                error.resposta = buscarVinculos
+                throw error
+            }
+
+            let pertenceUsuario = false
+
+            for (const vinculo of buscarVinculos.response.contato_emergencia_usuarios) {
+                if (vinculo.id_usuarios == idUsuario &&
+                    vinculo.id_contato_de_emergencia == idContato) {
+                    pertenceUsuario = true
+                    break
+                }
+            }
+
+            if (!pertenceUsuario) {
+                let error = new Error('CONTATO NÃO PERTENCE AO USUÁRIO')
+                error.resposta = customMessages.ERROR_BAD_REQUEST
+                throw error
+            }
+
+            let buscarContato = await contatoEmergenciaService.buscarContatoEmergenciaService(idContato, transaction)
+
+            if (!buscarContato.status) {
+                let error = new Error('NÃO FOI POSSÍVEL BUSCAR O CONTATO')
+                error.resposta = buscarContato
+                throw error
+            }
+
+            let contatoAtual = buscarContato.response.contato_emergencia[0]
+
+            let dadosContato = {
+                nome: contato.nome ?? contatoAtual.nome,
+                telefone: contato.telefone ?? contatoAtual.telefone
+            }
+
+            let atualizarContato = await contatoEmergenciaService.atualizarContatoEmergenciaService(dadosContato, idContato, transaction)
+
+            if (!atualizarContato.status) {
+                let error = new Error('NÃO FOI POSSÍVEL ATUALIZAR O CONTATO')
+                error.resposta = atualizarContato
+                throw error
+            }
+
+        } else {
+            let dadosContato = {
+                nome: contato.nome,
+                telefone: contato.telefone
+            }
+
+            let inserirContato = await contatoEmergenciaService.inserirContatoEmergenciaService(dadosContato, transaction)
+
+            if (!inserirContato.status) {
+                let error = new Error('NÃO FOI POSSÍVEL CADASTRAR O CONTATO')
+                error.resposta = inserirContato
+                throw error
+            }
+
+            let dadosAtribuicao = {
                 id_usuarios: Number(idUsuario),
-                id_role: Number(role['id_role'])
+                id_contato_de_emergencia: inserirContato.response.id
             }
 
-            let atribuir = await usuarioRoleService.inserirUsuarioRoleService(dadosRelacao, transaction);
-
-            if (!atribuir.status) {
-                let error = new Error(`NÃO FOI POSSÍVEL ATRIBUIR A ROLE ${role['id_role']} AO USUÁRIO`);
-                error.resposta = atribuir;
-                throw error;
-            }
+            await atribuirContatoDeEmergencia(dadosAtribuicao, transaction)
         }
     }
 }
 
+async function gerenciarAtualizacaoDoencas(transaction, idUsuario, doencas) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+    let doencasProcessadas = []
 
+    if (!Array.isArray(doencas)) {
+        let error = new Error('DOENÇAS CRÔNICAS INVÁLIDAS')
+        error.resposta = customMessages.ERROR_BAD_REQUEST
+        throw error
+    }
+
+    for (const doenca of doencas) {
+        if (!doenca || typeof doenca.nome_doenca != 'string' || !doenca.nome_doenca.trim()) {
+            let error = new Error('DOENÇA CRÔNICA INVÁLIDA')
+            error.resposta = customMessages.ERROR_BAD_REQUEST
+            throw error
+        }
+
+        if (doenca.id != null) {
+            let validacao = validarDados.validarIDs(doenca.id, customMessages)
+
+            if (validacao) {
+                let error = new Error('ID DA DOENÇA INVÁLIDO')
+                error.resposta = validacao
+                throw error
+            }
+
+            let idVinculo = Number(doenca.id)
+
+            if (doencasProcessadas.includes(idVinculo)) {
+                let error = new Error('DOENÇA REPETIDA')
+                error.resposta = customMessages.ERROR_BAD_REQUEST
+                throw error
+            }
+
+            doencasProcessadas.push(idVinculo)
+        }
+
+        let idDoenca = await obterOuCadastrarDoenca(doenca.nome_doenca, transaction)
+
+        let buscarVinculos = await doencaCronicaUsuarioService.listarDoencaCronicaUsuarioService(transaction)
+
+        if (!buscarVinculos.status && buscarVinculos.status_code != 404) {
+            let error = new Error('NÃO FOI POSSÍVEL BUSCAR AS DOENÇAS DO USUÁRIO')
+            error.resposta = buscarVinculos
+            throw error
+        }
+
+        let vinculos = buscarVinculos.status ? buscarVinculos.response.doenca_cronica_usuario : []
+
+        let pertenceUsuario = false
+        let doencaJaVinculada = false
+
+        for (const vinculo of vinculos) {
+            if (vinculo.id_usuarios == idUsuario) {
+
+                if (doenca.id != null && vinculo.id == doenca.id)
+                    pertenceUsuario = true
+
+                if (vinculo.id_doenca_cronica == idDoenca &&
+                    vinculo.id != doenca.id)
+                    doencaJaVinculada = true
+            }
+        }
+
+        if (doencaJaVinculada) {
+            let error = new Error('DOENÇA JÁ VINCULADA AO USUÁRIO')
+            error.resposta = customMessages.ERROR_BAD_REQUEST
+            throw error
+        }
+
+        let dadosAtribuicao = {
+            id_usuarios: Number(idUsuario),
+            id_doenca_cronica: idDoenca
+        }
+
+        if (doenca.id != null) {
+            if (!pertenceUsuario) {
+                let error = new Error('DOENÇA NÃO PERTENCE AO USUÁRIO')
+                error.resposta = customMessages.ERROR_BAD_REQUEST
+                throw error
+            }
+
+            let atualizarDoenca = await doencaCronicaUsuarioService.atualizarDoencaCronicaUsuarioService(dadosAtribuicao, doenca.id, transaction)
+
+            if (!atualizarDoenca.status) {
+                let error = new Error('NÃO FOI POSSÍVEL ATUALIZAR A DOENÇA DO USUÁRIO')
+                error.resposta = atualizarDoenca
+                throw error
+            }
+
+        } else {
+            await atribuirUsuarioDoencaCronica(dadosAtribuicao, transaction)
+        }
+    }
+}
 
 module.exports = {
     cadastrarUsuarioTransaction,

@@ -120,10 +120,10 @@ const deleteRolePermissoes = async function (id, transaction = null) {
 
 const selectPermissoesByRole = async function(role){
     try {
-        let sql = `select * from vw_role_permissoes where role = '${role}'`
-        
-        let result = await knexConection.raw(sql)
-        
+        let sql = `select * from vw_role_permissoes where id_role = ?`
+
+        let result = await knexConection.raw(sql, [role])
+
         if(result)
             return result[0][0]
         else

@@ -4,9 +4,8 @@ use db_medtime;
 
 # Tabela Role
 insert into tbl_role (role) values
-('uso próprio'),
 ('cuidador'),
-('acompanhado');
+('paciente');
 
 # Tabela Tipo de dosagem
 insert into tbl_tipo_dosagem (tipo_dosagem) values
@@ -35,36 +34,50 @@ insert into tbl_tipo_intervalo (tipo_intervalo) values
 ('hora'),
 ('dia');
 
-insert into tbl_usuarios (
-    nome,
-    email,
-    senha,
-    cpf,
-    data_nascimento
-)
-values (
-    'Carlos Ribeiro',
-    'carlos.teste@example.com',
-    'Teste@123',
-    '111.222.333-99',
-    '1955-06-15'
+# Tabela Permissões
+insert into tbl_permissoes (permissao) values
+('VISUALIZAR_MEDICAMENTOS'),
+('CADASTRAR_MEDICAMENTOS'),
+('EDITAR_MEDICAMENTOS'),
+('EXCLUIR_MEDICAMENTOS'),
+('CONFIRMAR_INGESTAO'),
+('VISUALIZAR_HISTORICO'),
+('VISUALIZAR_AGENDA'),
+('VISUALIZAR_PULSEIRA'),
+('VISUALIZAR_LOCALIZACAO'),
+('GERENCIAR_PACIENTES'),
+('EDITAR_PERFIL');
+
+-- ROLE 1: CUIDADOR
+insert into tbl_role_permissoes (id_role, id_permissoes)
+select 1, id
+from tbl_permissoes
+where permissao in (
+    'VISUALIZAR_MEDICAMENTOS',
+    'CADASTRAR_MEDICAMENTOS',
+    'EDITAR_MEDICAMENTOS',
+    'EXCLUIR_MEDICAMENTOS',
+    'VISUALIZAR_HISTORICO',
+    'VISUALIZAR_AGENDA',
+    'VISUALIZAR_PULSEIRA',
+    'VISUALIZAR_LOCALIZACAO',
+    'GERENCIAR_PACIENTES',
+    'EDITAR_PERFIL'
 );
 
-select
-    id,
-    nome,
-    email,
-    cpf,
-    data_nascimento
-from tbl_usuarios;
-
-select
-    id,
-    frequencia,
-    data_hora_inicio,
-    data_hora_fim,
-    id_tipo_intervalo,
-    id_receita_medica
-from tbl_programacao_medicamento
-where id_receita_medica = 2
-order by id;
+-- ROLE 2: PACIENTE
+insert into tbl_role_permissoes (id_role, id_permissoes)
+select 2, id
+from tbl_permissoes
+where permissao in (
+    'VISUALIZAR_MEDICAMENTOS',
+    'CADASTRAR_MEDICAMENTOS',
+    'EDITAR_MEDICAMENTOS',
+    'EXCLUIR_MEDICAMENTOS',
+    'CONFIRMAR_INGESTAO',
+    'VISUALIZAR_HISTORICO',
+    'VISUALIZAR_AGENDA',
+    'VISUALIZAR_PULSEIRA',
+    'VISUALIZAR_LOCALIZACAO',
+    'EDITAR_PERFIL'
+);
