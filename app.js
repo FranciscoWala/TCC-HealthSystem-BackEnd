@@ -66,6 +66,9 @@ app.use('/v1/healthSystem/medtime/vinculo_paciente', cors(), vinculoPacienteRout
 const codigoVerificacaoRouter = require('./routes/codigo_verificacao_email.router.js')
 app.use('/v1/healthSystem/medtime/codigo_verificacao_email', cors(), codigoVerificacaoRouter)
 
+const ocrRouter = require('./routes/ocr.router.js')
+app.use('/v1/healthSystem/medtime/ocr', cors(), ocrRouter)
+
 // FAZER O START DA API
 app.listen(8080, function() {
     console.log('API aguardando novas requisições...')
