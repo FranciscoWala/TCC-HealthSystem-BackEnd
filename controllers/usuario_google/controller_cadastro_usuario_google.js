@@ -69,7 +69,7 @@ const cadastrarUsuarioGoogle = async function (dados, contentType) {
             if (buscarEmail.status_code != 404)
                 return buscarEmail
 
-            if (!dados.usuario_role || !Number.isInteger(dados.usuario_role.id_role) || ![1, 2, 3].includes(dados.usuario_role.id_role))
+            if (!dados.usuario_role || !Number.isInteger(dados.usuario_role.id_role) || ![1, 2].includes(dados.usuario_role.id_role))
                 return customMessages.ERROR_BAD_REQUEST
 
             let buscarRole = await roleService.buscarRoleService(dados.usuario_role.id_role)
