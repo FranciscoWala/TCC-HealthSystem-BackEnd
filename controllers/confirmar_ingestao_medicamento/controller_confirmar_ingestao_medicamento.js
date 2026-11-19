@@ -11,6 +11,7 @@ const receitaMedicaService = require('../../services/receita_medica/service_rece
 const programacaoMedicamentoService = require('../../services/programacao_medicamento/service_programacao_medicamento.js')
 const historicoMedicamentoService = require('../../services/historico_medicamento/service_historico_medicamento.js')
 const estoqueService = require('../../services/estoque/service_estoque.js')
+const vinculoPacienteService = require('../../services/vinculo_paciente/service_vinculo_paciente.js')
 
 const knexConection = require('../../models/global_knex/global_knex.js')
 
@@ -27,10 +28,33 @@ const confirmarIngestaoMedicamento = async function (idReceitaMedica, idUsuario,
 
             let dadosReceita = receita.response.receita_medica[0]
 
+
             if (Number(dadosReceita.id_usuario) != Number(idUsuario)) {
-                customMessages.ERROR_FORBIDDEN.field = ['ID_USUARIO']
-                return customMessages.ERROR_FORBIDDEN
+                let buscarVinculo = await vinculoPacienteService.buscarVinculoPorIdPacienteService(
+                    dadosReceita.id_usuario,
+                    transaction
+                )
+
+                if (!buscarVinculo.status) {
+                    if (buscarVinculo.status_code == 404) {
+                        customMessages.ERROR_FORBIDDEN.field = ['ID_USUARIO']
+                        return customMessages.ERROR_FORBIDDEN
+                    }
+
+                    return buscarVinculo
+                }
+
+                let dadosVinculo = buscarVinculo.response.vinculo_paciente[0]
+
+                if (!dadosVinculo ||
+                    Number(dadosVinculo.id_paciente) != Number(dadosReceita.id_usuario) ||
+                    Number(dadosVinculo.id_cuidador) != Number(idUsuario)) {
+
+                    customMessages.ERROR_FORBIDDEN.field = ['ID_USUARIO']
+                    return customMessages.ERROR_FORBIDDEN
+                }
             }
+
 
             let programacoes = await programacaoMedicamentoService.buscarProgramacaoPorIdReceitaService(idReceitaMedica, transaction)
 
