@@ -5,7 +5,7 @@ module.exports = {
         // ⚠️ ALTERAÇÃO: Define o cliente como 'mysql2'
         client: 'mysql2',
         connection: {
-            host: 'localhost',
+            host: process.env.HOST_DB,
             user: process.env.USER_DB, // Substitua pelo seu usuário
             password: process.env.PASSWORD_DB, // Substitua pela sua senha
             database: process.env.NAME_DB,
@@ -13,7 +13,10 @@ module.exports = {
 
             // Opcional: Define charset (recomendado para UTF8)
             charset: 'utf8mb4',
-            timezone: 'Z'
+            timezone: 'Z',
+            ssl: {
+                rejectUnauthorized: false
+            }
         },
 
         // Configurações de Migração
