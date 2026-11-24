@@ -1,8 +1,8 @@
 /*************************************************************************************************************************
- * Objetivo: Controller responsável pela regra de negócio do OCR
- * Autor: Kayque Brenno Ferreira Almeida
- * Data: 16/11/2026
- * Versão: 1.0
+- Objetivo: Controller responsável pela regra de negócio do OCR e integração com o cadastro de medicamentos
+- Autor: Kayque Brenno Ferreira Almeida
+- Data: 16/11/2026
+- Versão: 2.1
 **************************************************************************************************************************/
 
 const configMessages = require('../../utils/messages/configMessages.js')
@@ -13,6 +13,8 @@ const iaService = require('../../services/ocr/service_ia.js')
 const tipoDosagemService = require('../../services/tipo_dosagem/service_tipo_dosagem.js')
 const unidadeMedidaService = require('../../services/unidade_medida/service_unidade_medida.js')
 const tipoIntervaloService = require('../../services/tipo_intervalo/service_tipo_intervalo.js')
+
+const cadastroMedicamentoController = require('../cadastro_medicamento_usuario/controller_cadastro_medicamento_usuario.js')
 
 const validarIdCatalogo = function (id, registros) {
     if (!Array.isArray(registros) || id == null)
@@ -35,25 +37,19 @@ const processarReceitaMedica = async function (imagem) {
             return customMessages.ERROR_BAD_REQUEST
         }
 
-        if (imagem.mimetype != 'image/jpeg' && imagem.mimetype != 'image/png') {
+        const tiposPermitidos = ['image/jpeg', 'image/png', 'image/webp']
+        if (!tiposPermitidos.includes(imagem.mimetype)) {
             customMessages.ERROR_BAD_REQUEST.field = ['TIPO_IMAGEM']
             return customMessages.ERROR_BAD_REQUEST
         }
 
+        // OCR.space como apoio opcional (não aborta se falhar em letra manuscrita)
         let textoReceita = await ocrService.extrairTextoReceitaService(
             imagem.buffer,
             imagem.mimetype
         )
 
-        console.log('TEXTO EXTRAÍDO PELO OCR:')
-        console.log(textoReceita)
-
-        if (!textoReceita) {
-            customMessages.ERROR_BAD_REQUEST.field = ['TEXTO_RECEITA']
-            return customMessages.ERROR_BAD_REQUEST
-        }
-
-        // CONSULTAR OS CATÁLOGOS ANTES DA IA
+        // Consultar catálogos antes da IA
         let resultadoTipoDosagem = await tipoDosagemService.listarTipoDosagemService()
         let resultadoUnidadeMedida = await unidadeMedidaService.listarUnidadeMedidaService()
         let resultadoTipoIntervalo = await tipoIntervaloService.listarTipoIntervaloService()
@@ -72,14 +68,17 @@ const processarReceitaMedica = async function (imagem) {
             !Array.isArray(tiposIntervalo))
             return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
 
-        // ENVIAR AS OPÇÕES REAIS PARA A IA
         let catalogos = {
             tipos_dosagem: tiposDosagem,
             unidades_medida: unidadesMedida,
             tipos_intervalo: tiposIntervalo
         }
 
-        let dadosReceita = await iaService.interpretarReceitaService(textoReceita, catalogos)
+        let dadosReceita = await iaService.interpretarReceitaService(
+            imagem,
+            textoReceita || null,
+            catalogos
+        )
 
         if (!dadosReceita || !Array.isArray(dadosReceita.medicamentos))
             return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
@@ -87,70 +86,40 @@ const processarReceitaMedica = async function (imagem) {
         let medicamentos = []
 
         for (let dados of dadosReceita.medicamentos) {
-            let camposPendentes = []
+            let med = dados.medicamento || {}
+            let rec = dados.receita_medica || {}
+            let prog = dados.programacao_medicamento || {}
 
-            let idTipoDosagem = validarIdCatalogo(dados.id_tipo_dosagem, tiposDosagem)
+            let idTipoDosagem = validarIdCatalogo(med.id_tipo_dosagem, tiposDosagem)
+            let idUnidadeEmbalagem = validarIdCatalogo(med.id_unidade_medida_embalagem, unidadesMedida)
+            let idUnidadeDosagem = validarIdCatalogo(rec.id_unidade_medida, unidadesMedida)
+            let idTipoIntervalo = validarIdCatalogo(prog.id_tipo_intervalo, tiposIntervalo)
 
-            let idUnidadeEmbalagem = validarIdCatalogo(dados.id_unidade_medida_embalagem, unidadesMedida)
-
-            let idUnidadeDosagem = validarIdCatalogo(dados.id_unidade_medida, unidadesMedida)
-
-            let idTipoIntervalo = validarIdCatalogo(dados.id_tipo_intervalo, tiposIntervalo)
-
-            let medicamento = {
+            // Estrutura idêntica ao JSON esperado por cadastrarMedicamentoUsuario
+            let itemCadastro = {
                 medicamento: {
-                    nome: dados.medicamento ?? null,
+                    nome: med.nome ?? null,
                     imagem: null,
-                    concentracao: dados.concentracao ?? null,
+                    concentracao: med.concentracao ?? null,
                     id_unidade_medida_embalagem: idUnidadeEmbalagem,
                     id_tipo_dosagem: idTipoDosagem
-                },
-                receita_medica: {
-                    dosagem: dados.dosagem ?? null,
-                    id_unidade_medida: idUnidadeDosagem,
-                    descricao: dados.descricao ?? null
-                },
-                programacao_medicamento: {
-                    frequencia: dados.frequencia ?? null,
-                    data_hora_inicio: null,
-                    id_tipo_intervalo: idTipoIntervalo
                 },
                 estoque: {
                     quantidade_em_estoque: null
                 },
-                quantidade_prescrita: dados.quantidade_prescrita ?? null,
-                campos_pendentes: camposPendentes
+                receita_medica: {
+                    dosagem: rec.dosagem ?? null,
+                    id_unidade_medida: idUnidadeDosagem,
+                    descricao: rec.descricao ?? null
+                },
+                programacao_medicamento: {
+                    frequencia: prog.frequencia ?? null,
+                    id_tipo_intervalo: idTipoIntervalo,
+                    data_hora_inicio: null
+                }
             }
 
-            if (!medicamento.medicamento.nome)
-                camposPendentes.push('medicamento.nome')
-
-            if (medicamento.medicamento.concentracao == null)
-                camposPendentes.push('medicamento.concentracao')
-
-            if (idUnidadeEmbalagem == null)
-                camposPendentes.push('medicamento.id_unidade_medida_embalagem')
-
-            if (idTipoDosagem == null)
-                camposPendentes.push('medicamento.id_tipo_dosagem')
-
-            if (medicamento.receita_medica.dosagem == null)
-                camposPendentes.push('receita_medica.dosagem')
-
-            if (idUnidadeDosagem == null)
-                camposPendentes.push('receita_medica.id_unidade_medida')
-
-            if (medicamento.programacao_medicamento.frequencia == null)
-                camposPendentes.push('programacao_medicamento.frequencia')
-
-            if (idTipoIntervalo == null)
-                camposPendentes.push('programacao_medicamento.id_tipo_intervalo')
-
-            camposPendentes.push('medicamento.imagem')
-            camposPendentes.push('programacao_medicamento.data_hora_inicio')
-            camposPendentes.push('estoque.quantidade_em_estoque')
-
-            medicamentos.push(medicamento)
+            medicamentos.push(itemCadastro)
         }
 
         customMessages.DEFAULT_MESSAGE.status = true
@@ -168,6 +137,53 @@ const processarReceitaMedica = async function (imagem) {
     }
 }
 
+// Reutiliza diretamente cadastrarMedicamentoUsuario após o usuário completar os campos pendentes
+const cadastrarMedicamentosOcr = async function (idUsuario, listaMedicamentos, contentType = 'application/json') {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+
+    try {
+        if (!idUsuario || isNaN(idUsuario)) {
+            customMessages.ERROR_BAD_REQUEST.field = ['ID_USUARIO']
+            return customMessages.ERROR_BAD_REQUEST
+        }
+
+        if (!Array.isArray(listaMedicamentos) || listaMedicamentos.length === 0) {
+            customMessages.ERROR_BAD_REQUEST.field = ['MEDICAMENTOS']
+            return customMessages.ERROR_BAD_REQUEST
+        }
+
+        let medicamentosCadastrados = []
+
+        for (let dadosMedicamento of listaMedicamentos) {
+            let resultadoCadastro = await cadastroMedicamentoController.cadastrarMedicamentoUsuario(
+                Number(idUsuario),
+                dadosMedicamento,
+                contentType
+            )
+
+            if (!resultadoCadastro || !resultadoCadastro.status) {
+                return resultadoCadastro || customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
+            }
+
+            medicamentosCadastrados.push(resultadoCadastro.response)
+        }
+
+        customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
+        customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_CREATED_ITEM.status_code
+        customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_CREATED_ITEM.message
+        customMessages.DEFAULT_MESSAGE.response = {
+            medicamentos: medicamentosCadastrados
+        }
+
+        return customMessages.DEFAULT_MESSAGE
+
+    } catch (error) {
+        console.log(error)
+        return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
+    }
+}
+
 module.exports = {
-    processarReceitaMedica
+    processarReceitaMedica,
+    cadastrarMedicamentosOcr
 }
