@@ -2,7 +2,7 @@
 - Objetivo: Realizar a interpretação da receita médica utilizando IA no formato do cadastro
 - Autor: Kayque Brenno Ferreira Almeida
 - Data: 16/11/2026
-- Versão: 2.2
+- Versão: 2.6
 ********************************************************************************************/
 
 const { GoogleGenAI } = require('@google/genai')
@@ -14,10 +14,18 @@ const ai = new GoogleGenAI({
 const aguardar = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 let cacheModelosDisponiveis = null
+let promessaCarregamentoModelos = null
 
 function isCotaDiariaEsgotada(erro) {
     const mensagem = JSON.stringify(erro || '')
     return mensagem.includes('PerDay') || mensagem.includes('GenerateRequestsPerDay')
+}
+
+function prioridadeVelocidadeModelo(nome) {
+    if (nome.includes('flash-lite')) return 1
+    if (nome.includes('flash')) return 2
+    if (nome.includes('pro')) return 3
+    return 4
 }
 
 async function obterModelosDisponiveis(aiClient) {
@@ -25,69 +33,104 @@ async function obterModelosDisponiveis(aiClient) {
         return cacheModelosDisponiveis
     }
 
+    if (promessaCarregamentoModelos) {
+        return promessaCarregamentoModelos
+    }
+
     const preferidos = [
         process.env.GEMINI_MODEL,
         process.env.GEMINI_FALLBACK_MODEL,
-        'gemini-3.8-flash'
-    ].filter(Boolean)
+        'gemini-3.5-flash-lite',
+        'gemini-3.5-flash'
+    ].filter((m, idx, arr) => Boolean(m) && arr.indexOf(m) === idx)
 
-    try {
-        const pager = await aiClient.models.list()
-        const encontrados = []
+    promessaCarregamentoModelos = (async () => {
+        try {
+            const pager = await aiClient.models.list()
+            const encontrados = []
 
-        for await (const modelo of pager) {
-            const nomeLimpo = String(modelo.name || '').replace(/^models\//, '')
-            const acoes = modelo.supportedActions || modelo.supportedGenerationMethods || []
-            const suportaGeracao = acoes.length === 0 || acoes.includes('generateContent')
-            const especializadoNaoTexto = /(embedding|imagen|veo|tts|aqa|lyria|robotics|computer-use|deep-research)/i.test(nomeLimpo)
+            for await (const modelo of pager) {
+                const nomeLimpo = String(modelo.name || '').replace(/^models\//, '')
+                const acoes = modelo.supportedActions || modelo.supportedGenerationMethods || []
+                const suportaGeracao = acoes.length === 0 || acoes.includes('generateContent')
+                const especializadoNaoTexto = /(embedding|imagen|veo|tts|aqa|lyria|robotics|computer-use|deep-research|image|audio)/i.test(nomeLimpo)
 
-            if (nomeLimpo.startsWith('gemini-') && suportaGeracao && !especializadoNaoTexto) {
-                encontrados.push(nomeLimpo)
+                if (nomeLimpo.startsWith('gemini-') && suportaGeracao && !especializadoNaoTexto) {
+                    encontrados.push(nomeLimpo)
+                }
             }
+
+            const ordenados = [
+                ...preferidos.filter((p) => encontrados.includes(p)),
+                ...encontrados
+                    .filter((n) => !preferidos.includes(n) && /(flash|pro)/i.test(n))
+                    .sort((a, b) => {
+                        const diffPrioridade = prioridadeVelocidadeModelo(a) - prioridadeVelocidadeModelo(b)
+                        if (diffPrioridade !== 0) return diffPrioridade
+                        return b.localeCompare(a)
+                    })
+            ]
+
+            if (ordenados.length > 0) {
+                cacheModelosDisponiveis = ordenados
+                console.log('Modelos Gemini disponíveis nesta chave:', cacheModelosDisponiveis)
+                return cacheModelosDisponiveis
+            }
+        } catch (erro) {
+            console.warn('Falha ao listar modelos Gemini:', erro.message)
+        } finally {
+            promessaCarregamentoModelos = null
         }
 
-        const ordenados = [
-            ...preferidos.filter((p) => encontrados.includes(p)),
-            ...encontrados
-                .filter((n) => !preferidos.includes(n) && /(flash|pro)/i.test(n))
-                .sort()
-                .reverse()
-        ]
+        cacheModelosDisponiveis = preferidos
+        return cacheModelosDisponiveis
+    })()
 
-        if (ordenados.length > 0) {
-            cacheModelosDisponiveis = ordenados
-            console.log('Modelos Gemini disponíveis nesta chave:', cacheModelosDisponiveis)
-            return cacheModelosDisponiveis
-        }
-    } catch (erro) {
-        console.warn('Falha ao listar modelos Gemini:', erro.message)
-    }
-
-    return preferidos
+    return promessaCarregamentoModelos
 }
 
+// Pré-carrega a lista ao subir o servidor para não atrasar a 1ª requisição de OCR
+obterModelosDisponiveis(ai).catch(() => {})
+
 async function gerarConteudoComFallback(aiClient, params) {
-    const modelos = await obterModelosDisponiveis(aiClient)
+    const modelos = [...(await obterModelosDisponiveis(aiClient))]
     let ultimoErro = null
 
     for (const modeloAtual of modelos) {
+        let configAtual = { ...params.config }
+
         for (let tentativa = 1; tentativa <= 2; tentativa++) {
             try {
                 return await aiClient.models.generateContent({
                     ...params,
+                    config: configAtual,
                     model: modeloAtual
                 })
             } catch (erro) {
                 ultimoErro = erro
                 const status = erro?.status || erro?.error?.code
 
-                if (status === 404 || (status === 429 && isCotaDiariaEsgotada(erro))) {
-                    console.warn(`Modelo ${modeloAtual} indisponível ou sem cota diária (HTTP ${status}). Trocando de modelo...`)
+                if (status === 400 && configAtual.thinkingConfig) {
+                    const { thinkingConfig, ...semThinking } = configAtual
+                    configAtual = semThinking
+                    continue
+                }
+
+                if (status === 404) {
+                    console.warn(`Modelo ${modeloAtual} indisponível (HTTP 404). Removendo do cache e trocando...`)
+                    if (Array.isArray(cacheModelosDisponiveis)) {
+                        cacheModelosDisponiveis = cacheModelosDisponiveis.filter((m) => m !== modeloAtual)
+                    }
+                    break
+                }
+
+                if (status === 429 && isCotaDiariaEsgotada(erro)) {
+                    console.warn(`Cota diária esgotada em ${modeloAtual} (HTTP 429). Trocando de modelo...`)
                     break
                 }
 
                 if ((status === 503 || status === 429) && tentativa < 2) {
-                    const tempoEspera = 2000 + Math.floor(Math.random() * 500)
+                    const tempoEspera = 1500 + Math.floor(Math.random() * 500)
                     console.warn(`Gemini (${modeloAtual}) ocupado (HTTP ${status}). Nova tentativa em ${tempoEspera}ms...`)
                     await aguardar(tempoEspera)
                     continue
@@ -101,14 +144,14 @@ async function gerarConteudoComFallback(aiClient, params) {
     throw ultimoErro
 }
 
-const interpretarReceitaService = async function (imagem, textoOcr, catalogos) {
+const interpretarReceitaService = async function (imagem, catalogos) {
     try {
         if (!imagem || !imagem.buffer || !catalogos)
             return false
 
-        const contextoOcr = textoOcr
-            ? `\nTEXTO AUXILIAR EXTRAÍDO POR OCR TRADICIONAL (pode conter falhas, priorize a leitura visual da imagem):\n${textoOcr}\n`
-            : '\nNenhuma transcrição auxiliar disponível. Leia diretamente a imagem da receita.\n'
+        const tiposDosagemResumo = catalogos.tipos_dosagem.map(({ id, tipo_dosagem }) => ({ id, tipo_dosagem }))
+        const unidadesMedidaResumo = catalogos.unidades_medida.map(({ id, unidade_medida, sigla }) => ({ id, unidade_medida, sigla }))
+        const tiposIntervaloResumo = catalogos.tipos_intervalo.map(({ id, tipo_intervalo }) => ({ id, tipo_intervalo }))
 
         const prompt = `
 Você é responsável por interpretar receitas médicas (impressas ou manuscritas) para o aplicativo MedTime,
@@ -149,10 +192,9 @@ REGRAS OBRIGATÓRIAS:
 10. A segurança do paciente tem prioridade sobre o preenchimento automático. Em caso de dúvida, retorne null.
 
 CATÁLOGOS DISPONÍVEIS NO MEDTIME:
-Tipos de dosagem: ${JSON.stringify(catalogos.tipos_dosagem)}
-Unidades de medida: ${JSON.stringify(catalogos.unidades_medida)}
-Tipos de intervalo: ${JSON.stringify(catalogos.tipos_intervalo)}
-${contextoOcr}
+Tipos de dosagem: ${JSON.stringify(tiposDosagemResumo)}
+Unidades de medida: ${JSON.stringify(unidadesMedidaResumo)}
+Tipos de intervalo: ${JSON.stringify(tiposIntervaloResumo)}
 `
 
         const resposta = await gerarConteudoComFallback(ai, {
@@ -167,6 +209,10 @@ ${contextoOcr}
             ],
             config: {
                 temperature: 0.1,
+                maxOutputTokens: 1024,
+                thinkingConfig: {
+                    thinkingLevel: 'MINIMAL'
+                },
                 responseMimeType: 'application/json',
                 responseSchema: {
                     type: 'object',
@@ -244,7 +290,7 @@ ${contextoOcr}
         if (!resposta || !resposta.text)
             return false
 
-        let medicamentos = JSON.parse(resposta.text)
+        const medicamentos = JSON.parse(resposta.text)
 
         if (medicamentos && Array.isArray(medicamentos.medicamentos))
             return medicamentos

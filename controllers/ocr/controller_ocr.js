@@ -2,12 +2,10 @@
 - Objetivo: Controller responsável pela regra de negócio do OCR e integração com o cadastro de medicamentos
 - Autor: Kayque Brenno Ferreira Almeida
 - Data: 16/11/2026
-- Versão: 2.1
+- Versão: 2.2
 **************************************************************************************************************************/
 
 const configMessages = require('../../utils/messages/configMessages.js')
-
-const ocrService = require('../../services/ocr/service_ocr.js')
 const iaService = require('../../services/ocr/service_ia.js')
 
 const tipoDosagemService = require('../../services/tipo_dosagem/service_tipo_dosagem.js')
@@ -15,6 +13,48 @@ const unidadeMedidaService = require('../../services/unidade_medida/service_unid
 const tipoIntervaloService = require('../../services/tipo_intervalo/service_tipo_intervalo.js')
 
 const cadastroMedicamentoController = require('../cadastro_medicamento_usuario/controller_cadastro_medicamento_usuario.js')
+
+const CACHE_TTL_MS = 10 * 60 * 1000
+let cacheCatalogos = null
+let cacheExpiraEm = 0
+
+const obterCatalogosEmCache = async function () {
+    const agora = Date.now()
+    if (cacheCatalogos && agora < cacheExpiraEm) {
+        return cacheCatalogos
+    }
+
+    const [resultadoTipoDosagem, resultadoUnidadeMedida, resultadoTipoIntervalo] = await Promise.all([
+        tipoDosagemService.listarTipoDosagemService(),
+        unidadeMedidaService.listarUnidadeMedidaService(),
+        tipoIntervaloService.listarTipoIntervaloService()
+    ])
+
+    if (!resultadoTipoDosagem.status ||
+        !resultadoUnidadeMedida.status ||
+        !resultadoTipoIntervalo.status) {
+        return null
+    }
+
+    const tiposDosagem = resultadoTipoDosagem.response.tipo_dosagem
+    const unidadesMedida = resultadoUnidadeMedida.response.unidade_medida
+    const tiposIntervalo = resultadoTipoIntervalo.response.tipoIntervalo
+
+    if (!Array.isArray(tiposDosagem) ||
+        !Array.isArray(unidadesMedida) ||
+        !Array.isArray(tiposIntervalo)) {
+        return null
+    }
+
+    cacheCatalogos = {
+        tipos_dosagem: tiposDosagem,
+        unidades_medida: unidadesMedida,
+        tipos_intervalo: tiposIntervalo
+    }
+    cacheExpiraEm = agora + CACHE_TTL_MS
+
+    return cacheCatalogos
+}
 
 const validarIdCatalogo = function (id, registros) {
     if (!Array.isArray(registros) || id == null)
@@ -43,59 +83,30 @@ const processarReceitaMedica = async function (imagem) {
             return customMessages.ERROR_BAD_REQUEST
         }
 
-        // OCR.space como apoio opcional (não aborta se falhar em letra manuscrita)
-        let textoReceita = await ocrService.extrairTextoReceitaService(
-            imagem.buffer,
-            imagem.mimetype
-        )
-
-        // Consultar catálogos antes da IA
-        let resultadoTipoDosagem = await tipoDosagemService.listarTipoDosagemService()
-        let resultadoUnidadeMedida = await unidadeMedidaService.listarUnidadeMedidaService()
-        let resultadoTipoIntervalo = await tipoIntervaloService.listarTipoIntervaloService()
-
-        if (!resultadoTipoDosagem.status ||
-            !resultadoUnidadeMedida.status ||
-            !resultadoTipoIntervalo.status)
+        const catalogos = await obterCatalogosEmCache()
+        if (!catalogos)
             return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
 
-        let tiposDosagem = resultadoTipoDosagem.response.tipo_dosagem
-        let unidadesMedida = resultadoUnidadeMedida.response.unidade_medida
-        let tiposIntervalo = resultadoTipoIntervalo.response.tipoIntervalo
-
-        if (!Array.isArray(tiposDosagem) ||
-            !Array.isArray(unidadesMedida) ||
-            !Array.isArray(tiposIntervalo))
-            return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
-
-        let catalogos = {
-            tipos_dosagem: tiposDosagem,
-            unidades_medida: unidadesMedida,
-            tipos_intervalo: tiposIntervalo
-        }
-
-        let dadosReceita = await iaService.interpretarReceitaService(
+        const dadosReceita = await iaService.interpretarReceitaService(
             imagem,
-            textoReceita || null,
             catalogos
         )
 
         if (!dadosReceita || !Array.isArray(dadosReceita.medicamentos))
             return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
 
-        let medicamentos = []
+        const medicamentos = []
 
         for (let dados of dadosReceita.medicamentos) {
             let med = dados.medicamento || {}
             let rec = dados.receita_medica || {}
             let prog = dados.programacao_medicamento || {}
 
-            let idTipoDosagem = validarIdCatalogo(med.id_tipo_dosagem, tiposDosagem)
-            let idUnidadeEmbalagem = validarIdCatalogo(med.id_unidade_medida_embalagem, unidadesMedida)
-            let idUnidadeDosagem = validarIdCatalogo(rec.id_unidade_medida, unidadesMedida)
-            let idTipoIntervalo = validarIdCatalogo(prog.id_tipo_intervalo, tiposIntervalo)
+            let idTipoDosagem = validarIdCatalogo(med.id_tipo_dosagem, catalogos.tipos_dosagem)
+            let idUnidadeEmbalagem = validarIdCatalogo(med.id_unidade_medida_embalagem, catalogos.unidades_medida)
+            let idUnidadeDosagem = validarIdCatalogo(rec.id_unidade_medida, catalogos.unidades_medida)
+            let idTipoIntervalo = validarIdCatalogo(prog.id_tipo_intervalo, catalogos.tipos_intervalo)
 
-            // Estrutura idêntica ao JSON esperado por cadastrarMedicamentoUsuario
             let itemCadastro = {
                 medicamento: {
                     nome: med.nome ?? null,
@@ -137,7 +148,6 @@ const processarReceitaMedica = async function (imagem) {
     }
 }
 
-// Reutiliza diretamente cadastrarMedicamentoUsuario após o usuário completar os campos pendentes
 const cadastrarMedicamentosOcr = async function (idUsuario, listaMedicamentos, contentType = 'application/json') {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
