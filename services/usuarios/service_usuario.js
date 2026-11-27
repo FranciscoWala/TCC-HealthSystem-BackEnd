@@ -15,6 +15,12 @@ const usuarioDAO = require('../../models/DAO/usuarios/usuario.js')
 const usuarioSchema = require('../../schemas/usuarioSchema.js')
 const usuarioCadastroGoogleSchema = require('../../schemas/usuarioCadastroGoogleSchema.js')
 const validarDados = require('../../utils/validar_dados/validarDados.js')
+const usuarioAtualizacaoSchema = usuarioSchema.fork(['senha'], (campo) => campo.optional())
+
+const validarDadosAtualizacaoUsuario = function (dados) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
+    return validarDados.validarDados(usuarioAtualizacaoSchema, dados, customMessages)
+}
 
 const validarDadosUsuario = function (dados) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
@@ -79,14 +85,13 @@ const atualizarUsuarioService = async function (dados, id, transaction = null) {
         if (!buscarID.status)
             return buscarID
 
-        let validacao = validarDadosUsuario(dados)
+        let validacao = validarDadosAtualizacaoUsuario(dados)
         if (validacao)
             return validacao
 
         dados.id = Number(id)
-        console.log(dados);
-        
-        let result = await usuarioDAO.updateUsuario(dados,transaction)
+
+        let result = await usuarioDAO.updateUsuario(dados, transaction)
         if (result) {
             customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
             customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code

@@ -46,19 +46,19 @@ const updateUsuario = async function (usuario, transaction = null) {
             usuario.nome,
             usuario.foto ?? null,
             usuario.email,
-            usuario.senha,
+            null,
             usuario.cpf ?? null,
             usuario.telefone ?? null,
             usuario.data_nascimento,
             usuario.id
         ])
 
-        if (result && result[0][0][0].affectedRows > 0)
+        if (result && result[0][0][0].affectedRows >= 0)
             return result
         else
             return false
     } catch (error) {
-        console.log(error);
+        console.log(error)
 
         return false
     }
