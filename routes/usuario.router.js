@@ -32,8 +32,8 @@ router.post('/', limitarTentativasCadastro, bodyParserJSON, async function (requ
     response.json(result)
 })
 
-router.put('/:id', verificarToken.verificarToken,
-    authorization.verficarPermissao('EDITAR_PERFIL'),bodyParserJSON,
+router.patch('/:id', verificarToken.verificarToken,
+    authorization.verficarPermissao('EDITAR_PERFIL'), bodyParserJSON,
     async function (request, response) {
         
         let id = request.params.id

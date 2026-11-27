@@ -788,7 +788,6 @@ BEGIN
         set nome = nome_param,
             foto = foto_param,
             email = email_param,
-            senha = senha_param,
             cpf = cpf_param,
             telefone = telefone_param,
             data_nascimento = data_nascimento_param
